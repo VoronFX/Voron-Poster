@@ -7,6 +7,19 @@
 *.sln.docstates
 
 # Build results
+<<<<<<< HEAD
+
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+[Bb]in/
+[Oo]bj/
+
+# Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
+!packages/*/build/
+
+=======
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -16,10 +29,15 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+<<<<<<< HEAD
+*_i.c
+*_p.c
+=======
 #NUNIT
 *.VisualState.xml
 TestResult.xml
@@ -32,6 +50,7 @@ dlldata.c
 *_i.c
 *_p.c
 *_i.h
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 *.ilk
 *.meta
 *.obj
@@ -51,12 +70,18 @@ dlldata.c
 *.vssscc
 .builds
 *.pidb
+<<<<<<< HEAD
+*.log
+*.scc
+
+=======
 *.svclog
 *.scc
 
 # Chutzpah Test files
 _Chutzpah*
 
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 # Visual C++ cache files
 ipch/
 *.aps
@@ -70,19 +95,25 @@ ipch/
 *.vsp
 *.vspx
 
+<<<<<<< HEAD
+=======
 # TFS 2012 Local Workspace
 $tf/
 
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 # Guidance Automation Toolkit
 *.gpState
 
 # ReSharper is a .NET coding add-in
 _ReSharper*/
 *.[Rr]e[Ss]harper
+<<<<<<< HEAD
+=======
 *.DotSettings.user
 
 # JustCode is a .NET coding addin-in
 .JustCode
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 
 # TeamCity is a build add-in
 _TeamCity*
@@ -92,6 +123,10 @@ _TeamCity*
 
 # NCrunch
 *.ncrunch*
+<<<<<<< HEAD
+.*crunch*.local.xml
+
+=======
 _NCrunch_*
 .*crunch*.local.xml
 
@@ -102,6 +137,7 @@ AutoTest.Net/
 # Web workbench (sass)
 .sass-cache/
 
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 # Installshield output folder
 [Ee]xpress/
 
@@ -119,6 +155,16 @@ DocProject/Help/html
 publish/
 
 # Publish Web Output
+<<<<<<< HEAD
+*.Publish.xml
+
+# NuGet Packages Directory
+## TODO: If you have NuGet Package Restore enabled, uncomment the next line
+#packages/
+
+# Windows Azure Build Output
+csx
+=======
 *.[Pp]ublish.xml
 *.azurePubxml
 
@@ -133,6 +179,7 @@ packages/
 
 # Windows Azure Build Output
 csx/
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 *.build.csdef
 
 # Windows Store app package directory
@@ -146,10 +193,16 @@ ClientBin/
 ~$*
 *~
 *.dbmdl
+<<<<<<< HEAD
+*.[Pp]ublish.xml
+*.pfx
+*.publishsettings
+=======
 *.dbproj.schemaview
 *.pfx
 *.publishsettings
 node_modules/
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -162,6 +215,33 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 # SQL Server files
+<<<<<<< HEAD
+App_Data/*.mdf
+App_Data/*.ldf
+
+
+#LightSwitch generated files
+GeneratedArtifacts/
+_Pvt_Extensions/
+ModelManifest.xml
+
+# =========================
+# Windows detritus
+# =========================
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac desktop service store files
+.DS_Store
+=======
 *.mdf
 *.ldf
 
@@ -172,3 +252,4 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+>>>>>>> 3afb9bd193a2da35a60fdd29775d0c3d1f00570f

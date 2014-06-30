@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
+using System.Net.Http;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
@@ -19,6 +20,8 @@ namespace Voron_Poster
         public Form1()
         {
             InitializeComponent();
+            var pos = this.PointToScreen(label1.Location);
+            pos = progressBar1.PointToClient(pos);
         }
 
         enum ForumEngine { Unknown, SMF }
@@ -71,95 +74,32 @@ namespace Voron_Poster
 
         abstract class Forum
         {
-
+            protected HttpClient Client;
+            HttpClientHandler ClientHandler;
             public int ReqTimeout;
             public List<string> Log;
             public int Progress;
-            Thread Thread;
             public Uri MainPage;
             protected CookieContainer Cookies;
-            public Forum() { 
+            public CancellationTokenSource Cancel;
+            public Forum()
+            {
                 Log = new List<string>();
                 Progress = 0;
+                Cancel = new CancellationTokenSource();
+                Cookies = new CookieContainer();
+                ClientHandler = new HttpClientHandler() { CookieContainer = Cookies };
+                Client = new HttpClient(ClientHandler);
             }
-            public abstract bool Login(string Username, string Password);
 
-            protected bool TryRequestGet(string Uri, out string Result)
+            ~Forum()
             {
-                Result = String.Empty;
-                try
-                {
-                    HttpWebRequest Request = HttpWebRequest.CreateHttp(Uri);
-                    Request.CookieContainer = Cookies;
-                    Request.Timeout = ReqTimeout;
-                    HttpWebResponse Response = (HttpWebResponse)Request.GetResponse();
-                    if (Response.StatusCode != HttpStatusCode.OK)
-                    {
-                        lock (Log) { Log.Add("Ошибка: " + Response.StatusDescription); }
-                        return false;
-                    }
-                    Stream dataStream = Response.GetResponseStream();
-                    using (StreamReader Reader = new StreamReader(dataStream))
-                    {
-                        Result = Reader.ReadToEnd();
-                        Response.Close();
-                        return true;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.Add("Ошибка: " + e.Message);
-                    return false;
-                }
+                ClientHandler.Dispose();
+                Client.Dispose();
             }
 
-            protected bool TryRequestPost(string Uri, string PostData, out string Result)
-            {
-                Result = String.Empty;
-                try
-                {
-                    HttpWebRequest Request = HttpWebRequest.CreateHttp(Uri);
-                    Request.CookieContainer = Cookies;
-                    Request.Timeout = ReqTimeout;
-                    Request.Method = "POST";
-                    Request.ContentType = "application/x-www-form-urlencoded";
-
-                    byte[] sentData = Encoding.UTF8.GetBytes(PostData);
-                    Request.ContentLength = sentData.Length;
-                    using (Stream sendStream = Request.GetRequestStream())
-                    {
-                        sendStream.Write(sentData, 0, sentData.Length);
-                    }
-                    HttpWebResponse Response = (HttpWebResponse)Request.GetResponse();
-                    if (Response.StatusCode != HttpStatusCode.OK)
-                    {
-                        lock (Log) { Log.Add("Ошибка: " + Response.StatusDescription); }
-                        return false;
-                    }
-                    using (Stream ReceiveStream = Response.GetResponseStream())
-                    {
-                        using (StreamReader sr = new StreamReader(ReceiveStream, Encoding.UTF8))
-                        {
-                            //Кодировка указывается в зависимости от кодировки ответа сервера
-                            Char[] read = new Char[256];
-                            int count = sr.Read(read, 0, 256);
-                            while (count > 0)
-                            {
-                                String str = new String(read, 0, count);
-                                Result += str;
-                                count = sr.Read(read, 0, 256);
-                            }
-                        }
-                    }
-                    Response.Close();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    Log.Add("Ошибка: " + e.Message);
-                    return false;
-                }
-            }
+            public abstract Task<bool> Login(string Username, string Password);
+            public abstract Task<bool> Post(Uri TargetBoard, string Title, string BBText);
 
         }
 
@@ -207,26 +147,31 @@ namespace Voron_Poster
                 return "";
             }
 
-            public override bool Login(string Username, string Password)
+            public override async Task<bool> Login(string Username, string Password)
             {
                 lock (Log) { Log.Add("Cоединение с сервером"); }
                 try
                 {
-                    Cookies = new CookieContainer();
-                    string Html = String.Empty;
-                    if (!TryRequestGet(MainPage.AbsoluteUri + "index.php?action=login", out Html)) return false;
+                    HttpResponseMessage RespMes = await Client.GetAsync(MainPage.AbsoluteUri + "index.php?action=login", Cancel.Token);
+                    Progress++;
+                    string Html = await RespMes.Content.ReadAsStringAsync();
                     lock (Log) { Log.Add("Авторизация"); Progress++; }
                     Html = Html.ToLower();
                     string CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
-                    string PostData =
-                    "user=" + Uri.EscapeDataString(Username.ToLower()) +
-                    "&cookielength=-1" +
-                    "&passwrd=" + Uri.EscapeDataString(Password);
                     string HashPswd = hashLoginPassword(Username, Password, CurrSessionID);
-                    if (HashPswd.Length > 0) PostData += "&hash_passwrd=" + HashPswd;
                     string AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
-                    if (AnotherID.Length > 0) PostData += "&" + AnotherID + "=" + CurrSessionID;
-                    if (!TryRequestPost(MainPage.AbsoluteUri + "index.php?action=login2", PostData, out Html)) return false;
+                    var PostData = new FormUrlEncodedContent(new[]
+                    {
+                        new KeyValuePair<string, string>("user", Username.ToLower()),
+                        new KeyValuePair<string, string>("cookielength", "-1"),
+                        new KeyValuePair<string, string>("passwrd", Password),        
+                        new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
+                        new KeyValuePair<string, string>(AnotherID, CurrSessionID)
+                     });
+                    Progress++;
+                    RespMes = await Client.PostAsync(MainPage.AbsoluteUri + "index.php?action=login2", PostData, Cancel.Token);
+                    Progress++;
+                    Html = await RespMes.Content.ReadAsStringAsync();
                     if (Html.ToLower().IndexOf("index.php?action=logout") >= 0)
                     {
                         lock (Log) { Log.Add("Успешно авторизирован"); Progress++; }
@@ -241,6 +186,11 @@ namespace Voron_Poster
                     return false;
                 }
             }
+
+            public override async Task<bool> Post(Uri TargetBoard, string Title, string BBText)
+            {
+                return false;
+            }
         }
 
         private void RenderHtml(string Html)
@@ -254,8 +204,8 @@ namespace Voron_Poster
             b.Show();
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
+        ForumSMF f;
+        private async void button1_Click(object sender, EventArgs e)
         {
             //WebRequest Request = WebRequest.Create(textBox1.Text);
             //WebResponse Response = Request.GetResponse();
@@ -269,16 +219,29 @@ namespace Voron_Poster
             //Reader.Close();
             //Response.Close();
             //textBox1.Text = responseFromServer;
-            ForumSMF f = new ForumSMF();
+            progressBar1.Parent = this;
+            progressBar1.Text = "test";
+            progressBar1.Maximum = 5;
+            
+
+            f = new ForumSMF();
             f.ReqTimeout = 3000;
             f.MainPage = new Uri("http://www.simplemachines.org/community/");
-
-            f.Login("Voron", "LEVEL2index");
+            System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+            t.Interval = 100;
+            t.Tick += new EventHandler((a, b) => { progressBar1.Value = f.Progress; });
+            t.Start();
+            await f.Login("Voron", "LEVEL2index");
             textBox1.Lines = f.Log.ToArray();
             textBox2.Text = f.h;
             RenderHtml(f.h);
             // this.Text = hashLoginPassword(textBox1.Lines[0], textBox1.Lines[1], textBox1.Lines[2]);
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            f.Cancel.Cancel();
         }
     }
 }

@@ -101,7 +101,7 @@ namespace Voron_Poster
             }
 
             public abstract Task<bool> Login(string Username, string Password);
-            public abstract Task<bool> NewTopic(Uri TargetBoard, string Title, string BBText);
+            public abstract Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText);
 
         }
 
@@ -222,6 +222,22 @@ namespace Voron_Poster
             //    return true;
             //}
 
+            private bool TryGetPostUrl(string Html, out Uri PostUri)
+            {
+                PostUri = null;
+                int b = Html.IndexOf("index.php?action=post2");
+                if (b < 0) return false;
+                int e = Html.IndexOf("\"", b+1);
+                if (e < 0) return false;
+                b = Html.LastIndexOf("\"", b);
+                if (b < 0) return false;
+                if (Uri.TryCreate(Html.Substring(b + 1, e - b - 1), UriKind.Absolute,
+                    out PostUri) && PostUri.Scheme == Uri.UriSchemeHttp)
+                    return true;
+                else return false;
+            }
+
+
             private async Task<bool> GetCaptcha(CaptchaForm CaptchaForm)
             {
                 CaptchaForm.button3.Enabled = false;
@@ -232,17 +248,17 @@ namespace Voron_Poster
                     lock (Log) { Log.Add("Загружаю каптчу"); };
                     CaptchaForm.pictureBox1.Image = new Bitmap(await RespMes.Content.ReadAsStreamAsync());
                     CaptchaForm.ClientSize = CaptchaForm.ClientSize - CaptchaForm.pictureBox1.Size + CaptchaForm.pictureBox1.Image.Size;
-                    Random r = new Random();
-                    string NewRand = String.Empty;
-                    int n = HttpUtility.ParseQueryString(CaptchaUri.Query).Get("rand").Length;
-                    for (int i = 0; i < n; i++)
-                    {
-                        int ran = r.Next(15);
-                        if (ran > 9)
-                            NewRand += ((char)(ran + 87)).ToString();
-                        else NewRand += ((char)ran).ToString();
-                    }
-                    HttpUtility.ParseQueryString(CaptchaUri.Query).Set("rand", NewRand);
+                    //Random r = new Random();
+                    //string NewRand = String.Empty;
+                    //int n = HttpUtility.ParseQueryString(CaptchaUri.Query).Get("rand").Length;
+                    //for (int i = 0; i < n; i++)
+                    //{
+                    //    int ran = r.Next(15);
+                    //    if (ran > 9)
+                    //        NewRand += ((char)(ran + 87)).ToString();
+                    //    else NewRand += ((char)ran).ToString();
+                    //}
+                    //HttpUtility.ParseQueryString(CaptchaUri.Query).Set("rand", NewRand);
                     return true;
                 }
                 catch (Exception e)
@@ -256,17 +272,23 @@ namespace Voron_Poster
                 }
             }
 
-            public override async Task<bool> NewTopic(Uri TargetBoard, string Title, string BBText)
+            public override async Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText)
             {
                 CaptchaForm CaptchaForm = null;
                 try
                 {
-                    string BoardValue = HttpUtility.ParseQueryString(TargetBoard.Query).Get("board");
                     HttpResponseMessage RespMes = await Client.GetAsync(MainPage.AbsoluteUri
-                        + "index.php?action=post;board=" + BoardValue, Cancel.Token);
+                        + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
                     Progress++;
                     string Html = await RespMes.Content.ReadAsStringAsync();
                     lock (Log) { Log.Add("Подготовка"); Progress++; }
+                    Html = Html.ToLower();
+                    string Topic = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get("topic");
+                    if (Topic == null) Topic = "0";
+                    if (!TryGetPostUrl(Html, out TargetBoard)){
+                        lock (Log) { Log.Add("Ошибка не удалось извлечь ссылку для публикации"); }
+                        return false;
+                    }
                     string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
                     if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                         UriKind.Absolute, out CaptchaUri) && CaptchaUri.Scheme == Uri.UriSchemeHttp)
@@ -280,11 +302,10 @@ namespace Voron_Poster
                     }
                     else Progress++;
                     lock (Log) { Log.Add("Публикация"); }
-                    h = Html;
                     using (var FormData = new MultipartFormDataContent())
                     {
-                        FormData.Add(new StringContent("0"), "topic");
-                        FormData.Add(new StringContent(Title), "subject");
+                        FormData.Add(new StringContent(Topic), "topic");
+                        FormData.Add(new StringContent(Subject), "subject");
                         FormData.Add(new StringContent(BBText), "message");
                         if (CaptchaForm != null)
                             FormData.Add(new StringContent(CaptchaForm.textBox1.Text), "post_vv[code]");
@@ -300,24 +321,11 @@ namespace Voron_Poster
                         //FormData.Add(new StringContent(""), "sel_face");
                         //FormData.Add(new StringContent("xx"), "icon");
 
-                        string Board = String.Empty;
-                        string Start = String.Empty;
-                        for (int i = 0; i < BoardValue.Length; i++)
-                        {
-                            if (char.IsDigit(BoardValue[i])) Board += BoardValue[i].ToString();
-                            else break;
-                        }
-                        for (int i = BoardValue.Length - 1; i >= 0; i--)
-                        {
-                            if (char.IsDigit(BoardValue[i])) Start = BoardValue[i].ToString() + Start;
-                            else break;
-                        }
-                        RespMes = await Client.PostAsync(MainPage.AbsoluteUri + "index.php?action=post2;Start="
-                            + Start + ";board=" + Board, FormData, Cancel.Token);
+                        RespMes = await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token);
                         Progress++;
                         Html = await RespMes.Content.ReadAsStringAsync();
                         Html = Html.ToLower();
-                        if (Html.IndexOf("errorbox") > 0 || Html.IndexOf(Title) < 0)
+                        if (Html.IndexOf("errorbox") > 0 || Html.IndexOf(Subject) < 0)
                         {
                             lock (Log) { Log.Add("Ошибка"); Progress++; }
                             return false;
@@ -394,7 +402,7 @@ namespace Voron_Poster
 
         private async void button3_Click(object sender, EventArgs e)
         {
-            await f.NewTopic(new Uri("http://www.simplemachines.org/community/index.php?board=7.0"), "test2", textBox2.Text);
+            await f.PostMessage(new Uri("http://www.simplemachines.org/community/index.php?topic=524612.0"), "test3", textBox2.Text);
             textBox1.Lines = f.Log.ToArray();
             textBox2.Text += f.h;
             RenderHtml(f.h);

@@ -437,8 +437,6 @@ namespace Voron_Poster
                 // 
                 // GTSelected
                 // 
-                Selected.AutoSize = false;
-                Selected.Dock = System.Windows.Forms.DockStyle.Fill;
                 Selected.Anchor = System.Windows.Forms.AnchorStyles.Top;
                 Selected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
                 Selected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -453,7 +451,7 @@ namespace Voron_Poster
                 // 
                 // GTName
                 // 
-                Name.AutoSize = false;
+                Name.AutoSize = true;
                 Name.Dock = System.Windows.Forms.DockStyle.Fill;
                 Name.Location = new System.Drawing.Point(28, 1);
                 Name.Name = "GTName";
@@ -466,7 +464,7 @@ namespace Voron_Poster
                 // 
                 // GTStatus
                 // 
-                Status.AutoSize = false;
+                Status.AutoSize = true;
                 Status.Dock = System.Windows.Forms.DockStyle.Fill;
                 Status.Location = new System.Drawing.Point(412, 1);
                 Status.Name = "GTStatus";
@@ -503,8 +501,7 @@ namespace Voron_Poster
                 // 
                 // GTStartStop
                 // 
-                StartStop.AutoSize = false;
-                StartStop.Dock = System.Windows.Forms.DockStyle.Fill;
+                StartStop.AutoSize = true;
                 StartStop.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
                 StartStop.Location = new System.Drawing.Point(670, 1);
                 StartStop.Margin = new System.Windows.Forms.Padding(0);
@@ -517,8 +514,7 @@ namespace Voron_Poster
                 // 
                 // GTPropeties
                 // 
-                Properties.AutoSize = false;
-                Properties.Dock = System.Windows.Forms.DockStyle.Fill;
+                Properties.AutoSize = true;
                 Properties.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
                 Properties.Location = new System.Drawing.Point(695, 1);
                 Properties.Margin = new System.Windows.Forms.Padding(0);
@@ -531,8 +527,7 @@ namespace Voron_Poster
                 // 
                 // GTDelete
                 // 
-                Delete.AutoSize = false;
-                Delete.Dock = System.Windows.Forms.DockStyle.Fill;
+                Delete.AutoSize = true;
                 Delete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
                 Delete.Location = new System.Drawing.Point(720, 1);
                 Delete.Margin = new System.Windows.Forms.Padding(0);
@@ -549,23 +544,73 @@ namespace Voron_Poster
                 Parent = ParentPanel;
                 InitializeComponent();
                 Control[] Ctrls = new Control[] { Selected, Name, Status, StatusIcon, Progress, StartStop, Properties, Delete };
-                Parent.RowCount = Parent.RowCount + 1;
-                for (int i = 0; i < Ctrls.Length; i++)
+                //  Parent.SuspendLayout();
+                Parent.Controls.AddRange(Ctrls);
+                foreach (RowStyle Style in Parent.RowStyles)
                 {
-                    Parent.Controls.Add(Ctrls[i], i, Parent.RowCount - 1);
-                    Parent.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+                    Style.SizeType = SizeType.Absolute;
+                    Style.Height = 24;
                 }
+                //for (int i = 0; i < Parent.ColumnCount - 1; i++)
+                //{
+                //    Parent.ColumnStyles[i].SizeType = SizeType.Absolute;
+                //}
+                int WidthLeft = Parent.ClientSize.Width - 24 * 5 - Parent.ColumnCount * 1;
+                if (Parent.RowCount * 25 >= Parent.ClientSize.Height) WidthLeft -= SystemInformation.VerticalScrollBarWidth;
+                for (int i = 0; i < Parent.ColumnCount-1; i++)
+                {
+               //     Parent.ColumnStyles[i].SizeType = SizeType.Absolute;
+                    if (i == 1)
+                    {
+                        //     Parent.ColumnStyles[i].SizeType = SizeType.Percent;
+                        Parent.ColumnStyles[i].Width = 0.6F * WidthLeft;
+                    }
+                    else if (i == 2)
+                    {
+                        //     Parent.ColumnStyles[i].SizeType = SizeType.Percent;
+                        Parent.ColumnStyles[i].Width = 0.3F * WidthLeft;
+                    }
+                    else if (i == 4)
+                    {
+                        //       Parent.ColumnStyles[i].SizeType = SizeType.Percent;
+                        Parent.ColumnStyles[i].Width = 0.09F * WidthLeft;
+                    }
+                    //else if (i == 7)
+                    //{
+                    //    Parent.ColumnStyles[i].SizeType = SizeType.Percent;
+                    //    Parent.ColumnStyles[i].Width = 5;
+                    //}
+                    else
+                    {
+                        //Parent.ColumnStyles[i].SizeType = SizeType.Absolute;
+                        Parent.ColumnStyles[i].Width = 24;
+                    }
+                }
+
+
+                 Parent.ColumnStyles[7].SizeType = SizeType.AutoSize;
+                //Parent.ColumnStyles[1].SizeType = SizeType.Percent;
+
+
+                //   Parent.ResumeLayout();
             }
         }
 
-        private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
+        private void GTStartStop_Click(object sender, EventArgs e)
         {
-            if (e.Row == 0)
-            {
-                Graphics g = e.Graphics;
-                Rectangle r = e.CellBounds;
-                g.FillRectangle(SystemBrushes.Control, r);
-            }
+            TaskGui t = new TaskGui(tableLayoutPanel1);
         }
+
+        private void tabPage3_Resize(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Resize(object sender, EventArgs e)
+        {
+            if (tableLayoutPanel1.ClientSize.Width > 10) { };
+        }
+
+
     }
 }

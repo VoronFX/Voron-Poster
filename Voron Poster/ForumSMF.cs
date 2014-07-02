@@ -14,9 +14,8 @@ namespace Voron_Poster
     {
 
         private Uri CaptchaUri;
-        public string h;
-        string CurrSessionID;
-        string AnotherID;
+        private string CurrSessionID;
+        private string AnotherID;
         public ForumSMF() : base() { }
 
         private static string SHA1HashStringForUTF8String(string s)
@@ -57,29 +56,32 @@ namespace Voron_Poster
             return "";
         }
 
-        public override async Task<bool> Login(string Username, string Password)
+        public override async Task<bool> Login()
         {
             lock (Log) { Log.Add("Cоединение с сервером"); }
             try
             {
-                HttpResponseMessage RespMes = await Client.GetAsync(MainPage.AbsoluteUri + "index.php?action=login", Cancel.Token);
+                if (Client != null) Client.Dispose();
+                Client = new HttpClient();
+                Progress++;
+                HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
                 Progress++;
                 string Html = await RespMes.Content.ReadAsStringAsync();
                 lock (Log) { Log.Add("Авторизация"); Progress++; }
                 Html = Html.ToLower();
                 CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
-                string HashPswd = hashLoginPassword(Username, Password, CurrSessionID);
+                string HashPswd = hashLoginPassword(Properties.Username, Properties.Password, CurrSessionID);
                 AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
                 var PostData = new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string>("user", Username.ToLower()),
+                        new KeyValuePair<string, string>("user", Properties.Username.ToLower()),
                         new KeyValuePair<string, string>("cookielength", "-1"),
-                        new KeyValuePair<string, string>("passwrd", Password),        
+                        new KeyValuePair<string, string>("passwrd", Properties.Password),        
                         new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
                         new KeyValuePair<string, string>(AnotherID, CurrSessionID)
                      });
                 Progress++;
-                RespMes = await Client.PostAsync(MainPage.AbsoluteUri + "index.php?action=login2", PostData, Cancel.Token);
+                RespMes = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
                 Progress++;
                 Html = await RespMes.Content.ReadAsStringAsync();
                 if (Html.ToLower().IndexOf("index.php?action=logout") >= 0)
@@ -142,7 +144,6 @@ namespace Voron_Poster
             else return false;
         }
 
-
         private async Task<bool> GetCaptcha(CaptchaForm CaptchaForm)
         {
             CaptchaForm.button3.Enabled = false;
@@ -182,7 +183,7 @@ namespace Voron_Poster
             CaptchaForm CaptchaForm = null;
             try
             {
-                HttpResponseMessage RespMes = await Client.GetAsync(MainPage.AbsoluteUri
+                HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage
                     + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
                 Progress++;
                 string Html = await RespMes.Content.ReadAsStringAsync();

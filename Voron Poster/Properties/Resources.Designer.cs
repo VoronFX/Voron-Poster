@@ -173,6 +173,16 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Restart_6322 {
+            get {
+                object obj = ResourceManager.GetObject("Restart_6322", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap save_16xLG {
             get {
                 object obj = ResourceManager.GetObject("save_16xLG", resourceCulture);
@@ -223,6 +233,16 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Pause_16xLG {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Pause_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StatusAnnotations_Play_16xLG {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Play_16xLG", resourceCulture);
@@ -236,6 +256,16 @@ namespace Voron_Poster.Properties {
         internal static System.Drawing.Bitmap StatusAnnotations_Stop_16xLG {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Stop_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Stop_16xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Stop_16xLG_color", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

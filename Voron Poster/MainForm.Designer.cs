@@ -28,19 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.DetectEngineButton = new System.Windows.Forms.Button();
+            this.components = new System.ComponentModel.Container();
+            this.Tabs = new System.Windows.Forms.TabControl();
+            this.TaskPropertiesPage = new System.Windows.Forms.TabPage();
             this.ForumEngineComboBox = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.ScriptMoveDownButton = new System.Windows.Forms.Button();
-            this.ScriptMoveUpButton = new System.Windows.Forms.Button();
-            this.ScriptAddButton = new System.Windows.Forms.Button();
-            this.RemoveScriptButton = new System.Windows.Forms.Button();
             this.ScriptListBox = new System.Windows.Forms.ListBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.TryLoginButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.LocalAccountCheckbox = new System.Windows.Forms.RadioButton();
@@ -50,14 +45,7 @@
             this.PasswordBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.UsernameBox = new System.Windows.Forms.TextBox();
-            this.TaskPropCancel = new System.Windows.Forms.Button();
-            this.TaskPropApply = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.BrowseProfileButton = new System.Windows.Forms.Button();
-            this.DeleteProfileButton = new System.Windows.Forms.Button();
-            this.NewProfileButton = new System.Windows.Forms.Button();
-            this.SaveProfileButton = new System.Windows.Forms.Button();
-            this.LoadProfileButton = new System.Windows.Forms.Button();
             this.ProfileComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.MainPageBox = new System.Windows.Forms.TextBox();
@@ -72,11 +60,33 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.Profiles = new System.Windows.Forms.TabPage();
-            this.button8 = new System.Windows.Forms.Button();
-            this.Tasks = new System.Windows.Forms.TabPage();
-            this.button4 = new System.Windows.Forms.Button();
+            this.TasksPage = new System.Windows.Forms.TabPage();
             this.textBox3 = new System.Windows.Forms.TextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.AddTaskButton = new System.Windows.Forms.Button();
+            this.DetectEngineButton = new System.Windows.Forms.Button();
+            this.ScriptMoveDownButton = new System.Windows.Forms.Button();
+            this.ScriptMoveUpButton = new System.Windows.Forms.Button();
+            this.ScriptAddButton = new System.Windows.Forms.Button();
+            this.RemoveScriptButton = new System.Windows.Forms.Button();
+            this.TryLoginButton = new System.Windows.Forms.Button();
+            this.BrowseProfileButton = new System.Windows.Forms.Button();
+            this.DeleteProfileButton = new System.Windows.Forms.Button();
+            this.NewProfileButton = new System.Windows.Forms.Button();
+            this.SaveProfileButton = new System.Windows.Forms.Button();
+            this.LoadProfileButton = new System.Windows.Forms.Button();
+            this.TaskPropCancel = new System.Windows.Forms.Button();
+            this.TaskPropApply = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
+            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.TasksGuiTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -86,67 +96,53 @@
             this.GTStatusIcon = new System.Windows.Forms.PictureBox();
             this.GTStop = new System.Windows.Forms.Button();
             this.GTDelete = new System.Windows.Forms.Button();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.tabControl1.SuspendLayout();
-            this.tabPage5.SuspendLayout();
+            this.Tabs.SuspendLayout();
+            this.TaskPropertiesPage.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.Profiles.SuspendLayout();
-            this.Tasks.SuspendLayout();
+            this.TasksPage.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.TasksGuiTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // Tabs
             // 
-            this.tabControl1.Controls.Add(this.tabPage5);
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.Profiles);
-            this.tabControl1.Controls.Add(this.Tasks);
-            this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(3, 3);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(681, 534);
-            this.tabControl1.TabIndex = 8;
+            this.Tabs.Controls.Add(this.tabPage1);
+            this.Tabs.Controls.Add(this.tabPage4);
+            this.Tabs.Controls.Add(this.TasksPage);
+            this.Tabs.Controls.Add(this.TaskPropertiesPage);
+            this.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Tabs.Location = new System.Drawing.Point(3, 3);
+            this.Tabs.Name = "Tabs";
+            this.Tabs.SelectedIndex = 0;
+            this.Tabs.Size = new System.Drawing.Size(681, 534);
+            this.Tabs.TabIndex = 8;
+            this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
-            // tabPage5
+            // TaskPropertiesPage
             // 
-            this.tabPage5.Controls.Add(this.DetectEngineButton);
-            this.tabPage5.Controls.Add(this.ForumEngineComboBox);
-            this.tabPage5.Controls.Add(this.label7);
-            this.tabPage5.Controls.Add(this.groupBox3);
-            this.tabPage5.Controls.Add(this.groupBox2);
-            this.tabPage5.Controls.Add(this.TaskPropCancel);
-            this.tabPage5.Controls.Add(this.TaskPropApply);
-            this.tabPage5.Controls.Add(this.groupBox1);
-            this.tabPage5.Controls.Add(this.label3);
-            this.tabPage5.Controls.Add(this.MainPageBox);
-            this.tabPage5.Controls.Add(this.label2);
-            this.tabPage5.Controls.Add(this.TargetURlBox);
-            this.tabPage5.Location = new System.Drawing.Point(4, 22);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(20);
-            this.tabPage5.Size = new System.Drawing.Size(673, 508);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "tabPage5";
-            this.tabPage5.UseVisualStyleBackColor = true;
-            // 
-            // DetectEngineButton
-            // 
-            this.DetectEngineButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DetectEngineButton.Enabled = false;
-            this.DetectEngineButton.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
-            this.DetectEngineButton.Location = new System.Drawing.Point(308, 195);
-            this.DetectEngineButton.Name = "DetectEngineButton";
-            this.DetectEngineButton.Size = new System.Drawing.Size(99, 24);
-            this.DetectEngineButton.TabIndex = 15;
-            this.DetectEngineButton.Text = "Определить";
-            this.DetectEngineButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.DetectEngineButton.UseVisualStyleBackColor = true;
+            this.TaskPropertiesPage.Controls.Add(this.DetectEngineButton);
+            this.TaskPropertiesPage.Controls.Add(this.ForumEngineComboBox);
+            this.TaskPropertiesPage.Controls.Add(this.label7);
+            this.TaskPropertiesPage.Controls.Add(this.groupBox3);
+            this.TaskPropertiesPage.Controls.Add(this.groupBox2);
+            this.TaskPropertiesPage.Controls.Add(this.groupBox1);
+            this.TaskPropertiesPage.Controls.Add(this.label3);
+            this.TaskPropertiesPage.Controls.Add(this.MainPageBox);
+            this.TaskPropertiesPage.Controls.Add(this.label2);
+            this.TaskPropertiesPage.Controls.Add(this.TargetURlBox);
+            this.TaskPropertiesPage.Controls.Add(this.TaskPropCancel);
+            this.TaskPropertiesPage.Controls.Add(this.TaskPropApply);
+            this.TaskPropertiesPage.Location = new System.Drawing.Point(4, 22);
+            this.TaskPropertiesPage.Name = "TaskPropertiesPage";
+            this.TaskPropertiesPage.Padding = new System.Windows.Forms.Padding(20);
+            this.TaskPropertiesPage.Size = new System.Drawing.Size(673, 508);
+            this.TaskPropertiesPage.TabIndex = 4;
+            this.TaskPropertiesPage.Text = "Параметры задачи";
+            this.TaskPropertiesPage.UseVisualStyleBackColor = true;
             // 
             // ForumEngineComboBox
             // 
@@ -190,50 +186,6 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Скрипты предобработки";
             // 
-            // ScriptMoveDownButton
-            // 
-            this.ScriptMoveDownButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScriptMoveDownButton.Image = global::Voron_Poster.Properties.Resources.arrow_Down_16xLG;
-            this.ScriptMoveDownButton.Location = new System.Drawing.Point(345, 51);
-            this.ScriptMoveDownButton.Name = "ScriptMoveDownButton";
-            this.ScriptMoveDownButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptMoveDownButton.TabIndex = 14;
-            this.ScriptMoveDownButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.ScriptMoveDownButton.UseVisualStyleBackColor = true;
-            // 
-            // ScriptMoveUpButton
-            // 
-            this.ScriptMoveUpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScriptMoveUpButton.Image = global::Voron_Poster.Properties.Resources.arrow_Up_16xLG;
-            this.ScriptMoveUpButton.Location = new System.Drawing.Point(345, 19);
-            this.ScriptMoveUpButton.Name = "ScriptMoveUpButton";
-            this.ScriptMoveUpButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptMoveUpButton.TabIndex = 13;
-            this.ScriptMoveUpButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.ScriptMoveUpButton.UseVisualStyleBackColor = true;
-            // 
-            // ScriptAddButton
-            // 
-            this.ScriptAddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScriptAddButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.ScriptAddButton.Location = new System.Drawing.Point(345, 186);
-            this.ScriptAddButton.Name = "ScriptAddButton";
-            this.ScriptAddButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptAddButton.TabIndex = 12;
-            this.ScriptAddButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.ScriptAddButton.UseVisualStyleBackColor = true;
-            // 
-            // RemoveScriptButton
-            // 
-            this.RemoveScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.RemoveScriptButton.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
-            this.RemoveScriptButton.Location = new System.Drawing.Point(345, 217);
-            this.RemoveScriptButton.Name = "RemoveScriptButton";
-            this.RemoveScriptButton.Size = new System.Drawing.Size(26, 26);
-            this.RemoveScriptButton.TabIndex = 11;
-            this.RemoveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.RemoveScriptButton.UseVisualStyleBackColor = true;
-            // 
             // ScriptListBox
             // 
             this.ScriptListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -264,18 +216,6 @@
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Авторизация";
-            // 
-            // TryLoginButton
-            // 
-            this.TryLoginButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.TryLoginButton.Image = global::Voron_Poster.Properties.Resources.user_16xLG;
-            this.TryLoginButton.Location = new System.Drawing.Point(11, 208);
-            this.TryLoginButton.Name = "TryLoginButton";
-            this.TryLoginButton.Size = new System.Drawing.Size(209, 24);
-            this.TryLoginButton.TabIndex = 14;
-            this.TryLoginButton.Text = "Пробная авторизация";
-            this.TryLoginButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.TryLoginButton.UseVisualStyleBackColor = true;
             // 
             // label6
             // 
@@ -367,31 +307,6 @@
             this.UsernameBox.Size = new System.Drawing.Size(209, 20);
             this.UsernameBox.TabIndex = 5;
             // 
-            // TaskPropCancel
-            // 
-            this.TaskPropCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.TaskPropCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.TaskPropCancel.Location = new System.Drawing.Point(534, 447);
-            this.TaskPropCancel.Name = "TaskPropCancel";
-            this.TaskPropCancel.Size = new System.Drawing.Size(116, 38);
-            this.TaskPropCancel.TabIndex = 7;
-            this.TaskPropCancel.Text = "Отмена";
-            this.TaskPropCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.TaskPropCancel.UseVisualStyleBackColor = true;
-            // 
-            // TaskPropApply
-            // 
-            this.TaskPropApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.TaskPropApply.Enabled = false;
-            this.TaskPropApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.TaskPropApply.Location = new System.Drawing.Point(413, 447);
-            this.TaskPropApply.Name = "TaskPropApply";
-            this.TaskPropApply.Size = new System.Drawing.Size(115, 38);
-            this.TaskPropApply.TabIndex = 6;
-            this.TaskPropApply.Text = "Применить";
-            this.TaskPropApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.TaskPropApply.UseVisualStyleBackColor = true;
-            // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -408,70 +323,7 @@
             this.groupBox1.Size = new System.Drawing.Size(627, 79);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Шаблоны";
-            // 
-            // BrowseProfileButton
-            // 
-            this.BrowseProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BrowseProfileButton.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
-            this.BrowseProfileButton.Location = new System.Drawing.Point(514, 17);
-            this.BrowseProfileButton.Name = "BrowseProfileButton";
-            this.BrowseProfileButton.Size = new System.Drawing.Size(96, 24);
-            this.BrowseProfileButton.TabIndex = 5;
-            this.BrowseProfileButton.Text = "... Обзор";
-            this.BrowseProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.BrowseProfileButton.UseVisualStyleBackColor = true;
-            // 
-            // DeleteProfileButton
-            // 
-            this.DeleteProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteProfileButton.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.DeleteProfileButton.Location = new System.Drawing.Point(247, 47);
-            this.DeleteProfileButton.Name = "DeleteProfileButton";
-            this.DeleteProfileButton.Size = new System.Drawing.Size(97, 24);
-            this.DeleteProfileButton.TabIndex = 4;
-            this.DeleteProfileButton.Text = "Удалить";
-            this.DeleteProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.DeleteProfileButton.UseVisualStyleBackColor = true;
-            this.DeleteProfileButton.Click += new System.EventHandler(this.DeleteProfileButton_Click);
-            // 
-            // NewProfileButton
-            // 
-            this.NewProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NewProfileButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.NewProfileButton.Location = new System.Drawing.Point(13, 47);
-            this.NewProfileButton.Name = "NewProfileButton";
-            this.NewProfileButton.Size = new System.Drawing.Size(125, 24);
-            this.NewProfileButton.TabIndex = 3;
-            this.NewProfileButton.Text = "Создать новый";
-            this.NewProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.NewProfileButton.UseVisualStyleBackColor = true;
-            this.NewProfileButton.Click += new System.EventHandler(this.NewProfileButton_Click);
-            // 
-            // SaveProfileButton
-            // 
-            this.SaveProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.SaveProfileButton.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.SaveProfileButton.Location = new System.Drawing.Point(144, 47);
-            this.SaveProfileButton.Name = "SaveProfileButton";
-            this.SaveProfileButton.Size = new System.Drawing.Size(97, 24);
-            this.SaveProfileButton.TabIndex = 2;
-            this.SaveProfileButton.Text = "Сохранить";
-            this.SaveProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.SaveProfileButton.UseVisualStyleBackColor = true;
-            this.SaveProfileButton.Click += new System.EventHandler(this.SaveProfileButton_Click);
-            // 
-            // LoadProfileButton
-            // 
-            this.LoadProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.LoadProfileButton.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.LoadProfileButton.Location = new System.Drawing.Point(463, 47);
-            this.LoadProfileButton.Name = "LoadProfileButton";
-            this.LoadProfileButton.Size = new System.Drawing.Size(147, 24);
-            this.LoadProfileButton.TabIndex = 1;
-            this.LoadProfileButton.Text = "Открыть (Применить)";
-            this.LoadProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.LoadProfileButton.UseVisualStyleBackColor = true;
+            this.groupBox1.Text = "Готовые профили";
             // 
             // ProfileComboBox
             // 
@@ -613,63 +465,319 @@
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // Profiles
+            // TasksPage
             // 
-            this.Profiles.Controls.Add(this.button8);
-            this.Profiles.Location = new System.Drawing.Point(4, 22);
-            this.Profiles.Name = "Profiles";
-            this.Profiles.Padding = new System.Windows.Forms.Padding(3);
-            this.Profiles.Size = new System.Drawing.Size(673, 508);
-            this.Profiles.TabIndex = 1;
-            this.Profiles.Text = "Профили";
-            this.Profiles.UseVisualStyleBackColor = true;
-            // 
-            // button8
-            // 
-            this.button8.AutoSize = true;
-            this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button8.ImageKey = "action_Cancel_16xLG.png";
-            this.button8.Location = new System.Drawing.Point(551, 305);
-            this.button8.Margin = new System.Windows.Forms.Padding(0);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(24, 24);
-            this.button8.TabIndex = 11;
-            this.button8.UseVisualStyleBackColor = true;
-            // 
-            // Tasks
-            // 
-            this.Tasks.Controls.Add(this.button4);
-            this.Tasks.Controls.Add(this.textBox3);
-            this.Tasks.Controls.Add(this.TasksGuiTable);
-            this.Tasks.Location = new System.Drawing.Point(4, 22);
-            this.Tasks.Name = "Tasks";
-            this.Tasks.Padding = new System.Windows.Forms.Padding(20);
-            this.Tasks.Size = new System.Drawing.Size(673, 508);
-            this.Tasks.TabIndex = 2;
-            this.Tasks.Text = "Темы/Разделы";
-            this.Tasks.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.button4.Location = new System.Drawing.Point(560, 21);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(90, 24);
-            this.button4.TabIndex = 2;
-            this.button4.Text = "Добавить";
-            this.button4.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.button4.UseVisualStyleBackColor = true;
+            this.TasksPage.Controls.Add(this.groupBox4);
+            this.TasksPage.Controls.Add(this.label8);
+            this.TasksPage.Controls.Add(this.AddTaskButton);
+            this.TasksPage.Controls.Add(this.textBox3);
+            this.TasksPage.Controls.Add(this.TasksGuiTable);
+            this.TasksPage.Location = new System.Drawing.Point(4, 22);
+            this.TasksPage.Name = "TasksPage";
+            this.TasksPage.Padding = new System.Windows.Forms.Padding(20);
+            this.TasksPage.Size = new System.Drawing.Size(673, 508);
+            this.TasksPage.TabIndex = 2;
+            this.TasksPage.Text = "Публикация";
+            this.TasksPage.UseVisualStyleBackColor = true;
             // 
             // textBox3
             // 
             this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox3.Location = new System.Drawing.Point(23, 23);
+            this.textBox3.Location = new System.Drawing.Point(23, 129);
             this.textBox3.Margin = new System.Windows.Forms.Padding(3, 3, 13, 3);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(521, 20);
+            this.textBox3.Size = new System.Drawing.Size(522, 20);
             this.textBox3.TabIndex = 1;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(673, 508);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Сообщение";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // AddTaskButton
+            // 
+            this.AddTaskButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.AddTaskButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.AddTaskButton.Location = new System.Drawing.Point(561, 127);
+            this.AddTaskButton.Name = "AddTaskButton";
+            this.AddTaskButton.Size = new System.Drawing.Size(90, 24);
+            this.AddTaskButton.TabIndex = 2;
+            this.AddTaskButton.Text = "Добавить";
+            this.AddTaskButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.AddTaskButton.UseVisualStyleBackColor = true;
+            this.AddTaskButton.Click += new System.EventHandler(this.AddTaskButton_Click);
+            // 
+            // DetectEngineButton
+            // 
+            this.DetectEngineButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.DetectEngineButton.Enabled = false;
+            this.DetectEngineButton.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
+            this.DetectEngineButton.Location = new System.Drawing.Point(308, 195);
+            this.DetectEngineButton.Name = "DetectEngineButton";
+            this.DetectEngineButton.Size = new System.Drawing.Size(99, 24);
+            this.DetectEngineButton.TabIndex = 15;
+            this.DetectEngineButton.Text = "Определить";
+            this.DetectEngineButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.DetectEngineButton.UseVisualStyleBackColor = true;
+            // 
+            // ScriptMoveDownButton
+            // 
+            this.ScriptMoveDownButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ScriptMoveDownButton.Image = global::Voron_Poster.Properties.Resources.arrow_Down_16xLG;
+            this.ScriptMoveDownButton.Location = new System.Drawing.Point(345, 51);
+            this.ScriptMoveDownButton.Name = "ScriptMoveDownButton";
+            this.ScriptMoveDownButton.Size = new System.Drawing.Size(26, 26);
+            this.ScriptMoveDownButton.TabIndex = 14;
+            this.ScriptMoveDownButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.ScriptMoveDownButton.UseVisualStyleBackColor = true;
+            // 
+            // ScriptMoveUpButton
+            // 
+            this.ScriptMoveUpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ScriptMoveUpButton.Image = global::Voron_Poster.Properties.Resources.arrow_Up_16xLG;
+            this.ScriptMoveUpButton.Location = new System.Drawing.Point(345, 19);
+            this.ScriptMoveUpButton.Name = "ScriptMoveUpButton";
+            this.ScriptMoveUpButton.Size = new System.Drawing.Size(26, 26);
+            this.ScriptMoveUpButton.TabIndex = 13;
+            this.ScriptMoveUpButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.ScriptMoveUpButton.UseVisualStyleBackColor = true;
+            // 
+            // ScriptAddButton
+            // 
+            this.ScriptAddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ScriptAddButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.ScriptAddButton.Location = new System.Drawing.Point(345, 186);
+            this.ScriptAddButton.Name = "ScriptAddButton";
+            this.ScriptAddButton.Size = new System.Drawing.Size(26, 26);
+            this.ScriptAddButton.TabIndex = 12;
+            this.ScriptAddButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.ScriptAddButton.UseVisualStyleBackColor = true;
+            // 
+            // RemoveScriptButton
+            // 
+            this.RemoveScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.RemoveScriptButton.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
+            this.RemoveScriptButton.Location = new System.Drawing.Point(345, 217);
+            this.RemoveScriptButton.Name = "RemoveScriptButton";
+            this.RemoveScriptButton.Size = new System.Drawing.Size(26, 26);
+            this.RemoveScriptButton.TabIndex = 11;
+            this.RemoveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.RemoveScriptButton.UseVisualStyleBackColor = true;
+            // 
+            // TryLoginButton
+            // 
+            this.TryLoginButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.TryLoginButton.Image = global::Voron_Poster.Properties.Resources.user_16xLG;
+            this.TryLoginButton.Location = new System.Drawing.Point(11, 208);
+            this.TryLoginButton.Name = "TryLoginButton";
+            this.TryLoginButton.Size = new System.Drawing.Size(209, 24);
+            this.TryLoginButton.TabIndex = 14;
+            this.TryLoginButton.Text = "Пробная авторизация";
+            this.TryLoginButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.TryLoginButton.UseVisualStyleBackColor = true;
+            // 
+            // BrowseProfileButton
+            // 
+            this.BrowseProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BrowseProfileButton.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
+            this.BrowseProfileButton.Location = new System.Drawing.Point(514, 17);
+            this.BrowseProfileButton.Name = "BrowseProfileButton";
+            this.BrowseProfileButton.Size = new System.Drawing.Size(96, 24);
+            this.BrowseProfileButton.TabIndex = 5;
+            this.BrowseProfileButton.Text = "... Обзор";
+            this.BrowseProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.BrowseProfileButton.UseVisualStyleBackColor = true;
+            // 
+            // DeleteProfileButton
+            // 
+            this.DeleteProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteProfileButton.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.DeleteProfileButton.Location = new System.Drawing.Point(247, 47);
+            this.DeleteProfileButton.Name = "DeleteProfileButton";
+            this.DeleteProfileButton.Size = new System.Drawing.Size(97, 24);
+            this.DeleteProfileButton.TabIndex = 4;
+            this.DeleteProfileButton.Text = "Удалить";
+            this.DeleteProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.DeleteProfileButton.UseVisualStyleBackColor = true;
+            this.DeleteProfileButton.Click += new System.EventHandler(this.DeleteProfileButton_Click);
+            // 
+            // NewProfileButton
+            // 
+            this.NewProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.NewProfileButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.NewProfileButton.Location = new System.Drawing.Point(13, 47);
+            this.NewProfileButton.Name = "NewProfileButton";
+            this.NewProfileButton.Size = new System.Drawing.Size(125, 24);
+            this.NewProfileButton.TabIndex = 3;
+            this.NewProfileButton.Text = "Создать новый";
+            this.NewProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.NewProfileButton.UseVisualStyleBackColor = true;
+            this.NewProfileButton.Click += new System.EventHandler(this.NewProfileButton_Click);
+            // 
+            // SaveProfileButton
+            // 
+            this.SaveProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.SaveProfileButton.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.SaveProfileButton.Location = new System.Drawing.Point(144, 47);
+            this.SaveProfileButton.Name = "SaveProfileButton";
+            this.SaveProfileButton.Size = new System.Drawing.Size(97, 24);
+            this.SaveProfileButton.TabIndex = 2;
+            this.SaveProfileButton.Text = "Сохранить";
+            this.SaveProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.SaveProfileButton.UseVisualStyleBackColor = true;
+            this.SaveProfileButton.Click += new System.EventHandler(this.SaveProfileButton_Click);
+            // 
+            // LoadProfileButton
+            // 
+            this.LoadProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LoadProfileButton.Image = global::Voron_Poster.Properties.Resources.Open_6529;
+            this.LoadProfileButton.Location = new System.Drawing.Point(463, 47);
+            this.LoadProfileButton.Name = "LoadProfileButton";
+            this.LoadProfileButton.Size = new System.Drawing.Size(147, 24);
+            this.LoadProfileButton.TabIndex = 1;
+            this.LoadProfileButton.Text = "Открыть (Применить)";
+            this.LoadProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.LoadProfileButton.UseVisualStyleBackColor = true;
+            // 
+            // TaskPropCancel
+            // 
+            this.TaskPropCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.TaskPropCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.TaskPropCancel.Location = new System.Drawing.Point(534, 447);
+            this.TaskPropCancel.Name = "TaskPropCancel";
+            this.TaskPropCancel.Size = new System.Drawing.Size(116, 38);
+            this.TaskPropCancel.TabIndex = 7;
+            this.TaskPropCancel.Text = "Отмена";
+            this.TaskPropCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.TaskPropCancel.UseVisualStyleBackColor = true;
+            // 
+            // TaskPropApply
+            // 
+            this.TaskPropApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.TaskPropApply.Enabled = false;
+            this.TaskPropApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.TaskPropApply.Location = new System.Drawing.Point(413, 447);
+            this.TaskPropApply.Name = "TaskPropApply";
+            this.TaskPropApply.Size = new System.Drawing.Size(115, 38);
+            this.TaskPropApply.TabIndex = 6;
+            this.TaskPropApply.Text = "Применить";
+            this.TaskPropApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.TaskPropApply.UseVisualStyleBackColor = true;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(23, 113);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(212, 13);
+            this.label8.TabIndex = 7;
+            this.label8.Text = "Ссылка на тему/раздел для публикации";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox4.Controls.Add(this.button4);
+            this.groupBox4.Controls.Add(this.button5);
+            this.groupBox4.Controls.Add(this.button6);
+            this.groupBox4.Controls.Add(this.button7);
+            this.groupBox4.Controls.Add(this.button8);
+            this.groupBox4.Controls.Add(this.comboBox1);
+            this.groupBox4.Location = new System.Drawing.Point(23, 23);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(10, 3, 3, 5);
+            this.groupBox4.Size = new System.Drawing.Size(628, 79);
+            this.groupBox4.TabIndex = 9;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Готовые профили";
+            // 
+            // button4
+            // 
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button4.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
+            this.button4.Location = new System.Drawing.Point(515, 17);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(96, 24);
+            this.button4.TabIndex = 5;
+            this.button4.Text = "... Обзор";
+            this.button4.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // button5
+            // 
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button5.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.button5.Location = new System.Drawing.Point(247, 47);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(97, 24);
+            this.button5.TabIndex = 4;
+            this.button5.Text = "Удалить";
+            this.button5.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button5.UseVisualStyleBackColor = true;
+            // 
+            // button6
+            // 
+            this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button6.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.button6.Location = new System.Drawing.Point(13, 47);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(125, 24);
+            this.button6.TabIndex = 3;
+            this.button6.Text = "Создать новый";
+            this.button6.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button6.UseVisualStyleBackColor = true;
+            // 
+            // button7
+            // 
+            this.button7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button7.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.button7.Location = new System.Drawing.Point(144, 47);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(97, 24);
+            this.button7.TabIndex = 2;
+            this.button7.Text = "Сохранить";
+            this.button7.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button7.UseVisualStyleBackColor = true;
+            // 
+            // button8
+            // 
+            this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button8.Image = global::Voron_Poster.Properties.Resources.Open_6529;
+            this.button8.Location = new System.Drawing.Point(464, 47);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(147, 24);
+            this.button8.TabIndex = 1;
+            this.button8.Text = "Открыть (Применить)";
+            this.button8.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button8.UseVisualStyleBackColor = true;
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(13, 19);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(496, 21);
+            this.comboBox1.TabIndex = 0;
+            // 
+            // TasksUpdater
+            // 
+            this.TasksUpdater.Tick += new System.EventHandler(this.TasksUpdater_Tick);
+            // 
+            // ToolTip
+            // 
+            this.ToolTip.AutoPopDelay = 5000;
+            this.ToolTip.InitialDelay = 250;
+            this.ToolTip.ReshowDelay = 100;
+            this.ToolTip.Popup += new System.Windows.Forms.PopupEventHandler(this.ToolTip_Popup);
             // 
             // TasksGuiTable
             // 
@@ -697,12 +805,12 @@
             this.TasksGuiTable.Controls.Add(this.GTStatusIcon, 3, 0);
             this.TasksGuiTable.Controls.Add(this.GTStop, 6, 0);
             this.TasksGuiTable.Controls.Add(this.GTDelete, 7, 0);
-            this.TasksGuiTable.Location = new System.Drawing.Point(23, 69);
+            this.TasksGuiTable.Location = new System.Drawing.Point(23, 175);
             this.TasksGuiTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
             this.TasksGuiTable.Name = "TasksGuiTable";
             this.TasksGuiTable.RowCount = 1;
             this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.TasksGuiTable.Size = new System.Drawing.Size(627, 416);
+            this.TasksGuiTable.Size = new System.Drawing.Size(627, 310);
             this.TasksGuiTable.TabIndex = 0;
             this.TasksGuiTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
             // 
@@ -815,38 +923,28 @@
             this.GTDelete.TabIndex = 10;
             this.GTDelete.UseVisualStyleBackColor = true;
             // 
-            // tabPage4
-            // 
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(673, 508);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Сообщение";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(687, 540);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.Tabs);
             this.MinimumSize = new System.Drawing.Size(590, 531);
             this.Name = "MainForm";
             this.Padding = new System.Windows.Forms.Padding(3);
             this.Text = "Voron Poster";
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage5.ResumeLayout(false);
-            this.tabPage5.PerformLayout();
+            this.Tabs.ResumeLayout(false);
+            this.TaskPropertiesPage.ResumeLayout(false);
+            this.TaskPropertiesPage.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            this.Profiles.ResumeLayout(false);
-            this.Profiles.PerformLayout();
-            this.Tasks.ResumeLayout(false);
-            this.Tasks.PerformLayout();
+            this.TasksPage.ResumeLayout(false);
+            this.TasksPage.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
             this.TasksGuiTable.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.ResumeLayout(false);
@@ -855,7 +953,7 @@
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
@@ -865,23 +963,17 @@
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TabPage Profiles;
-        private System.Windows.Forms.TabPage Tasks;
+        private System.Windows.Forms.TabPage TasksPage;
 
         private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.TabPage TaskPropertiesPage;
 
         private DBTableLayoutPanel TasksGuiTable;
         private System.Windows.Forms.CheckBox GTSelected;
         private System.Windows.Forms.PictureBox GTStatusIcon;
-        private System.Windows.Forms.ProgressBar GTProgress;
-        private System.Windows.Forms.Button GTStart;
-        private System.Windows.Forms.Button GTStop;
         private System.Windows.Forms.Button GTDelete;
-
-        private System.Windows.Forms.Button button8;
         private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button AddTaskButton;
         private System.Windows.Forms.Label GTStatus;
         private System.Windows.Forms.Label GTName;
         private System.Windows.Forms.TextBox TargetURlBox;
@@ -917,6 +1009,19 @@
         private System.Windows.Forms.Button DetectEngineButton;
         private System.Windows.Forms.ComboBox ForumEngineComboBox;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button GTStart;
+        private System.Windows.Forms.ProgressBar GTProgress;
+        private System.Windows.Forms.Button GTStop;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Timer TasksUpdater;
+        private System.Windows.Forms.ToolTip ToolTip;
 
     }
 }

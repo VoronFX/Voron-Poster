@@ -13,7 +13,7 @@ namespace Voron_Poster
     {
 
         #region Detect Forum Engine
-        enum ForumEngine { Unknown, SMF }
+        public enum ForumEngine { Unknown, SMF }
 
         struct FESearchExpression
         {
@@ -59,35 +59,61 @@ namespace Voron_Poster
                     PossibleEngine = (ForumEngine)i;
             }
             return PossibleEngine;
-        } 
+        }
         #endregion
+        public struct TaskBaseProperties
+        {
+            public ForumEngine Engine;
+            public string ForumMainPage;
+            public bool UseGlobalAccount;
+            public string Username;
+            public string Password;
+            public List<String> PreProcessingScripts;
+            public TaskBaseProperties(TaskBaseProperties Data)
+            {
+                Engine = Data.Engine;
+                ForumMainPage = Data.ForumMainPage;
+                UseGlobalAccount = Data.UseGlobalAccount;
+                Username = Data.Username;
+                Password = Data.Password;
+                PreProcessingScripts = new List<string>(Data.PreProcessingScripts);
+            }
+        }
 
-        protected HttpClient Client;
-        HttpClientHandler ClientHandler;
-        public int ReqTimeout;
+        public Task<bool> Task;
+        public TaskBaseProperties Properties = new TaskBaseProperties();
+        public int RequestTimeout;
         public List<string> Log;
         public int Progress;
-        public Uri MainPage;
-        protected CookieContainer Cookies;
         public CancellationTokenSource Cancel;
         public Forum()
         {
             Log = new List<string>();
             Progress = 0;
-            Cancel = new CancellationTokenSource();
-            Cookies = new CookieContainer();
-            ClientHandler = new HttpClientHandler() { CookieContainer = Cookies };
-            Client = new HttpClient(ClientHandler);
         }
+
+        protected HttpClient Client;
 
         ~Forum()
         {
-            ClientHandler.Dispose();
-            Client.Dispose();
+            if (Client != null) Client.Dispose();
         }
 
-        public abstract Task<bool> Login(string Username, string Password);
+        public abstract Task<bool> Login();
         public abstract Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText);
-
+        public async Task<bool> Run()
+        {
+            try
+            {
+                Cancel = new CancellationTokenSource();
+                await Login();
+                //return await PostMessage()
+            }
+            catch (Exception e)
+            {
+            }
+            return true;
+        }
     }
+
 }

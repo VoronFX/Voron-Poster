@@ -13,6 +13,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Web;
+using System.Xml;
+using Roslyn.Scripting.CSharp;
 
 namespace Voron_Poster
 {
@@ -24,7 +26,7 @@ namespace Voron_Poster
             var pos = this.PointToScreen(label1.Location);
             pos = progressBar1.PointToClient(pos);
         }
-  
+
         private void RenderHtml(string Html)
         {
             Form b = new Form();
@@ -85,6 +87,8 @@ namespace Voron_Poster
         }
 
 
+
+        #region Tasks Page
         class TaskGui
         {
             TableLayoutPanel Parent;
@@ -240,5 +244,148 @@ namespace Voron_Poster
                 g.FillRectangle(SystemBrushes.Control, r);
             }
         }
+        #endregion
+
+        #region Task Properties Page
+
+        TaskProperties CurrentProperties = new TaskProperties();
+
+        public class TaskProperties
+        {
+            public string ForumMainPage;
+            public bool UseGlobalAccount;
+            public string Username;
+            public string Password;
+            public List<String> PreProcessingScripts;
+            public TaskProperties()
+            {
+                PreProcessingScripts = new List<string>();
+            }
+        }
+
+        private void ShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            PasswordBox.UseSystemPasswordChar = !ShowPassword.Checked;
+        }
+
+        private void TargetURlBox_TextChanged(object sender, EventArgs e)
+        {
+            Uri TargetUrl;
+            if (Uri.TryCreate(TargetURlBox.Text, UriKind.Absolute, out TargetUrl)
+                && TargetUrl.Scheme == Uri.UriSchemeHttp)
+            {
+                if (MainPageBox.Enabled && MainPageBox.Text == String.Empty)
+                {
+                    MainPageBox.Text = TargetUrl.AbsolutePath;
+                }
+                TargetURlBox.ForeColor = Color.Black;
+                if (MainPageBox.Enabled & MainPageBox.ForeColor == Color.Black)
+                    TaskPropApply.Enabled = true; ;
+            }
+            else
+            {
+                TaskPropApply.Enabled = false;
+                TargetURlBox.ForeColor = Color.Red;
+            }
+        }
+
+        private void MainPageBox_TextChanged(object sender, EventArgs e)
+        {
+            Uri MainPageUrl;
+            if (Uri.TryCreate(MainPageBox.Text, UriKind.Absolute, out MainPageUrl)
+                && MainPageUrl.Scheme == Uri.UriSchemeHttp)
+            {
+                CurrentProperties.ForumMainPage = MainPageBox.Text;
+                MainPageBox.ForeColor = Color.Black;
+                DetectEngineButton.Enabled = true;
+                if (TargetURlBox.ForeColor == Color.Black)
+                    TaskPropApply.Enabled = true; ;
+            }
+            else
+            {
+                DetectEngineButton.Enabled = false;
+                TaskPropApply.Enabled = false;
+                MainPageBox.ForeColor = Color.Red;
+            }
+        }
+
+        private string GetProfilePath(string Path)
+        {
+            if (!Path.EndsWith(".xml")) Path += ".xml";
+            if (Path.IndexOf('\\') < 0) Path = "Profiles\\" + Path;
+            return Path;
+        }
+
+        private void ProfileComboBox_TextChanged(object sender, EventArgs e)
+        {
+            if (File.Exists(GetProfilePath(ProfileComboBox.Text)))
+            {
+                DeleteProfileButton.Enabled = true;
+                LoadProfileButton.Enabled = true;
+            }
+            else
+            {
+                DeleteProfileButton.Enabled = false;
+                LoadProfileButton.Enabled = false;
+            }
+        }
+
+        private void ProfileComboBox_Enter(object sender, EventArgs e)
+        {
+            ProfileComboBox.Items.Clear();
+            Directory.CreateDirectory(".\\Profiles\\");
+            string[] Paths = Directory.GetFiles(".\\Profiles\\", "*.xml");
+            //trying complicated constructions =D
+            Array.ForEach<string>(Paths, s => ProfileComboBox.Items.Add(
+                s.Replace(".\\Profiles\\", String.Empty).Replace(".xml", String.Empty)));
+        }
+
+        private void DeleteProfileButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                File.Delete(GetProfilePath(ProfileComboBox.Text));
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            finally
+            {
+                DeleteProfileButton.Enabled = false;
+                LoadProfileButton.Enabled = false;
+            }            
+        }
+
+        private void SaveProfileButton_Click(object sender, EventArgs e)
+        {
+            SaveProfileButton.Enabled = false;
+            try
+            {
+                System.Xml.Serialization.XmlSerializer Xml =
+                    new System.Xml.Serialization.XmlSerializer(typeof(TaskProperties));
+                using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
+                    Xml.Serialize(F, CurrentProperties);
+                LoadProfileButton.Enabled = true;
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            finally
+            {
+                SaveProfileButton.Enabled = true;
+            }
+        }
+
+        #endregion
+
+        private void NewProfileButton_Click(object sender, EventArgs e)
+        {
+            int i = 1;
+            while (File.Exists(GetProfilePath("Шаблон#" + i.ToString()))) i++;
+            ProfileComboBox.Text = "Шаблон#" + i.ToString();
+        }
+
     }
 }

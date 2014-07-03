@@ -252,56 +252,43 @@ namespace Voron_Poster
 
         private void TasksUpdater_Tick(object sender, EventArgs e)
         {
-            bool IconRunning = false, IconCritical = false, IconCancelled = false, IconComplete = false;
-            bool IconStart = false, IconRestart = false, IconStop = false;
+            bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
             bool Selected = true;
             for (int i = 0; i < Tasks.Count; i++)
             {
                 Tasks[i].SetStatusIcon();
                 if (Tasks[i].Ctrls.Selected.Checked)
                 {
-                    if (!IconRunning) IconRunning = Tasks[i].Ctrls.StatusIcon.Image ==
-                        global::Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG
-                        || Tasks[i].Ctrls.StatusIcon.Image ==
-                        global::Voron_Poster.Properties.Resources.StatusAnnotations_Pause_16xLG;
-                    if (!IconCritical) IconCritical = Tasks[i].Ctrls.StatusIcon.Image ==
-                        global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
-                    if (!IconCancelled) IconCancelled = Tasks[i].Ctrls.StatusIcon.Image ==
-                        global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color;
-                    if (!IconComplete) IconComplete = Tasks[i].Ctrls.StatusIcon.Image ==
-                        global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
-                    if (Tasks[i].Ctrls.StartStop.Enabled)
-                    {
-                        if (!IconStart) IconStart = Tasks[i].Ctrls.StartStop.Image ==
-                            global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-                        if (!IconRestart) IconRestart = Tasks[i].Ctrls.StartStop.Image ==
-                            global::Voron_Poster.Properties.Resources.Restart_6322;
-                        if (!IconStop) IconStop = Tasks[i].Ctrls.StartStop.Image ==
-                            global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-                    }
+                    SelInfo[(int)Tasks[i].Status] = true;
+                    SelInfo[(int)Tasks[i].Action] = true;                  
                 }
                 else Selected = false;
             }
-            if (IconRunning)
-                GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG;
-            else if (IconCritical)
-                GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
-            else if (IconCancelled)
-                GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color;
-            else if (IconComplete)
-                GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
-            else GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            GTSelected.Checked = Selected;
-            GTStart.Enabled = IconRestart || IconStart;
-            if (IconRestart) GTStart.Image = global::Voron_Poster.Properties.Resources.Restart_6322;
-            else GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-            GTStop.Enabled = IconRestart || IconStop;
-            if (IconRestart) GTStop.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            else GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-        }
+            // Set global status icon
+            if (SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting])
+                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Running);
+            else if (SelInfo[(int)TaskGui.InfoIcons.Error])
+                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            else if (SelInfo[(int)TaskGui.InfoIcons.Cancelled])
+                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Cancelled);
+            else if (SelInfo[(int)TaskGui.InfoIcons.Complete])
+                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+            else GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Stopped);
 
-        private void ToolTip_Popup(object sender, PopupEventArgs e)
-        {
+            GTSelected.Checked = Selected;
+            // Set global start icon 
+            TaskGui.InfoIcons GActionStart, GActionStop;
+            GTStart.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Run];
+            if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStart = TaskGui.InfoIcons.Restart;
+            else GActionStart = TaskGui.InfoIcons.Run;
+            // Set global stop icon 
+            GTStop.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Cancel];
+            if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStop = TaskGui.InfoIcons.Clear;
+            else GActionStop = TaskGui.InfoIcons.Cancel;
+            GTStart.Image = TaskGui.GetIcon(GActionStart);
+            GTStop.Image = TaskGui.GetIcon(GActionStop);
+            ToolTip.SetToolTip(GTStart, TaskGui.GetTooltip(GActionStart));
+            ToolTip.SetToolTip(GTStop, TaskGui.GetTooltip(GActionStop));
         }
 
     }

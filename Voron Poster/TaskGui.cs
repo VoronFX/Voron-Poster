@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -19,10 +20,116 @@ namespace Voron_Poster
         }
     }
 
-    class TaskGui
-    {      
+    public class TaskGui
+    {
 
         public TableLayoutPanel Panel;
+        public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, None }
+        public static Bitmap GetIcon(InfoIcons Info)
+        {
+            switch (Info)
+            {   //Statuses
+                case InfoIcons.Complete: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
+                case InfoIcons.Running: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG;
+                case InfoIcons.Stopped: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                case InfoIcons.Waiting: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Pause_16xLG;
+                case InfoIcons.Cancelled: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color;
+                case InfoIcons.Error: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
+                //Actions
+                case InfoIcons.Run: return global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
+                case InfoIcons.Restart: return global::Voron_Poster.Properties.Resources.Restart_6322;
+                case InfoIcons.Cancel: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                case InfoIcons.Clear: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                default: return null;
+            }
+        }
+        public static InfoIcons GetInfo(Bitmap Icon)
+        {   //Statuses
+            if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color) return InfoIcons.Complete;
+            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG) return InfoIcons.Running;
+            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG) return InfoIcons.Stopped;
+            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Pause_16xLG) return InfoIcons.Waiting;
+            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color) return InfoIcons.Cancelled;
+            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color) return InfoIcons.Error;
+            //Actions
+            else if (Icon == Voron_Poster.Properties.Resources.arrow_run_16xLG) return InfoIcons.Run;
+            else if (Icon == Voron_Poster.Properties.Resources.Restart_6322) return InfoIcons.Restart;
+            else if (Icon == Voron_Poster.Properties.Resources.Symbols_Stop_16xLG) return InfoIcons.Cancel;
+            else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG) return InfoIcons.Clear;
+            else return InfoIcons.None;
+        }
+        public static string GetTooltip(InfoIcons Info)
+        {
+            switch (Info)
+            {   //Statuses
+                case InfoIcons.Complete: return "Выполнено";
+                case InfoIcons.Running: return "Выполянется...";
+                case InfoIcons.Stopped: return "Остановлено";
+                case InfoIcons.Waiting: return "В очереди...";
+                case InfoIcons.Cancelled: return "Отменено";
+                case InfoIcons.Error: return "Ошибка";
+                //Actions
+                case InfoIcons.Run: return "Старт";
+                case InfoIcons.Restart: return "Повторить";
+                case InfoIcons.Cancel: return "Отменить";
+                case InfoIcons.Clear: return "Сбросить статус";
+                default: return null;
+            }
+        }
+        public InfoIcons Status = InfoIcons.Stopped, Action = InfoIcons.Run;
+        public void SetStatusIcon()
+        {
+            if (Forum == null || Forum.Task == null)
+            {
+                Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+            }
+            else
+            {
+                switch (Forum.Task.Status)
+                {
+                    case TaskStatus.Running:
+                        Status = InfoIcons.Running;
+                        Action = InfoIcons.Cancel;
+                        break;
+                    case TaskStatus.RanToCompletion:
+                        if (Forum.Task.Result == true)
+                        {
+                            Status = InfoIcons.Complete;
+                            Action = InfoIcons.Run;
+                        }
+                        else
+                        {
+                            Status = InfoIcons.Error;
+                            Action = InfoIcons.Restart;
+                        }
+                        break;
+                    case TaskStatus.Created:
+                    case TaskStatus.WaitingForActivation:
+                    case TaskStatus.WaitingToRun:
+                        Status = InfoIcons.Waiting;
+                        Action = InfoIcons.Cancel;
+                        break;
+                    case TaskStatus.Canceled:
+                        Status = InfoIcons.Cancelled;
+                        Action = InfoIcons.Run;
+                        break;
+                    default:
+                        Status = InfoIcons.Error;
+                        Action = InfoIcons.Restart;
+                        break;
+                }
+            }
+            Ctrls.StatusIcon.Image = GetIcon(Status);
+            Ctrls.StartStop.Image = GetIcon(Action);
+            if (Status == InfoIcons.Error)
+                ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
+            else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
+        }
+        public void SetTooltip(ToolTip ToolTip)
+        {
+            ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
+            ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
+        }
         public struct TaskGuiControls
         {
             public CheckBox Selected;
@@ -157,8 +264,9 @@ namespace Voron_Poster
         }
 
         public TaskGuiControls Ctrls;
+
         private void AddToPanel()
-        {
+        {            
             Panel.RowCount = Panel.RowCount + 1;
             for (int i = 0; i < Ctrls.AsArray.Length; i++)
             {
@@ -166,6 +274,7 @@ namespace Voron_Poster
                 Panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
             }
         }
+
         public TaskGui(TableLayoutPanel ParentPanel)
         {
             Panel = ParentPanel;
@@ -184,51 +293,6 @@ namespace Voron_Poster
             }
         }
 
-        public void SetStatusIcon()
-        {
-            if (Forum == null || Forum.Task == null)
-            {
-                Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            }
-            else
-            {
-                switch (Forum.Task.Status)
-                {
-                    case TaskStatus.Running:
-                        Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG;
-                        Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-                        break;
-                    case TaskStatus.RanToCompletion:
-                        if (Forum.Task.Result == true)
-                        {
-                            Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
-                            Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-                        }
-                        else {
-                            Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
-                            Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.Restart_6322;
-                        }
-                        break;
-                    case TaskStatus.Created:
-                    case TaskStatus.WaitingForActivation:
-                    case TaskStatus.WaitingToRun:
-                        Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Pause_16xLG;
-                        Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-                        break;
-                    case TaskStatus.Canceled:
-                        Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color;
-                        Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-                        break;
-                    default:
-                        Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
-                        Ctrls.StartStop.Image = global::Voron_Poster.Properties.Resources.Restart_6322;
-                        break;
-                }
-            }
-            if (Ctrls.StatusIcon.Image == global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color)
-                ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
-            else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
-        }
 
         private async void Cancel(object sender, EventArgs e)
         {

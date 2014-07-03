@@ -43,8 +43,6 @@ namespace Voron_Poster
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
             //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
             //null, Tabs, new object[] { true });
-
-
         }
 
         private void RenderHtml(string Html)

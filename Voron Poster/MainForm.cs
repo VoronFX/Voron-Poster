@@ -15,18 +15,34 @@ using System.Threading;
 using System.Web;
 using System.Xml;
 using Roslyn.Scripting.CSharp;
+using System.Reflection;
 
 namespace Voron_Poster
 {
+
     public partial class MainForm : Form
     {
+
         public List<TaskGui> Tasks = new List<TaskGui>();
         public TaskGui CurrTask;
 
         public MainForm()
         {
             InitializeComponent();
+
+            for (int i = 0; i < Tabs.TabPages.Count; i++)
+            {
+                typeof(TabPage).InvokeMember("DoubleBuffered",
+        BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+        null, Tabs.TabPages[i], new object[] { true });
+
+            }
             Tabs.TabPages.Remove(TaskPropertiesPage);
+            ForumEngineComboBox.Items.AddRange(Enum.GetNames(typeof(Forum.ForumEngine)));
+            ForumEngineComboBox.Items.RemoveAt(0);
+            //        typeof(TabControl).InvokeMember("DoubleBuffered",
+            //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+            //null, Tabs, new object[] { true });
         }
 
         private void RenderHtml(string Html)
@@ -106,7 +122,9 @@ namespace Voron_Poster
 
         #region Task Properties Page
 
-        Forum.TaskBaseProperties CurrentProperties = new Forum.TaskBaseProperties();
+        string TempTargetUrl;
+        Forum TempForum;
+        Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
 
 
 
@@ -118,21 +136,22 @@ namespace Voron_Poster
         private void TargetURlBox_TextChanged(object sender, EventArgs e)
         {
             Uri TargetUrl;
-            if (Uri.TryCreate(TargetURlBox.Text, UriKind.Absolute, out TargetUrl)
+            if (Uri.TryCreate(TargetUrlBox.Text, UriKind.Absolute, out TargetUrl)
                 && TargetUrl.Scheme == Uri.UriSchemeHttp)
             {
-                if (MainPageBox.Enabled && MainPageBox.Text == String.Empty)
-                {
-                    MainPageBox.Text = TargetUrl.AbsolutePath;
-                }
-                TargetURlBox.ForeColor = Color.Black;
+                //TempTargetUrl = TargetUrlBox.Text;
+                //if (MainPageBox.Enabled && MainPageBox.Text == String.Empty)
+                //{
+                //    MainPageBox.Text = TargetUrl.AbsolutePath;
+                //}
+                TargetUrlBox.ForeColor = Color.Black;
                 if (MainPageBox.Enabled & MainPageBox.ForeColor == Color.Black)
-                    TaskPropApply.Enabled = true; ;
+                    TaskPropApply.Enabled = true;
             }
             else
             {
                 TaskPropApply.Enabled = false;
-                TargetURlBox.ForeColor = Color.Red;
+                TargetUrlBox.ForeColor = Color.Red;
             }
         }
 
@@ -142,19 +161,24 @@ namespace Voron_Poster
             if (Uri.TryCreate(MainPageBox.Text, UriKind.Absolute, out MainPageUrl)
                 && MainPageUrl.Scheme == Uri.UriSchemeHttp)
             {
-                CurrentProperties.ForumMainPage = MainPageBox.Text;
+                // TempProperties.ForumMainPage = MainPageBox.Text;
                 MainPageBox.ForeColor = Color.Black;
                 DetectEngineButton.Enabled = true;
-                if (TargetURlBox.ForeColor == Color.Black)
-                    TaskPropApply.Enabled = true; ;
+                if (ForumEngineComboBox.SelectedIndex >= 0)
+                    TryLoginButton.Enabled = true;
+                if (TargetUrlBox.ForeColor == Color.Black)
+                    TaskPropApply.Enabled = true;
             }
             else
             {
                 DetectEngineButton.Enabled = false;
                 TaskPropApply.Enabled = false;
+                TryLoginButton.Enabled = false;
                 MainPageBox.ForeColor = Color.Red;
             }
         }
+
+        #region PropertiesProfiles
 
         private string GetProfilePath(string Path)
         {
@@ -212,7 +236,7 @@ namespace Voron_Poster
                 System.Xml.Serialization.XmlSerializer Xml =
                     new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
                 using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
-                    Xml.Serialize(F, CurrentProperties);
+                    Xml.Serialize(F, TempProperties);
                 LoadProfileButton.Enabled = true;
             }
             catch (Exception Error)
@@ -225,8 +249,6 @@ namespace Voron_Poster
             }
         }
 
-        #endregion
-
         private void NewProfileButton_Click(object sender, EventArgs e)
         {
             int i = 1;
@@ -234,20 +256,11 @@ namespace Voron_Poster
             ProfileComboBox.Text = "Шаблон#" + i.ToString();
         }
 
-        public void FireEvent(object onMe, string invokeMe, params object[] eventParams)
-        {
-            MulticastDelegate eventDelagate =
-                  (MulticastDelegate)onMe.GetType().GetField(invokeMe,
-                   System.Reflection.BindingFlags.Instance |
-                   System.Reflection.BindingFlags.NonPublic).GetValue(onMe);
+        #endregion
 
-            Delegate[] delegates = eventDelagate.GetInvocationList();
+        #endregion
 
-            foreach (Delegate dlg in delegates)
-            {
-                dlg.Method.Invoke(dlg.Target, eventParams);
-            }
-        }
+
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
@@ -263,31 +276,45 @@ namespace Voron_Poster
 
         public void ShowPropertiesPage()
         {
-            for (int i = 0; i < Tabs.TabPages.Count; i++)
-              //  if (Tabs.TabPages[i] != TaskPropertiesPage)
-                    Tabs.TabPages[i].Enabled = false;
+            //
             Tabs.TabPages.Add(TaskPropertiesPage);
+            //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
             Tabs.SelectTab(TaskPropertiesPage);
-            TaskPropertiesPage.Enabled = true;
+            for (int i = 0; i < Tabs.TabPages.Count; i++)
+                if (Tabs.TabPages[i] != TaskPropertiesPage)
+                    Tabs.TabPages[i].Enabled = false;
+            //  TaskPropertiesPage.Enabled = true;
+            // this.ResumeLayout();
         }
 
         private void ClosePropertiesPage(object sender, EventArgs e)
         {
-            TaskPropertiesPage.Enabled = false;
+            TaskPropCancel.Enabled = false;
+            TasksPage.Enabled = true;
+            Tabs.SelectTab(TasksPage);
             for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
             Tabs.TabPages.Remove(TaskPropertiesPage);
-            Tabs.SelectTab(TasksPage);
             if (CurrTask.New)
             {
                 CurrTask.Delete(sender, e);
             }
+            TaskPropCancel.Enabled = true;
+        }
+
+        private void TaskPropApply_Click(object sender, EventArgs e)
+        {
+            TaskPropApply.Enabled = false;
+            CurrTask.New = false;
+            // CurrTask.Forum.Properties = CurrTa;
+            ClosePropertiesPage(sender, e);
+            TaskPropApply.Enabled = true;
         }
 
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            // TaskPropApply.
+            //if (Tabs.SelectedIndex == Tabs.TabPages.IndexOf(TaskPropertiesPage))
             e.Cancel = !e.TabPage.Enabled;
-           TasksUpdater.Enabled = e.TabPage == TasksPage;
+            TasksUpdater.Enabled = e.TabPage == TasksPage;
         }
 
         private void TasksUpdater_Tick(object sender, EventArgs e)
@@ -362,7 +389,7 @@ namespace Voron_Poster
         }
 
         private void GTDelete_Click(object sender, EventArgs e)
-        {    
+        {
             (sender as Button).Enabled = false;
             List<TaskGui> Remove = new List<TaskGui>();
             lock (Tasks)
@@ -380,6 +407,56 @@ namespace Voron_Poster
                 }
             }
             Remove.Clear();
+        }
+
+        private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TempForum = Forum.New((Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
+                (string)ForumEngineComboBox.SelectedItem));
+            TryLoginButton.Enabled = MainPageBox.ForeColor == Color.Black;
+        }
+
+        private async void DetectEngineButton_Click(object sender, EventArgs e)
+        {
+            DetectEngineButton.Enabled = false;
+            TryLoginButton.Enabled = false;
+            ForumEngineComboBox.Enabled = false;
+            MainPageBox.Enabled = false;
+            TaskPropApply.Enabled = false;
+            LoadProfileButton.Enabled = false;
+            DetectEngineButton.Image
+            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
+            HttpClient Client = new HttpClient();
+            try
+            {
+                TempForum.DetectForumEngine(await
+                    (await Client.GetAsync(TempProperties.ForumMainPage)).Content.ReadAsStringAsync());
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                Client.Dispose();
+            }
+
+
+
+        }
+
+        private void ValidateProperties()
+        {
+            TaskPropApply.Enabled =
+                TargetUrlBox.ForeColor == Color.Black &&
+                MainPageBox.ForeColor == Color.Black &&
+                ForumEngineComboBox.SelectedIndex >= 0 &&
+                DetectEngineButton.Enabled &&
+                TryLoginButton.Enabled;
+
+            //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
+            //    TryLoginButton.Enabled;
+
         }
 
     }

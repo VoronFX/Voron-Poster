@@ -61,8 +61,6 @@ namespace Voron_Poster
             lock (Log) { Log.Add("Cоединение с сервером"); }
             try
             {
-                if (Client != null) Client.Dispose();
-                Client = new HttpClient();
                 Progress++;
                 HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
                 Progress++;
@@ -180,7 +178,7 @@ namespace Voron_Poster
 
         public override async Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText)
         {
-            CaptchaForm CaptchaForm = null;
+            CaptchaForm CaptchaForm = new CaptchaForm();
             try
             {
                 HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage
@@ -200,7 +198,6 @@ namespace Voron_Poster
                 if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                     UriKind.Absolute, out CaptchaUri) && CaptchaUri.Scheme == Uri.UriSchemeHttp)
                 {
-                    CaptchaForm = new CaptchaForm();
                     CaptchaForm.func = GetCaptcha;
                     CaptchaForm.button2.Click += new System.EventHandler((object o, EventArgs e) => { Cancel.Cancel(); });
                     await GetCaptcha(CaptchaForm);

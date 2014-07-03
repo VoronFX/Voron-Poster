@@ -9,7 +9,7 @@ using System.Net;
 
 namespace Voron_Poster
 {
-    abstract class Forum
+    public abstract class Forum
     {
 
         #region Detect Forum Engine
@@ -38,7 +38,7 @@ namespace Voron_Poster
             return ResultMatch;
         }
 
-        private ForumEngine DetectForumEngine(string Html)
+        public ForumEngine DetectForumEngine(string Html)
         {
             int[] Match = new int[Enum.GetNames(typeof(ForumEngine))
                      .Length];
@@ -92,7 +92,17 @@ namespace Voron_Poster
             Progress = 0;
         }
 
+        public static Forum New(ForumEngine Engine)
+        {
+            switch (Engine)
+            {
+                case ForumEngine.SMF: return new ForumSMF();
+                default: return null;
+            }
+        }
+
         protected HttpClient Client;
+
 
         ~Forum()
         {
@@ -101,13 +111,13 @@ namespace Voron_Poster
 
         public abstract Task<bool> Login();
         public abstract Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText);
-        public async Task<bool> Run()
+        public async Task<bool> Run(Uri TargetBoard, string Subject, string BBText)
         {
             try
             {
                 Cancel = new CancellationTokenSource();
                 await Login();
-                //return await PostMessage()
+                return await PostMessage(TargetBoard, Subject, BBText);
             }
             catch (Exception e)
             {

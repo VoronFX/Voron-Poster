@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Voron_Poster
 {
-
+    
     public static class ModifyProgressBarColor
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
@@ -23,8 +23,11 @@ namespace Voron_Poster
     public class TaskGui
     {
 
+        #region Gui
+
         private MainForm MainForm;
-        public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, None }
+        public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, 
+            Gear, Activity, Login, Question, None }
         public static Bitmap GetIcon(InfoIcons Info)
         {
             switch (Info)
@@ -40,6 +43,9 @@ namespace Voron_Poster
                 case InfoIcons.Restart: return global::Voron_Poster.Properties.Resources.Restart_6322;
                 case InfoIcons.Cancel: return global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
                 case InfoIcons.Clear: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                //OtherStuff
+                case InfoIcons.Gear: return global::Voron_Poster.Properties.Resources.gear_16xLG;
+                case InfoIcons.Activity: return global::Voron_Poster.Properties.Resources.ac
                 default: return null;
             }
         }
@@ -128,7 +134,7 @@ namespace Voron_Poster
             MainForm.ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
         }
 
-        private struct TaskGuiControls
+        public struct TaskGuiControls
         {
             public CheckBox Selected;
             public LinkLabel Name;
@@ -262,7 +268,7 @@ namespace Voron_Poster
             }
         }
 
-        private TaskGuiControls Ctrls;
+        public TaskGuiControls Ctrls;
 
         private void AddToGuiTable()
         {
@@ -276,28 +282,24 @@ namespace Voron_Poster
             }
         }
 
+        #endregion
+
         public TaskGui(MainForm Parent)
         {
             MainForm = Parent;
             Ctrls.InitializeControls();
             MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
             MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
-            Ctrls.
+            Ctrls.Delete.Click += new EventHandler(Delete);
+            Ctrls.Properties.Click += new EventHandler(Properties);
             AddToGuiTable();
         }
 
         public bool New = true;
 
-        Forum Forum;
-        Forum.TaskBaseProperties ForumProperties;
-
-        private void InitForum()
-        {
-            if (Forum == null)
-            {
-                if (ForumProperties.Engine == Forum.ForumEngine.SMF) Forum = new ForumSMF();
-            }
-        }
+        public string TargetUrl;
+        public Forum Forum;
+        //public Forum.TaskBaseProperties ForumProperties;
 
         private void Properties(object sender, EventArgs e)
         {
@@ -344,7 +346,7 @@ namespace Voron_Poster
             Ctrls.Properties.Enabled = false;
             Ctrls.StartStop.Click -= Start;
             Ctrls.StartStop.Click += Cancel;
-            Forum.Task = Forum.Run();
+           // Forum.Task = Forum.Run();
             SetStatusIcon();
             Ctrls.StartStop.Enabled = true;
             await Forum.Task;

@@ -20,13 +20,13 @@ namespace Voron_Poster
 {
     public partial class MainForm : Form
     {
-        List<TaskGui> Tasks = new List<TaskGui>();
+        public List<TaskGui> Tasks = new List<TaskGui>();
+        public TaskGui CurrTask;
 
         public MainForm()
         {
             InitializeComponent();
-            var pos = this.PointToScreen(label1.Location);
-            pos = progressBar1.PointToClient(pos);
+            Tabs.TabPages.Remove(TaskPropertiesPage);
         }
 
         private void RenderHtml(string Html)
@@ -234,35 +234,79 @@ namespace Voron_Poster
             ProfileComboBox.Text = "Шаблон#" + i.ToString();
         }
 
+        public void FireEvent(object onMe, string invokeMe, params object[] eventParams)
+        {
+            MulticastDelegate eventDelagate =
+                  (MulticastDelegate)onMe.GetType().GetField(invokeMe,
+                   System.Reflection.BindingFlags.Instance |
+                   System.Reflection.BindingFlags.NonPublic).GetValue(onMe);
+
+            Delegate[] delegates = eventDelagate.GetInvocationList();
+
+            foreach (Delegate dlg in delegates)
+            {
+                dlg.Method.Invoke(dlg.Target, eventParams);
+            }
+        }
+
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
-            TaskPropertiesPage.Enabled = false;
+            Tasks.Add(new TaskGui(this));
+
+
+            //TaskPropertiesPage.Enabled = false;
             // Tabs.TabIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
             // Tabs.SelectTab(TaskPropertiesPage);
             // TaskPropertiesPage.Select();
             //  Tabs.TabPages.Remove(TaskPropertiesPage);
         }
 
+        public void ShowPropertiesPage()
+        {
+            for (int i = 0; i < Tabs.TabPages.Count; i++)
+              //  if (Tabs.TabPages[i] != TaskPropertiesPage)
+                    Tabs.TabPages[i].Enabled = false;
+            Tabs.TabPages.Add(TaskPropertiesPage);
+            Tabs.SelectTab(TaskPropertiesPage);
+            TaskPropertiesPage.Enabled = true;
+        }
+
+        private void ClosePropertiesPage(object sender, EventArgs e)
+        {
+            TaskPropertiesPage.Enabled = false;
+            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
+            Tabs.TabPages.Remove(TaskPropertiesPage);
+            Tabs.SelectTab(TasksPage);
+            if (CurrTask.New)
+            {
+                CurrTask.Delete(sender, e);
+            }
+        }
+
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
         {
             // TaskPropApply.
             e.Cancel = !e.TabPage.Enabled;
-            TasksUpdater.Enabled = e.TabPage == TasksPage;
+           TasksUpdater.Enabled = e.TabPage == TasksPage;
         }
 
         private void TasksUpdater_Tick(object sender, EventArgs e)
         {
             bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
-            bool Selected = true;
-            for (int i = 0; i < Tasks.Count; i++)
+            bool Checked = false, Unchecked = false;
+            lock (Tasks)
             {
-                Tasks[i].SetStatusIcon();
-                if (Tasks[i].Ctrls.Selected.Checked)
+                for (int i = 0; i < Tasks.Count; i++)
                 {
-                    SelInfo[(int)Tasks[i].Status] = true;
-                    SelInfo[(int)Tasks[i].Action] = true;                  
+                    Tasks[i].SetStatusIcon();
+                    if (Tasks[i].Ctrls.Selected.Checked)
+                    {
+                        SelInfo[(int)Tasks[i].Status] = true;
+                        SelInfo[(int)Tasks[i].Action] = true;
+                        Checked = true;
+                    }
+                    else Unchecked = true;
                 }
-                else Selected = false;
             }
             // Set global status icon
             if (SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting])
@@ -275,10 +319,14 @@ namespace Voron_Poster
                 GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
             else GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Stopped);
 
-            GTSelected.Checked = Selected;
+            if (Checked && Unchecked) GTSelected.CheckState = CheckState.Indeterminate;
+            else if (Checked) GTSelected.CheckState = CheckState.Checked;
+            else GTSelected.CheckState = CheckState.Unchecked;
+
             // Set global start icon 
             TaskGui.InfoIcons GActionStart, GActionStop;
             GTStart.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Run];
+            GTDelete.Enabled = GTStart.Enabled;
             if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStart = TaskGui.InfoIcons.Restart;
             else GActionStart = TaskGui.InfoIcons.Run;
             // Set global stop icon 
@@ -289,6 +337,49 @@ namespace Voron_Poster
             GTStop.Image = TaskGui.GetIcon(GActionStop);
             ToolTip.SetToolTip(GTStart, TaskGui.GetTooltip(GActionStart));
             ToolTip.SetToolTip(GTStop, TaskGui.GetTooltip(GActionStop));
+        }
+
+        private void GTSelected_Click(object sender, EventArgs e)
+        {
+            if (GTSelected.CheckState == CheckState.Indeterminate)
+                GTSelected.CheckState = CheckState.Unchecked;
+            for (int i = 0; i < Tasks.Count; i++)
+                Tasks[i].Ctrls.Selected.Checked = GTSelected.Checked;
+
+        }
+
+        private void GTStartStop_Click(object sender, EventArgs e)
+        {
+            (sender as Button).Enabled = false;
+            TasksUpdater.Enabled = false;
+            TaskGui.InfoIcons Action = TaskGui.GetInfo(new Bitmap((sender as Button).Image));
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+                if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Action == Action)
+                    Tasks[i].Ctrls.StartStop.PerformClick();
+            }
+            TasksUpdater.Enabled = true;
+        }
+
+        private void GTDelete_Click(object sender, EventArgs e)
+        {    
+            (sender as Button).Enabled = false;
+            List<TaskGui> Remove = new List<TaskGui>();
+            lock (Tasks)
+            {
+                for (int i = 0; i < Tasks.Count; i++)
+                {
+                    if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Ctrls.Delete.Enabled)
+                    {
+                        Remove.Add(Tasks[i]);
+                    }
+                }
+                foreach (TaskGui Task in Remove)
+                {
+                    Task.Ctrls.Delete.PerformClick();
+                }
+            }
+            Remove.Clear();
         }
 
     }

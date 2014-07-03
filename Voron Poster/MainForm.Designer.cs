@@ -229,7 +229,7 @@
             this.TasksPage.Padding = new System.Windows.Forms.Padding(20);
             this.TasksPage.Size = new System.Drawing.Size(673, 508);
             this.TasksPage.TabIndex = 2;
-            this.TasksPage.Text = "Публикация";
+            this.TasksPage.Text = "Задачи";
             this.TasksPage.UseVisualStyleBackColor = true;
             // 
             // groupBox4
@@ -383,7 +383,8 @@
             this.TasksGuiTable.Location = new System.Drawing.Point(23, 175);
             this.TasksGuiTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
             this.TasksGuiTable.Name = "TasksGuiTable";
-            this.TasksGuiTable.RowCount = 1;
+            this.TasksGuiTable.RowCount = 2;
+            this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.TasksGuiTable.Size = new System.Drawing.Size(627, 310);
             this.TasksGuiTable.TabIndex = 0;
@@ -422,6 +423,7 @@
             // GTStart
             // 
             this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStart.Enabled = false;
             this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
             this.GTStart.Location = new System.Drawing.Point(550, 1);
             this.GTStart.Margin = new System.Windows.Forms.Padding(0);
@@ -431,6 +433,7 @@
             this.GTStart.Size = new System.Drawing.Size(24, 24);
             this.GTStart.TabIndex = 8;
             this.GTStart.UseVisualStyleBackColor = true;
+            this.GTStart.Click += new System.EventHandler(this.GTStartStop_Click);
             // 
             // GTSelected
             // 
@@ -445,7 +448,9 @@
             this.GTSelected.Name = "GTSelected";
             this.GTSelected.Size = new System.Drawing.Size(24, 24);
             this.GTSelected.TabIndex = 0;
+            this.GTSelected.ThreeState = true;
             this.GTSelected.UseVisualStyleBackColor = false;
+            this.GTSelected.Click += new System.EventHandler(this.GTSelected_Click);
             // 
             // GTProgress
             // 
@@ -475,6 +480,7 @@
             // GTStop
             // 
             this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStop.Enabled = false;
             this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
             this.GTStop.Location = new System.Drawing.Point(575, 1);
             this.GTStop.Margin = new System.Windows.Forms.Padding(0);
@@ -484,10 +490,12 @@
             this.GTStop.Size = new System.Drawing.Size(24, 24);
             this.GTStop.TabIndex = 7;
             this.GTStop.UseVisualStyleBackColor = true;
+            this.GTStop.Click += new System.EventHandler(this.GTStartStop_Click);
             // 
             // GTDelete
             // 
             this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTDelete.Enabled = false;
             this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
             this.GTDelete.Location = new System.Drawing.Point(600, 1);
             this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
@@ -497,6 +505,7 @@
             this.GTDelete.Size = new System.Drawing.Size(24, 24);
             this.GTDelete.TabIndex = 10;
             this.GTDelete.UseVisualStyleBackColor = true;
+            this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
             // 
             // TaskPropertiesPage
             // 
@@ -898,6 +907,7 @@
             this.TaskPropCancel.Text = "Отмена";
             this.TaskPropCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.TaskPropCancel.UseVisualStyleBackColor = true;
+            this.TaskPropCancel.Click += new System.EventHandler(this.ClosePropertiesPage);
             // 
             // TaskPropApply
             // 
@@ -966,8 +976,6 @@
 
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.TabPage TaskPropertiesPage;
-
-        private DBTableLayoutPanel TasksGuiTable;
         private System.Windows.Forms.CheckBox GTSelected;
         private System.Windows.Forms.PictureBox GTStatusIcon;
         private System.Windows.Forms.Button GTDelete;
@@ -1020,7 +1028,8 @@
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Timer TasksUpdater;
-        private System.Windows.Forms.ToolTip ToolTip;
+        public DBTableLayoutPanel TasksGuiTable;
+        public System.Windows.Forms.ToolTip ToolTip;
 
     }
 }

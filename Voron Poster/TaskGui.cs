@@ -23,7 +23,7 @@ namespace Voron_Poster
     public class TaskGui
     {
 
-        public TableLayoutPanel Panel;
+        private MainForm MainForm;
         public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, None }
         public static Bitmap GetIcon(InfoIcons Info)
         {
@@ -38,7 +38,7 @@ namespace Voron_Poster
                 //Actions
                 case InfoIcons.Run: return global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
                 case InfoIcons.Restart: return global::Voron_Poster.Properties.Resources.Restart_6322;
-                case InfoIcons.Cancel: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                case InfoIcons.Cancel: return global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
                 case InfoIcons.Clear: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
                 default: return null;
             }
@@ -124,13 +124,11 @@ namespace Voron_Poster
             if (Status == InfoIcons.Error)
                 ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
             else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
+            MainForm.ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
+            MainForm.ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
         }
-        public void SetTooltip(ToolTip ToolTip)
-        {
-            ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
-            ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
-        }
-        public struct TaskGuiControls
+
+        private struct TaskGuiControls
         {
             public CheckBox Selected;
             public LinkLabel Name;
@@ -167,6 +165,7 @@ namespace Voron_Poster
                 Selected.Size = new System.Drawing.Size(24, 24);
                 Selected.TabIndex = 0;
                 Selected.UseVisualStyleBackColor = true;
+                Selected.Checked = true;
                 // 
                 // GTName
                 // 
@@ -263,24 +262,31 @@ namespace Voron_Poster
             }
         }
 
-        public TaskGuiControls Ctrls;
+        private TaskGuiControls Ctrls;
 
-        private void AddToPanel()
-        {            
-            Panel.RowCount = Panel.RowCount + 1;
+        private void AddToGuiTable()
+        {
+            MainForm.TasksGuiTable.RowCount = MainForm.TasksGuiTable.RowCount + 1;
             for (int i = 0; i < Ctrls.AsArray.Length; i++)
             {
-                Panel.Controls.Add(Ctrls.AsArray[i], i, Panel.RowCount - 1);
-                Panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+                MainForm.TasksGuiTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.TasksGuiTable.RowCount - 2);
+                MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 2].SizeType = SizeType.Absolute;
+                MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 2].Height = 24F;
+                MainForm.TasksGuiTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             }
         }
 
-        public TaskGui(TableLayoutPanel ParentPanel)
+        public TaskGui(MainForm Parent)
         {
-            Panel = ParentPanel;
+            MainForm = Parent;
             Ctrls.InitializeControls();
-            AddToPanel();
+            MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
+            MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
+            Ctrls.
+            AddToGuiTable();
         }
+
+        public bool New = true;
 
         Forum Forum;
         Forum.TaskBaseProperties ForumProperties;
@@ -293,6 +299,30 @@ namespace Voron_Poster
             }
         }
 
+        private void Properties(object sender, EventArgs e)
+        {
+                MainForm.ShowPropertiesPage();
+                MainForm.CurrTask = this;
+        }
+
+        public void Delete(object sender, EventArgs e)
+        {
+            for (int c = 0; c < Ctrls.AsArray.Length; c++)
+            {
+                int r = MainForm.TasksGuiTable.GetRow(Ctrls.AsArray[c]);
+                MainForm.TasksGuiTable.Controls.Remove(Ctrls.AsArray[c]);
+                Ctrls.AsArray[c].Dispose();
+                for (r = r + 1; r < MainForm.TasksGuiTable.RowCount; r++)
+                {
+                    Control ControlUnder = MainForm.TasksGuiTable.GetControlFromPosition(c, r);
+                    if (ControlUnder != null)
+                        MainForm.TasksGuiTable.SetRow(ControlUnder, r - 1);
+                }
+            }
+            lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
+            MainForm.TasksGuiTable.RowCount -= 1;
+            MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 1].SizeType = SizeType.AutoSize;
+        }
 
         private async void Cancel(object sender, EventArgs e)
         {
@@ -321,6 +351,7 @@ namespace Voron_Poster
             Ctrls.Delete.Enabled = true;
             Ctrls.Properties.Enabled = true;
         }
+
 
     }
 

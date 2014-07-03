@@ -122,7 +122,6 @@
     <Compile Include="ForumSMF.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PublishTask.cs" />
     <Compile Include="TaskGui.cs" />
     <EmbeddedResource Include="CaptchaForm.resx">
       <DependentUpon>CaptchaForm.cs</DependentUpon>

@@ -122,63 +122,310 @@ namespace Voron_Poster
 
         #region Task Properties Page
 
+
         string TempTargetUrl;
+        bool DetectMainPage;
+        bool RecheckBlock;
+        bool PropertiesActivity;
+        bool PropertiesLoginActivity;
+        Task PropertiesActivityTask;
         Forum TempForum;
         Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
+        CancellationTokenSource StopProperties;
 
-
+        private void GlobalAccountCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            TempProperties.UseLocalAccount = LocalAccountCheckbox.Checked;
+            ResetIcon(sender, e);
+            ValidateProperties();
+        }
 
         private void ShowPassword_CheckedChanged(object sender, EventArgs e)
         {
             PasswordBox.UseSystemPasswordChar = !ShowPassword.Checked;
         }
 
-        private void TargetURlBox_TextChanged(object sender, EventArgs e)
+        private void UrlBox_TextChanged(object sender, EventArgs e)
         {
-            Uri TargetUrl;
-            if (Uri.TryCreate(TargetUrlBox.Text, UriKind.Absolute, out TargetUrl)
-                && TargetUrl.Scheme == Uri.UriSchemeHttp)
-            {
-                //TempTargetUrl = TargetUrlBox.Text;
-                //if (MainPageBox.Enabled && MainPageBox.Text == String.Empty)
-                //{
-                //    MainPageBox.Text = TargetUrl.AbsolutePath;
-                //}
-                TargetUrlBox.ForeColor = Color.Black;
-                if (MainPageBox.Enabled & MainPageBox.ForeColor == Color.Black)
-                    TaskPropApply.Enabled = true;
+            string Text = (sender as TextBox).Text;
+            int CaretPos = (sender as TextBox).SelectionStart;
+            if (!RecheckBlock)
+            {      
+                RecheckBlock = true;
+                Text = new String(Text.Skip(Math.Max(Text.LastIndexOf("https://"), Text.LastIndexOf("http://"))).ToArray());
+                if (CaretPos > 0 && CaretPos < 9 && CaretPos < Text.Length && 
+                    !(CaretPos == 5 && Text.ToLower()[4] == 's')) Text = Text.Remove(CaretPos-1, 1);
+                int i = 0;
+                int https = 0;
+                while (i < Text.Length && i < 4 && Text.ToLower()[i] == "http"[i]) i++;
+                if (i == 4 && Text.Length > 4 && Text.ToLower()[4] == 's') { i = 5; https = 1; }
+                if (i == 4 + https) while (i < Text.Length && i < 7 + https && Text.ToLower()[i] == "://"[i - 4 - https]) i++;
+               // Text = Text.Remove(0, i).Replace("http://",String.Empty).Replace("https://", String.Empty);
+                if (https == 1)
+                    Text = "https://" + Text.Remove(0, i);
+                else Text = "http://" + Text.Remove(0, i);
+                (sender as TextBox).Text = Text;
+                CaretPos += 7 + https;
+                RecheckBlock = false;
             }
-            else
+            //if (!(sender as TextBox).Text.StartsWith("http://".Substring(0,Math.Min(, StringComparison.OrdinalIgnoreCase)
+            //    && !(sender as TextBox).Text.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    CaretPos += 7;
+            //    (sender as TextBox).Text = "http://" + (sender as TextBox).Text;
+            //}
+            Uri Url;
+            if (Uri.TryCreate((sender as TextBox).Text, UriKind.Absolute, out Url)
+                && (Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps))
             {
-                TaskPropApply.Enabled = false;
-                TargetUrlBox.ForeColor = Color.Red;
+                (sender as TextBox).ForeColor = Color.Black;
+                if (sender == TargetUrlBox)
+                {
+                    TempTargetUrl = (sender as TextBox).Text;
+                    if (DetectMainPage && Text.IndexOf('/') >= 0)
+                        MainPageBox.Text = new string(Text.Take(Text.LastIndexOf('/')+1).ToArray());
+                }
+                else
+                    TempProperties.ForumMainPage = (sender as TextBox).Text;
+            }
+            else (sender as TextBox).ForeColor = Color.Red;
+            (sender as TextBox).SelectionStart = CaretPos;
+            if (sender == MainPageBox && MainPageBox.Focused) DetectMainPage = false;
+            if (MainPageBox.Text == "http://" || MainPageBox.Text == "https://") DetectMainPage = true;
+            ResetIcon(sender, e);
+            ValidateProperties();
+        }
+
+        private void UsernameBox_TextChanged(object sender, EventArgs e)
+        {
+            TempProperties.Username = UsernameBox.Text;
+            ResetIcon(sender, e);
+        }
+
+        private void PasswordBox_TextChanged(object sender, EventArgs e)
+        {
+            TempProperties.Password = PasswordBox.Text;
+            ResetIcon(sender, e);
+        }
+
+        private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ForumEngineComboBox.SelectedIndex >= 0)
+                TempProperties.Engine = (Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
+            (string)ForumEngineComboBox.SelectedItem);
+            ValidateProperties();
+            ResetIcon(sender, e);
+        }
+
+        //private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    TryLoginButton.Enabled = MainPageBox.ForeColor == Color.Black;
+        //}
+
+        private async void DetectEngineButton_Click(object sender, EventArgs e)
+        {
+            PropertiesActivity = true;
+            ValidateProperties();
+            DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
+            HttpClient Client = new HttpClient();
+            StopProperties = new CancellationTokenSource();
+            Client.Timeout = new TimeSpan(0, 0, 10);
+            bool Error = false;
+            try
+            {
+                Task<Forum.ForumEngine> DetectTask = Forum.DetectForumEngine(TempProperties.ForumMainPage, Client, StopProperties.Token);
+                PropertiesActivityTask = DetectTask;
+                Detected = await DetectTask;
+            }
+            catch
+            {
+                Error = true;
+                DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            }
+            finally
+            {
+                Client.Dispose();
+            }
+            if (!Error)
+            {
+                if (Detected == Forum.ForumEngine.Unknown)
+                    DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Question);
+                else
+                {
+                    TempProperties.Engine = Detected;
+                    ForumEngineComboBox.SelectedIndex =
+                        ForumEngineComboBox.Items.IndexOf(Enum.GetName(typeof(Forum.ForumEngine), Detected));
+                    DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                }
+            }
+            else DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            PropertiesActivity = false;
+            ValidateProperties();
+        }
+
+        private async void TryLoginButton_Click(object sender, EventArgs e)
+        {
+            PropertiesActivity = true;
+            PropertiesLoginActivity = true;
+            ValidateProperties();
+            TryLoginButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            TempForum = Forum.New(TempProperties.Engine);
+            StopProperties = new CancellationTokenSource();
+            TempForum.Properties = TempProperties;
+            TempForum.Cancel = StopProperties;
+            TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
+            try
+            {
+                Task<bool> LoginTask = TempForum.Login();
+                PropertiesActivityTask = LoginTask;
+                if (await LoginTask)
+                    TryLoginButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                else
+                    TryLoginButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            }
+            catch { TryLoginButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error); }
+            TempForum = null;
+            PropertiesActivity = false;
+            PropertiesLoginActivity = false;
+            ValidateProperties();
+        }
+
+        private void ResetIcon(object sender, EventArgs e)
+        {
+            if (!PropertiesActivity)
+            {
+                TryLoginButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Login);
+                if (sender == MainPageBox || sender == ForumEngineComboBox)
+                    DetectEngineButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Gear);
             }
         }
 
-        private void MainPageBox_TextChanged(object sender, EventArgs e)
+        private void ValidateProperties()
         {
-            Uri MainPageUrl;
-            if (Uri.TryCreate(MainPageBox.Text, UriKind.Absolute, out MainPageUrl)
-                && MainPageUrl.Scheme == Uri.UriSchemeHttp)
-            {
-                // TempProperties.ForumMainPage = MainPageBox.Text;
-                MainPageBox.ForeColor = Color.Black;
-                DetectEngineButton.Enabled = true;
-                if (ForumEngineComboBox.SelectedIndex >= 0)
-                    TryLoginButton.Enabled = true;
-                if (TargetUrlBox.ForeColor == Color.Black)
-                    TaskPropApply.Enabled = true;
-            }
+            //if (PropertiesActivity == null)
+            //{
+            //    if (File.Exists(GetProfilePath(ProfileComboBox.Text)))
+            //    {
+            //        DeleteProfileButton.Enabled = false;
+            //        LoadProfileButton.Enabled = false;
+            //    }
+            //    //   MainPageBox.Enabled
+            //    //       ForumEngineComboBox.Enabled
+            //}
+            GlobalAccountCheckbox.Enabled = !PropertiesLoginActivity;
+            LocalAccountCheckbox.Enabled = !PropertiesLoginActivity;
+            UsernameBox.Enabled = LocalAccountCheckbox.Checked &&
+                LocalAccountCheckbox.Enabled && !PropertiesLoginActivity;
+            PasswordBox.Enabled = UsernameBox.Enabled;
+            ShowPassword.Enabled = UsernameBox.Enabled;
+
+            DeleteProfileButton.Enabled =
+                File.Exists(GetProfilePath(ProfileComboBox.Text)) &&
+                !PropertiesActivity;
+            LoadProfileButton.Enabled = DeleteProfileButton.Enabled;
+
+            MainPageBox.Enabled = !PropertiesActivity;
+            ForumEngineComboBox.Enabled = !PropertiesActivity;
+            DetectEngineButton.Enabled =
+                MainPageBox.ForeColor == Color.Black &&
+                !PropertiesActivity;
+            TryLoginButton.Enabled =
+                MainPageBox.ForeColor == Color.Black &&
+                ForumEngineComboBox.SelectedIndex >= 0 &&
+                !PropertiesActivity;
+
+            TaskPropApply.Enabled =
+                TargetUrlBox.ForeColor == Color.Black &&
+                MainPageBox.ForeColor == Color.Black &&
+                ForumEngineComboBox.SelectedIndex >= 0 &&
+                !PropertiesActivity;
+            SaveProfileButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Save);
+            //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
+            //    TryLoginButton.Enabled;
+        }
+
+        private void TaskPropApply_Click(object sender, EventArgs e)
+        {
+            TaskPropApply.Enabled = false;
+            TempForum = Forum.New(TempProperties.Engine);
+            TempForum.Properties = TempProperties;
+            CurrTask.Forum = TempForum;
+            CurrTask.TargetUrl = TempTargetUrl;
+            TempForum = null;
+            CurrTask.New = false;
+            ClosePropertiesPage(sender, e);
+            TaskPropApply.Enabled = true;
+        }
+
+        public void ShowPropertiesPage()
+        {
+            //
+            Tabs.TabPages.Add(TaskPropertiesPage);
+            //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
+            Tabs.SelectTab(TaskPropertiesPage);
+            for (int i = 0; i < Tabs.TabPages.Count; i++)
+                Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == TaskPropertiesPage;
+            //  TaskPropertiesPage.Enabled = true;
+            // this.ResumeLayout();
+
+            TargetUrlBox.Text = CurrTask.TargetUrl;
+            PropertiesActivity = false;
+            PropertiesLoginActivity = false;
+            if (CurrTask.Forum != null)
+                TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
             else
+                TempProperties = new Forum.TaskBaseProperties();
+            LoadTaskBaseProperties(TempProperties);
+        }
+
+        private void LoadTaskBaseProperties(Forum.TaskBaseProperties Properties)
+        {
+            if (TempProperties.UseLocalAccount)
+                LocalAccountCheckbox.Select();
+            else GlobalAccountCheckbox.Select();
+            MainPageBox.Text = TempProperties.ForumMainPage;
+            DetectMainPage = TempProperties.ForumMainPage == null
+                || TempProperties.ForumMainPage == "https://"
+                || TempProperties.ForumMainPage == "http://"
+                || TempProperties.ForumMainPage == String.Empty;
+            ForumEngineComboBox.SelectedIndex = ForumEngineComboBox.Items.IndexOf(
+                Enum.GetName(typeof(Forum.ForumEngine), TempProperties.Engine));
+            UsernameBox.Text = TempProperties.Username;
+            PasswordBox.Text = TempProperties.Password;
+        }
+
+        private async void ClosePropertiesPage(object sender, EventArgs e)
+        {
+            TaskPropCancel.Enabled = false;
+            TaskPropertiesPage.Enabled = false;
+
+            if (PropertiesActivityTask != null && StopProperties != null)
             {
-                DetectEngineButton.Enabled = false;
-                TaskPropApply.Enabled = false;
-                TryLoginButton.Enabled = false;
-                MainPageBox.ForeColor = Color.Red;
+                StopProperties.Cancel();
+                try
+                {
+                    await PropertiesActivityTask;
+                }
+                catch (Exception)
+                {
+                }
             }
+
+            TasksPage.Enabled = true;
+            Tabs.SelectTab(TasksPage);
+            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
+            Tabs.TabPages.Remove(TaskPropertiesPage);
+            if (CurrTask.New)
+            {
+                CurrTask.Delete(sender, e);
+            }
+            TaskPropCancel.Enabled = true;
         }
 
         #region PropertiesProfiles
+
+        bool ProfilesLocked;
 
         private string GetProfilePath(string Path)
         {
@@ -189,26 +436,25 @@ namespace Voron_Poster
 
         private void ProfileComboBox_TextChanged(object sender, EventArgs e)
         {
-            if (File.Exists(GetProfilePath(ProfileComboBox.Text)))
-            {
-                DeleteProfileButton.Enabled = true;
-                LoadProfileButton.Enabled = true;
-            }
-            else
-            {
-                DeleteProfileButton.Enabled = false;
-                LoadProfileButton.Enabled = false;
-            }
+            ValidateProperties();
         }
 
         private void ProfileComboBox_Enter(object sender, EventArgs e)
         {
-            ProfileComboBox.Items.Clear();
-            Directory.CreateDirectory(".\\Profiles\\");
-            string[] Paths = Directory.GetFiles(".\\Profiles\\", "*.xml");
-            //trying complicated constructions =D
-            Array.ForEach<string>(Paths, s => ProfileComboBox.Items.Add(
-                s.Replace(".\\Profiles\\", String.Empty).Replace(".xml", String.Empty)));
+            if (!ProfilesLocked)
+            {
+                ProfilesLocked = true;
+                lock (ProfileComboBox.Items)
+                {
+                    ProfileComboBox.Items.Clear();
+                    Directory.CreateDirectory(".\\Profiles\\");
+                    string[] Paths = Directory.GetFiles(".\\Profiles\\", "*.xml");
+                    //trying complicated constructions =D
+                    Array.ForEach<string>(Paths, s => ProfileComboBox.Items.Add(
+                        s.Replace(".\\Profiles\\", String.Empty).Replace(".xml", String.Empty)));
+                }
+                ProfilesLocked = false;
+            }
         }
 
         private void DeleteProfileButton_Click(object sender, EventArgs e)
@@ -233,14 +479,17 @@ namespace Voron_Poster
             SaveProfileButton.Enabled = false;
             try
             {
-                System.Xml.Serialization.XmlSerializer Xml =
-                    new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
-                using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
-                    Xml.Serialize(F, TempProperties);
-                LoadProfileButton.Enabled = true;
+                if (ProfileComboBox.Text == String.Empty) NewProfileButton_Click(sender, e);
+                    System.Xml.Serialization.XmlSerializer Xml =
+                        new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                    using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
+                        Xml.Serialize(F, TempProperties);
+                    ValidateProperties();
+                    SaveProfileButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
             }
             catch (Exception Error)
             {
+                SaveProfileButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
                 MessageBox.Show(Error.Message);
             }
             finally
@@ -249,22 +498,58 @@ namespace Voron_Poster
             }
         }
 
-        private void NewProfileButton_Click(object sender, EventArgs e)
+        private void LoadProfileButton_Click(object sender, EventArgs e)
         {
-            int i = 1;
-            while (File.Exists(GetProfilePath("Шаблон#" + i.ToString()))) i++;
-            ProfileComboBox.Text = "Шаблон#" + i.ToString();
+            SaveProfileButton.Enabled = false;
+            LoadProfileButton.Enabled = false;
+            try
+            {
+                System.Xml.Serialization.XmlSerializer Xml =
+                    new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                using (FileStream F = File.OpenRead(GetProfilePath(ProfileComboBox.Text)))
+                    TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
+                LoadTaskBaseProperties(TempProperties);
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            finally
+            {
+                LoadProfileButton.Enabled = true;
+                SaveProfileButton.Enabled = true;
+            }
+        }
+
+        private void NewProfileButton_Click(object sender, EventArgs e)
+        {     
+            string NameBase = new String(MainPageBox.Text.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (NameBase == String.Empty) NameBase = new String(TargetUrlBox.Text.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (NameBase == String.Empty) NameBase = "Профиль";
+            int i = 2;
+            if (File.Exists(GetProfilePath(NameBase)))
+            {
+                while (File.Exists(GetProfilePath(NameBase + "(" + i.ToString() + ")"))) i++;
+                NameBase += "(" + i.ToString() + ")";
+            }
+            ProfileComboBox.Text = NameBase;
         }
 
         #endregion
 
         #endregion
 
-
+        #region TasksPage
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
-            Tasks.Add(new TaskGui(this));
+            TaskGui New = new TaskGui(this);
+            New.TargetUrl = NewUrlTextBox.Text;
+            New.Properties(sender, e);
+            ForumEngineComboBox.SelectedIndex = -1;
+            Tasks.Add(New);
 
 
             //TaskPropertiesPage.Enabled = false;
@@ -272,42 +557,6 @@ namespace Voron_Poster
             // Tabs.SelectTab(TaskPropertiesPage);
             // TaskPropertiesPage.Select();
             //  Tabs.TabPages.Remove(TaskPropertiesPage);
-        }
-
-        public void ShowPropertiesPage()
-        {
-            //
-            Tabs.TabPages.Add(TaskPropertiesPage);
-            //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
-            Tabs.SelectTab(TaskPropertiesPage);
-            for (int i = 0; i < Tabs.TabPages.Count; i++)
-                if (Tabs.TabPages[i] != TaskPropertiesPage)
-                    Tabs.TabPages[i].Enabled = false;
-            //  TaskPropertiesPage.Enabled = true;
-            // this.ResumeLayout();
-        }
-
-        private void ClosePropertiesPage(object sender, EventArgs e)
-        {
-            TaskPropCancel.Enabled = false;
-            TasksPage.Enabled = true;
-            Tabs.SelectTab(TasksPage);
-            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
-            Tabs.TabPages.Remove(TaskPropertiesPage);
-            if (CurrTask.New)
-            {
-                CurrTask.Delete(sender, e);
-            }
-            TaskPropCancel.Enabled = true;
-        }
-
-        private void TaskPropApply_Click(object sender, EventArgs e)
-        {
-            TaskPropApply.Enabled = false;
-            CurrTask.New = false;
-            // CurrTask.Forum.Properties = CurrTa;
-            ClosePropertiesPage(sender, e);
-            TaskPropApply.Enabled = true;
         }
 
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
@@ -379,7 +628,7 @@ namespace Voron_Poster
         {
             (sender as Button).Enabled = false;
             TasksUpdater.Enabled = false;
-            TaskGui.InfoIcons Action = TaskGui.GetInfo(new Bitmap((sender as Button).Image));
+            TaskGui.InfoIcons Action = TaskGui.GetInfo((Bitmap)((sender as Button).Image));
             for (int i = 0; i < Tasks.Count; i++)
             {
                 if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Action == Action)
@@ -409,55 +658,7 @@ namespace Voron_Poster
             Remove.Clear();
         }
 
-        private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            TempForum = Forum.New((Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
-                (string)ForumEngineComboBox.SelectedItem));
-            TryLoginButton.Enabled = MainPageBox.ForeColor == Color.Black;
-        }
-
-        private async void DetectEngineButton_Click(object sender, EventArgs e)
-        {
-            DetectEngineButton.Enabled = false;
-            TryLoginButton.Enabled = false;
-            ForumEngineComboBox.Enabled = false;
-            MainPageBox.Enabled = false;
-            TaskPropApply.Enabled = false;
-            LoadProfileButton.Enabled = false;
-            DetectEngineButton.Image
-            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
-            HttpClient Client = new HttpClient();
-            try
-            {
-                TempForum.DetectForumEngine(await
-                    (await Client.GetAsync(TempProperties.ForumMainPage)).Content.ReadAsStringAsync());
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                Client.Dispose();
-            }
-
-
-
-        }
-
-        private void ValidateProperties()
-        {
-            TaskPropApply.Enabled =
-                TargetUrlBox.ForeColor == Color.Black &&
-                MainPageBox.ForeColor == Color.Black &&
-                ForumEngineComboBox.SelectedIndex >= 0 &&
-                DetectEngineButton.Enabled &&
-                TryLoginButton.Enabled;
-
-            //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
-            //    TryLoginButton.Enabled;
-
-        }
+        #endregion
 
     }
 }

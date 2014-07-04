@@ -27,7 +27,7 @@ namespace Voron_Poster
 
         private MainForm MainForm;
         public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, 
-            Gear, Activity, Login, Question, None }
+            Gear, Activity, Login, Question, Save, None }
         public static Bitmap GetIcon(InfoIcons Info)
         {
             switch (Info)
@@ -45,7 +45,10 @@ namespace Voron_Poster
                 case InfoIcons.Clear: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
                 //OtherStuff
                 case InfoIcons.Gear: return global::Voron_Poster.Properties.Resources.gear_16xLG;
-                case InfoIcons.Activity: return global::Voron_Poster.Properties.Resources.ac
+                case InfoIcons.Activity: return global::Voron_Poster.Properties.Resources.Activity_16xLG;
+                case InfoIcons.Login: return global::Voron_Poster.Properties.Resources.user_16xLG;
+                case InfoIcons.Question: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG;
+                case InfoIcons.Save: return global::Voron_Poster.Properties.Resources.save_16xLG;
                 default: return null;
             }
         }
@@ -62,6 +65,12 @@ namespace Voron_Poster
             else if (Icon == Voron_Poster.Properties.Resources.Restart_6322) return InfoIcons.Restart;
             else if (Icon == Voron_Poster.Properties.Resources.Symbols_Stop_16xLG) return InfoIcons.Cancel;
             else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG) return InfoIcons.Clear;
+            //OtherStuff
+            else if (Icon == Voron_Poster.Properties.Resources.gear_16xLG) return InfoIcons.Gear;
+            else if (Icon == Voron_Poster.Properties.Resources.Activity_16xLG) return InfoIcons.Activity;
+            else if (Icon == Voron_Poster.Properties.Resources.user_16xLG) return InfoIcons.Login;
+            else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG) return InfoIcons.Question;
+            else if (Icon == global::Voron_Poster.Properties.Resources.save_16xLG) return InfoIcons.Save;
             else return InfoIcons.None;
         }
         public static string GetTooltip(InfoIcons Info)
@@ -184,7 +193,7 @@ namespace Voron_Poster
                 Name.MinimumSize = new System.Drawing.Size(0, 24);
                 Name.TabIndex = 3;
                 Name.Text = "Тема/Раздел";
-                Name.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+                Name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
                 // 
                 // GTStatus
                 // 
@@ -301,10 +310,10 @@ namespace Voron_Poster
         public Forum Forum;
         //public Forum.TaskBaseProperties ForumProperties;
 
-        private void Properties(object sender, EventArgs e)
+        public void Properties(object sender, EventArgs e)
         {
-                MainForm.ShowPropertiesPage();
                 MainForm.CurrTask = this;
+                MainForm.ShowPropertiesPage();
         }
 
         public void Delete(object sender, EventArgs e)

@@ -27,7 +27,7 @@ namespace Voron_Poster
             }
         }
 
-        private int SearchForExpressions(string Html, FESearchExpression[] Expressions)
+        private static int SearchForExpressions(string Html, FESearchExpression[] Expressions)
         {
             int ResultMatch = 0;
             foreach (FESearchExpression CurrExpression in Expressions)
@@ -38,11 +38,11 @@ namespace Voron_Poster
             return ResultMatch;
         }
 
-        public ForumEngine DetectForumEngine(string Html)
-        {
+        public static async Task<ForumEngine> DetectForumEngine(string Url, HttpClient Client, CancellationToken Cancel)
+        {          
             int[] Match = new int[Enum.GetNames(typeof(ForumEngine))
                      .Length];
-            Html = Html.ToLower();
+            string Html = await (await Client.GetAsync(Url, Cancel)).Content.ReadAsStringAsync();
             Match[(int)ForumEngine.Unknown] = 9;
 
             Match[(int)ForumEngine.SMF] += SearchForExpressions(Html, new FESearchExpression[] {
@@ -60,20 +60,25 @@ namespace Voron_Poster
             }
             return PossibleEngine;
         }
+
         #endregion
-        public struct TaskBaseProperties
+        public class TaskBaseProperties
         {
             public ForumEngine Engine;
             public string ForumMainPage;
-            public bool UseGlobalAccount;
+            public bool UseLocalAccount;
             public string Username;
             public string Password;
             public List<String> PreProcessingScripts;
+            public TaskBaseProperties()
+            {
+                PreProcessingScripts = new List<string>();
+            }
             public TaskBaseProperties(TaskBaseProperties Data)
             {
                 Engine = Data.Engine;
                 ForumMainPage = Data.ForumMainPage;
-                UseGlobalAccount = Data.UseGlobalAccount;
+                UseLocalAccount = Data.UseLocalAccount;
                 Username = Data.Username;
                 Password = Data.Password;
                 PreProcessingScripts = new List<string>(Data.PreProcessingScripts);
@@ -82,7 +87,7 @@ namespace Voron_Poster
 
         public Task<bool> Task;
         public TaskBaseProperties Properties = new TaskBaseProperties();
-        public int RequestTimeout;
+        public TimeSpan RequestTimeout;
         public List<string> Log;
         public int Progress;
         public CancellationTokenSource Cancel;

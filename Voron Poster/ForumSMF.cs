@@ -59,6 +59,9 @@ namespace Voron_Poster
         public override async Task<bool> Login()
         {
             lock (Log) { Log.Add("Cоединение с сервером"); }
+            if (Client != null) Client.Dispose();
+            Client = new HttpClient();
+            Client.Timeout = RequestTimeout;
             try
             {
                 Progress++;
@@ -137,7 +140,7 @@ namespace Voron_Poster
             b = Html.LastIndexOf("\"", b);
             if (b < 0) return false;
             if (Uri.TryCreate(Html.Substring(b + 1, e - b - 1), UriKind.Absolute,
-                out PostUri) && PostUri.Scheme == Uri.UriSchemeHttp)
+                out PostUri) && (PostUri.Scheme == Uri.UriSchemeHttp || PostUri.Scheme == Uri.UriSchemeHttps))
                 return true;
             else return false;
         }
@@ -196,7 +199,7 @@ namespace Voron_Poster
                 }
                 string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
                 if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
-                    UriKind.Absolute, out CaptchaUri) && CaptchaUri.Scheme == Uri.UriSchemeHttp)
+                    UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
                 {
                     CaptchaForm.func = GetCaptcha;
                     CaptchaForm.button2.Click += new System.EventHandler((object o, EventArgs e) => { Cancel.Cancel(); });

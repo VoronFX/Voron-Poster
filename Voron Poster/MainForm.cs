@@ -133,6 +133,15 @@ namespace Voron_Poster
         Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
         CancellationTokenSource StopProperties;
 
+        private string GetDomain(string Url)
+        {
+            string Domain = new String(Url.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length-1)
+                return Domain;
+            return String.Empty;
+        }
+
         private void GlobalAccountCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             TempProperties.UseLocalAccount = LocalAccountCheckbox.Checked;
@@ -150,17 +159,17 @@ namespace Voron_Poster
             string Text = (sender as TextBox).Text;
             int CaretPos = (sender as TextBox).SelectionStart;
             if (!RecheckBlock)
-            {      
+            {
                 RecheckBlock = true;
                 Text = new String(Text.Skip(Math.Max(Text.LastIndexOf("https://"), Text.LastIndexOf("http://"))).ToArray());
-                if (CaretPos > 0 && CaretPos < 9 && CaretPos < Text.Length && 
-                    !(CaretPos == 5 && Text.ToLower()[4] == 's')) Text = Text.Remove(CaretPos-1, 1);
+                if (CaretPos > 0 && CaretPos < 9 && CaretPos < Text.Length &&
+                    !(CaretPos == 5 && Text.ToLower()[4] == 's')) Text = Text.Remove(CaretPos - 1, 1);
                 int i = 0;
                 int https = 0;
                 while (i < Text.Length && i < 4 && Text.ToLower()[i] == "http"[i]) i++;
                 if (i == 4 && Text.Length > 4 && Text.ToLower()[4] == 's') { i = 5; https = 1; }
                 if (i == 4 + https) while (i < Text.Length && i < 7 + https && Text.ToLower()[i] == "://"[i - 4 - https]) i++;
-               // Text = Text.Remove(0, i).Replace("http://",String.Empty).Replace("https://", String.Empty);
+                // Text = Text.Remove(0, i).Replace("http://",String.Empty).Replace("https://", String.Empty);
                 if (https == 1)
                     Text = "https://" + Text.Remove(0, i);
                 else Text = "http://" + Text.Remove(0, i);
@@ -182,8 +191,22 @@ namespace Voron_Poster
                 if (sender == TargetUrlBox)
                 {
                     TempTargetUrl = (sender as TextBox).Text;
-                    if (DetectMainPage && Text.IndexOf('/') >= 0)
-                        MainPageBox.Text = new string(Text.Take(Text.LastIndexOf('/')+1).ToArray());
+                    if (DetectMainPage)
+                    {
+                        string Domain = GetDomain(TargetUrlBox.Text).ToLower();
+                        if (MainPageBox.Text.IndexOf("https://") >= 0)
+                        MainPageBox.Text = "https://" + Domain;
+                        else MainPageBox.Text = "http://" + Domain;
+                            if (Domain != String.Empty) //suggest profile
+                                foreach (Object s in ProfileComboBox.Items)
+                                {
+                                    if ((s as String).ToLower().IndexOf(Domain) >= 0)
+                                    {
+                                        ProfileComboBox.Text = (s as String);
+                                        break;
+                                    }
+                                }
+                    }
                 }
                 else
                     TempProperties.ForumMainPage = (sender as TextBox).Text;
@@ -368,15 +391,18 @@ namespace Voron_Poster
                 Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == TaskPropertiesPage;
             //  TaskPropertiesPage.Enabled = true;
             // this.ResumeLayout();
-
-            TargetUrlBox.Text = CurrTask.TargetUrl;
+            ProfileComboBox_Enter(ProfileComboBox, EventArgs.Empty);
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
             if (CurrTask.Forum != null)
                 TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
             else
                 TempProperties = new Forum.TaskBaseProperties();
-            LoadTaskBaseProperties(TempProperties);
+            LoadTaskBaseProperties(TempProperties);   
+            TargetUrlBox.Text = CurrTask.TargetUrl;
+            TargetUrlBox.Focus();
+            //this.AcceptButton = TaskPropApply;
+            //this.CancelButton = TaskPropCancel;
         }
 
         private void LoadTaskBaseProperties(Forum.TaskBaseProperties Properties)
@@ -480,12 +506,12 @@ namespace Voron_Poster
             try
             {
                 if (ProfileComboBox.Text == String.Empty) NewProfileButton_Click(sender, e);
-                    System.Xml.Serialization.XmlSerializer Xml =
-                        new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
-                    using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
-                        Xml.Serialize(F, TempProperties);
-                    ValidateProperties();
-                    SaveProfileButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                System.Xml.Serialization.XmlSerializer Xml =
+                    new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
+                    Xml.Serialize(F, TempProperties);
+                ValidateProperties();
+                SaveProfileButton.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
             }
             catch (Exception Error)
             {
@@ -522,11 +548,9 @@ namespace Voron_Poster
         }
 
         private void NewProfileButton_Click(object sender, EventArgs e)
-        {     
-            string NameBase = new String(MainPageBox.Text.Replace("http://", String.Empty)
-                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
-            if (NameBase == String.Empty) NameBase = new String(TargetUrlBox.Text.Replace("http://", String.Empty)
-                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+        {
+            string NameBase = GetDomain(MainPageBox.Text);
+            if (NameBase == String.Empty) NameBase = GetDomain(TargetUrlBox.Text);
             if (NameBase == String.Empty) NameBase = "Профиль";
             int i = 2;
             if (File.Exists(GetProfilePath(NameBase)))

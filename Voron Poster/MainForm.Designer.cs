@@ -384,7 +384,7 @@
             this.DetectEngineButton.Location = new System.Drawing.Point(308, 194);
             this.DetectEngineButton.Name = "DetectEngineButton";
             this.DetectEngineButton.Size = new System.Drawing.Size(99, 25);
-            this.DetectEngineButton.TabIndex = 15;
+            this.DetectEngineButton.TabIndex = 8;
             this.DetectEngineButton.Text = "Определить";
             this.DetectEngineButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.DetectEngineButton.UseVisualStyleBackColor = true;
@@ -401,7 +401,7 @@
             this.ForumEngineComboBox.Location = new System.Drawing.Point(122, 196);
             this.ForumEngineComboBox.Name = "ForumEngineComboBox";
             this.ForumEngineComboBox.Size = new System.Drawing.Size(180, 21);
-            this.ForumEngineComboBox.TabIndex = 12;
+            this.ForumEngineComboBox.TabIndex = 7;
             this.ForumEngineComboBox.SelectedIndexChanged += new System.EventHandler(this.ForumEngineComboBox_SelectedIndexChanged);
             // 
             // label7
@@ -410,7 +410,7 @@
             this.label7.Location = new System.Drawing.Point(23, 201);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(93, 13);
-            this.label7.TabIndex = 11;
+            this.label7.TabIndex = 6;
             this.label7.Text = "Движок форума:";
             // 
             // groupBox3
@@ -427,7 +427,7 @@
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
             this.groupBox3.Size = new System.Drawing.Size(384, 220);
-            this.groupBox3.TabIndex = 10;
+            this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Скрипты предобработки";
             // 
@@ -438,7 +438,7 @@
             this.ScriptMoveDownButton.Location = new System.Drawing.Point(345, 51);
             this.ScriptMoveDownButton.Name = "ScriptMoveDownButton";
             this.ScriptMoveDownButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptMoveDownButton.TabIndex = 14;
+            this.ScriptMoveDownButton.TabIndex = 5;
             this.ScriptMoveDownButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ScriptMoveDownButton.UseVisualStyleBackColor = true;
             // 
@@ -449,7 +449,7 @@
             this.ScriptMoveUpButton.Location = new System.Drawing.Point(345, 19);
             this.ScriptMoveUpButton.Name = "ScriptMoveUpButton";
             this.ScriptMoveUpButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptMoveUpButton.TabIndex = 13;
+            this.ScriptMoveUpButton.TabIndex = 4;
             this.ScriptMoveUpButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ScriptMoveUpButton.UseVisualStyleBackColor = true;
             // 
@@ -460,7 +460,7 @@
             this.ScriptAddButton.Location = new System.Drawing.Point(345, 146);
             this.ScriptAddButton.Name = "ScriptAddButton";
             this.ScriptAddButton.Size = new System.Drawing.Size(26, 26);
-            this.ScriptAddButton.TabIndex = 12;
+            this.ScriptAddButton.TabIndex = 0;
             this.ScriptAddButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ScriptAddButton.UseVisualStyleBackColor = true;
             // 
@@ -471,7 +471,7 @@
             this.RemoveScriptButton.Location = new System.Drawing.Point(345, 177);
             this.RemoveScriptButton.Name = "RemoveScriptButton";
             this.RemoveScriptButton.Size = new System.Drawing.Size(26, 26);
-            this.RemoveScriptButton.TabIndex = 11;
+            this.RemoveScriptButton.TabIndex = 1;
             this.RemoveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.RemoveScriptButton.UseVisualStyleBackColor = true;
             // 
@@ -483,7 +483,7 @@
             this.ScriptListBox.Location = new System.Drawing.Point(13, 19);
             this.ScriptListBox.Name = "ScriptListBox";
             this.ScriptListBox.Size = new System.Drawing.Size(326, 160);
-            this.ScriptListBox.TabIndex = 10;
+            this.ScriptListBox.TabIndex = 3;
             // 
             // groupBox2
             // 
@@ -502,7 +502,7 @@
             this.groupBox2.Location = new System.Drawing.Point(413, 154);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(237, 247);
-            this.groupBox2.TabIndex = 8;
+            this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Авторизация";
             // 
@@ -514,7 +514,7 @@
             this.TryLoginButton.Location = new System.Drawing.Point(11, 208);
             this.TryLoginButton.Name = "TryLoginButton";
             this.TryLoginButton.Size = new System.Drawing.Size(209, 24);
-            this.TryLoginButton.TabIndex = 14;
+            this.TryLoginButton.TabIndex = 9;
             this.TryLoginButton.Text = "Пробная авторизация";
             this.TryLoginButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.TryLoginButton.UseVisualStyleBackColor = true;
@@ -526,7 +526,7 @@
             this.label6.Location = new System.Drawing.Point(6, 19);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(173, 13);
-            this.label6.TabIndex = 13;
+            this.label6.TabIndex = 0;
             this.label6.Text = "Для авторизации использовать:";
             // 
             // textBox8
@@ -537,7 +537,8 @@
             this.textBox8.Name = "textBox8";
             this.textBox8.ReadOnly = true;
             this.textBox8.Size = new System.Drawing.Size(209, 20);
-            this.textBox8.TabIndex = 12;
+            this.textBox8.TabIndex = 2;
+            this.textBox8.TabStop = false;
             // 
             // LocalAccountCheckbox
             // 
@@ -545,7 +546,7 @@
             this.LocalAccountCheckbox.Location = new System.Drawing.Point(11, 84);
             this.LocalAccountCheckbox.Name = "LocalAccountCheckbox";
             this.LocalAccountCheckbox.Size = new System.Drawing.Size(166, 17);
-            this.LocalAccountCheckbox.TabIndex = 11;
+            this.LocalAccountCheckbox.TabIndex = 3;
             this.LocalAccountCheckbox.Text = "Отдельную учетную запись:";
             this.LocalAccountCheckbox.UseVisualStyleBackColor = true;
             this.LocalAccountCheckbox.CheckedChanged += new System.EventHandler(this.GlobalAccountCheckbox_CheckedChanged);
@@ -557,8 +558,7 @@
             this.GlobalAccountCheckbox.Location = new System.Drawing.Point(11, 35);
             this.GlobalAccountCheckbox.Name = "GlobalAccountCheckbox";
             this.GlobalAccountCheckbox.Size = new System.Drawing.Size(171, 17);
-            this.GlobalAccountCheckbox.TabIndex = 10;
-            this.GlobalAccountCheckbox.TabStop = true;
+            this.GlobalAccountCheckbox.TabIndex = 1;
             this.GlobalAccountCheckbox.Text = "Глобальную учетную запись:";
             this.GlobalAccountCheckbox.UseVisualStyleBackColor = true;
             this.GlobalAccountCheckbox.CheckedChanged += new System.EventHandler(this.GlobalAccountCheckbox_CheckedChanged);
@@ -570,7 +570,7 @@
             this.ShowPassword.Location = new System.Drawing.Point(11, 185);
             this.ShowPassword.Name = "ShowPassword";
             this.ShowPassword.Size = new System.Drawing.Size(128, 17);
-            this.ShowPassword.TabIndex = 9;
+            this.ShowPassword.TabIndex = 8;
             this.ShowPassword.Tag = "";
             this.ShowPassword.Text = "Показывать пароль";
             this.ShowPassword.UseVisualStyleBackColor = true;
@@ -582,7 +582,7 @@
             this.label5.Location = new System.Drawing.Point(8, 143);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(48, 13);
-            this.label5.TabIndex = 8;
+            this.label5.TabIndex = 6;
             this.label5.Text = "Пароль:";
             // 
             // PasswordBox
@@ -603,7 +603,7 @@
             this.label4.Location = new System.Drawing.Point(8, 104);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(106, 13);
-            this.label4.TabIndex = 6;
+            this.label4.TabIndex = 4;
             this.label4.Text = "Имя пользователя:";
             // 
             // UsernameBox
@@ -631,7 +631,7 @@
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(10, 3, 3, 5);
             this.groupBox1.Size = new System.Drawing.Size(627, 79);
-            this.groupBox1.TabIndex = 5;
+            this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Готовые профили";
             // 
@@ -654,7 +654,7 @@
             this.DeleteProfileButton.Location = new System.Drawing.Point(247, 47);
             this.DeleteProfileButton.Name = "DeleteProfileButton";
             this.DeleteProfileButton.Size = new System.Drawing.Size(97, 24);
-            this.DeleteProfileButton.TabIndex = 4;
+            this.DeleteProfileButton.TabIndex = 2;
             this.DeleteProfileButton.Text = "Удалить";
             this.DeleteProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.DeleteProfileButton.UseVisualStyleBackColor = true;
@@ -667,7 +667,7 @@
             this.NewProfileButton.Location = new System.Drawing.Point(13, 47);
             this.NewProfileButton.Name = "NewProfileButton";
             this.NewProfileButton.Size = new System.Drawing.Size(125, 24);
-            this.NewProfileButton.TabIndex = 3;
+            this.NewProfileButton.TabIndex = 4;
             this.NewProfileButton.Text = "Создать новый";
             this.NewProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.NewProfileButton.UseVisualStyleBackColor = true;
@@ -680,7 +680,7 @@
             this.SaveProfileButton.Location = new System.Drawing.Point(144, 47);
             this.SaveProfileButton.Name = "SaveProfileButton";
             this.SaveProfileButton.Size = new System.Drawing.Size(97, 24);
-            this.SaveProfileButton.TabIndex = 2;
+            this.SaveProfileButton.TabIndex = 3;
             this.SaveProfileButton.Text = "Сохранить";
             this.SaveProfileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.SaveProfileButton.UseVisualStyleBackColor = true;
@@ -731,7 +731,7 @@
             this.MainPageBox.Location = new System.Drawing.Point(23, 170);
             this.MainPageBox.Name = "MainPageBox";
             this.MainPageBox.Size = new System.Drawing.Size(384, 20);
-            this.MainPageBox.TabIndex = 3;
+            this.MainPageBox.TabIndex = 5;
             this.MainPageBox.Text = "http://";
             this.MainPageBox.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
             // 
@@ -741,7 +741,7 @@
             this.label2.Location = new System.Drawing.Point(23, 20);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(212, 13);
-            this.label2.TabIndex = 2;
+            this.label2.TabIndex = 0;
             this.label2.Text = "Ссылка на тему/раздел для публикации";
             // 
             // TargetUrlBox
@@ -753,18 +753,19 @@
             this.TargetUrlBox.Location = new System.Drawing.Point(23, 36);
             this.TargetUrlBox.Name = "TargetUrlBox";
             this.TargetUrlBox.Size = new System.Drawing.Size(627, 20);
-            this.TargetUrlBox.TabIndex = 0;
+            this.TargetUrlBox.TabIndex = 1;
             this.TargetUrlBox.Text = "http://";
             this.TargetUrlBox.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
             // 
             // TaskPropCancel
             // 
             this.TaskPropCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.TaskPropCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.TaskPropCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
             this.TaskPropCancel.Location = new System.Drawing.Point(534, 407);
             this.TaskPropCancel.Name = "TaskPropCancel";
             this.TaskPropCancel.Size = new System.Drawing.Size(116, 38);
-            this.TaskPropCancel.TabIndex = 7;
+            this.TaskPropCancel.TabIndex = 12;
             this.TaskPropCancel.Text = "Отмена";
             this.TaskPropCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.TaskPropCancel.UseVisualStyleBackColor = true;
@@ -773,12 +774,13 @@
             // TaskPropApply
             // 
             this.TaskPropApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.TaskPropApply.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.TaskPropApply.Enabled = false;
             this.TaskPropApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
             this.TaskPropApply.Location = new System.Drawing.Point(413, 407);
             this.TaskPropApply.Name = "TaskPropApply";
             this.TaskPropApply.Size = new System.Drawing.Size(115, 38);
-            this.TaskPropApply.TabIndex = 6;
+            this.TaskPropApply.TabIndex = 11;
             this.TaskPropApply.Text = "Применить";
             this.TaskPropApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.TaskPropApply.UseVisualStyleBackColor = true;

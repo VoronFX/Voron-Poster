@@ -506,8 +506,7 @@ namespace Voron_Poster
             try
             {
                 if (ProfileComboBox.Text == String.Empty) NewProfileButton_Click(sender, e);
-                System.Xml.Serialization.XmlSerializer Xml =
-                    new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
                 using (FileStream F = File.Create(GetProfilePath(ProfileComboBox.Text)))
                     Xml.Serialize(F, TempProperties);
                 ValidateProperties();
@@ -530,8 +529,7 @@ namespace Voron_Poster
             LoadProfileButton.Enabled = false;
             try
             {
-                System.Xml.Serialization.XmlSerializer Xml =
-                    new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
                 using (FileStream F = File.OpenRead(GetProfilePath(ProfileComboBox.Text)))
                     TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
                 LoadTaskBaseProperties(TempProperties);
@@ -683,6 +681,11 @@ namespace Voron_Poster
         }
 
         #endregion
+
+        private void textBox4_Enter(object sender, EventArgs e)
+        {
+          //  if ()
+        }
 
     }
 }

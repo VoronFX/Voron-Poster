@@ -133,6 +133,16 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Execute_10024 {
+            get {
+                object obj = ResourceManager.GetObject("Execute_10024", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap folder_Open_16xLG {
             get {
                 object obj = ResourceManager.GetObject("folder_Open_16xLG", resourceCulture);
@@ -266,6 +276,16 @@ namespace Voron_Poster.Properties {
         internal static System.Drawing.Bitmap StatusAnnotations_Play_16xLG {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Play_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Play_32xMD_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Play_32xMD_color", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

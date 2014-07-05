@@ -50,15 +50,6 @@
             this.NewUrlComboBox = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
             this.NewUrlTextBox = new System.Windows.Forms.TextBox();
-            this.TasksGuiTable = new Voron_Poster.DBTableLayoutPanel();
-            this.GTName = new System.Windows.Forms.Label();
-            this.GTStatus = new System.Windows.Forms.Label();
-            this.GTStart = new System.Windows.Forms.Button();
-            this.GTSelected = new System.Windows.Forms.CheckBox();
-            this.GTProgress = new System.Windows.Forms.ProgressBar();
-            this.GTStatusIcon = new System.Windows.Forms.PictureBox();
-            this.GTStop = new System.Windows.Forms.Button();
-            this.GTDelete = new System.Windows.Forms.Button();
             this.AddTaskButton = new System.Windows.Forms.Button();
             this.TaskPropertiesPage = new System.Windows.Forms.TabPage();
             this.DetectEngineButton = new System.Windows.Forms.Button();
@@ -101,7 +92,6 @@
             this.DeleteScriptButton = new System.Windows.Forms.Button();
             this.NewScriptButton = new System.Windows.Forms.Button();
             this.SaveScriptButton = new System.Windows.Forms.Button();
-            this.CodeBox = new System.Windows.Forms.TextBox();
             this.TestTab = new System.Windows.Forms.TabPage();
             this.TestResultBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -117,12 +107,20 @@
             this.ScriptAcceptButton = new System.Windows.Forms.Button();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.CodeBox = new System.Windows.Forms.TextBox();
+            this.TasksGuiTable = new Voron_Poster.DBTableLayoutPanel();
+            this.GTName = new System.Windows.Forms.Label();
+            this.GTStatus = new System.Windows.Forms.Label();
+            this.GTStart = new System.Windows.Forms.Button();
+            this.GTSelected = new System.Windows.Forms.CheckBox();
+            this.GTProgress = new System.Windows.Forms.ProgressBar();
+            this.GTStatusIcon = new System.Windows.Forms.PictureBox();
+            this.GTStop = new System.Windows.Forms.Button();
+            this.GTDelete = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.TasksPage.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.TasksGuiTable.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.TaskPropertiesPage.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -133,6 +131,8 @@
             this.TestTab.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.TasksGuiTable.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.SuspendLayout();
             // 
             // Tabs
@@ -250,8 +250,8 @@
             this.TasksPage.Controls.Add(this.groupBox4);
             this.TasksPage.Controls.Add(this.label8);
             this.TasksPage.Controls.Add(this.NewUrlTextBox);
-            this.TasksPage.Controls.Add(this.TasksGuiTable);
             this.TasksPage.Controls.Add(this.AddTaskButton);
+            this.TasksPage.Controls.Add(this.TasksGuiTable);
             this.TasksPage.Location = new System.Drawing.Point(4, 22);
             this.TasksPage.Name = "TasksPage";
             this.TasksPage.Padding = new System.Windows.Forms.Padding(20);
@@ -368,159 +368,6 @@
             this.NewUrlTextBox.Name = "NewUrlTextBox";
             this.NewUrlTextBox.Size = new System.Drawing.Size(475, 20);
             this.NewUrlTextBox.TabIndex = 1;
-            // 
-            // TasksGuiTable
-            // 
-            this.TasksGuiTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TasksGuiTable.AutoScroll = true;
-            this.TasksGuiTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.TasksGuiTable.BackColor = System.Drawing.Color.White;
-            this.TasksGuiTable.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.TasksGuiTable.ColumnCount = 8;
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.TasksGuiTable.Controls.Add(this.GTName, 0, 0);
-            this.TasksGuiTable.Controls.Add(this.GTStatus, 2, 0);
-            this.TasksGuiTable.Controls.Add(this.GTStart, 5, 0);
-            this.TasksGuiTable.Controls.Add(this.GTSelected, 0, 0);
-            this.TasksGuiTable.Controls.Add(this.GTProgress, 4, 0);
-            this.TasksGuiTable.Controls.Add(this.GTStatusIcon, 3, 0);
-            this.TasksGuiTable.Controls.Add(this.GTStop, 6, 0);
-            this.TasksGuiTable.Controls.Add(this.GTDelete, 7, 0);
-            this.TasksGuiTable.Location = new System.Drawing.Point(23, 175);
-            this.TasksGuiTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
-            this.TasksGuiTable.Name = "TasksGuiTable";
-            this.TasksGuiTable.RowCount = 2;
-            this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.TasksGuiTable.Size = new System.Drawing.Size(581, 309);
-            this.TasksGuiTable.TabIndex = 0;
-            this.TasksGuiTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
-            // 
-            // GTName
-            // 
-            this.GTName.BackColor = System.Drawing.SystemColors.Control;
-            this.GTName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTName.Location = new System.Drawing.Point(26, 1);
-            this.GTName.Margin = new System.Windows.Forms.Padding(0);
-            this.GTName.MaximumSize = new System.Drawing.Size(0, 24);
-            this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
-            this.GTName.Name = "GTName";
-            this.GTName.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.GTName.Size = new System.Drawing.Size(262, 24);
-            this.GTName.TabIndex = 13;
-            this.GTName.Text = "Тема/Раздел";
-            this.GTName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // GTStatus
-            // 
-            this.GTStatus.BackColor = System.Drawing.SystemColors.Control;
-            this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatus.Location = new System.Drawing.Point(289, 1);
-            this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
-            this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
-            this.GTStatus.Name = "GTStatus";
-            this.GTStatus.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.GTStatus.Size = new System.Drawing.Size(120, 24);
-            this.GTStatus.TabIndex = 12;
-            this.GTStatus.Text = "Состояние";
-            this.GTStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // GTStart
-            // 
-            this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStart.Enabled = false;
-            this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-            this.GTStart.Location = new System.Drawing.Point(506, 1);
-            this.GTStart.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStart.Name = "GTStart";
-            this.GTStart.Size = new System.Drawing.Size(24, 24);
-            this.GTStart.TabIndex = 8;
-            this.GTStart.UseVisualStyleBackColor = true;
-            this.GTStart.Click += new System.EventHandler(this.GTStartStop_Click);
-            // 
-            // GTSelected
-            // 
-            this.GTSelected.BackColor = System.Drawing.SystemColors.Control;
-            this.GTSelected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.GTSelected.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTSelected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.GTSelected.Location = new System.Drawing.Point(1, 1);
-            this.GTSelected.Margin = new System.Windows.Forms.Padding(0);
-            this.GTSelected.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTSelected.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTSelected.Name = "GTSelected";
-            this.GTSelected.Size = new System.Drawing.Size(24, 24);
-            this.GTSelected.TabIndex = 0;
-            this.GTSelected.ThreeState = true;
-            this.GTSelected.UseVisualStyleBackColor = false;
-            this.GTSelected.Click += new System.EventHandler(this.GTSelected_Click);
-            // 
-            // GTProgress
-            // 
-            this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTProgress.Location = new System.Drawing.Point(438, 4);
-            this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
-            this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
-            this.GTProgress.Name = "GTProgress";
-            this.GTProgress.Size = new System.Drawing.Size(64, 18);
-            this.GTProgress.TabIndex = 2;
-            // 
-            // GTStatusIcon
-            // 
-            this.GTStatusIcon.BackColor = System.Drawing.SystemColors.Control;
-            this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            this.GTStatusIcon.Location = new System.Drawing.Point(410, 1);
-            this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.Name = "GTStatusIcon";
-            this.GTStatusIcon.Size = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.GTStatusIcon.TabIndex = 9;
-            this.GTStatusIcon.TabStop = false;
-            // 
-            // GTStop
-            // 
-            this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStop.Enabled = false;
-            this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-            this.GTStop.Location = new System.Drawing.Point(531, 1);
-            this.GTStop.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStop.Name = "GTStop";
-            this.GTStop.Size = new System.Drawing.Size(24, 24);
-            this.GTStop.TabIndex = 7;
-            this.GTStop.UseVisualStyleBackColor = true;
-            this.GTStop.Click += new System.EventHandler(this.GTStartStop_Click);
-            // 
-            // GTDelete
-            // 
-            this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTDelete.Enabled = false;
-            this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.GTDelete.Location = new System.Drawing.Point(556, 1);
-            this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
-            this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTDelete.Name = "GTDelete";
-            this.GTDelete.Size = new System.Drawing.Size(24, 24);
-            this.GTDelete.TabIndex = 10;
-            this.GTDelete.UseVisualStyleBackColor = true;
-            this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
             // 
             // AddTaskButton
             // 
@@ -1053,18 +900,6 @@
             this.SaveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.SaveScriptButton.UseVisualStyleBackColor = true;
             // 
-            // CodeBox
-            // 
-            this.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.CodeBox.Location = new System.Drawing.Point(6, 6);
-            this.CodeBox.Multiline = true;
-            this.CodeBox.Name = "CodeBox";
-            this.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.CodeBox.Size = new System.Drawing.Size(593, 433);
-            this.CodeBox.TabIndex = 1;
-            // 
             // TestTab
             // 
             this.TestTab.Controls.Add(this.TestResultBox);
@@ -1158,7 +993,7 @@
             this.panel2.MaximumSize = new System.Drawing.Size(0, 10);
             this.panel2.MinimumSize = new System.Drawing.Size(0, 10);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(585, 10);
+            this.panel2.Size = new System.Drawing.Size(0, 10);
             this.panel2.TabIndex = 39;
             // 
             // TestSubjectBox
@@ -1194,7 +1029,6 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(210, 20);
             this.textBox3.TabIndex = 34;
-            this.textBox3.Text = "Тема сообщения";
             // 
             // ScriptsListBox
             // 
@@ -1232,6 +1066,171 @@
             this.ToolTip.InitialDelay = 250;
             this.ToolTip.ReshowDelay = 100;
             // 
+            // CodeBox
+            // 
+            this.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CodeBox.Location = new System.Drawing.Point(6, 6);
+            this.CodeBox.Multiline = true;
+            this.CodeBox.Name = "CodeBox";
+            this.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.CodeBox.Size = new System.Drawing.Size(593, 433);
+            this.CodeBox.TabIndex = 1;
+            // 
+            // TasksGuiTable
+            // 
+            this.TasksGuiTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TasksGuiTable.AutoScroll = true;
+            this.TasksGuiTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.TasksGuiTable.BackColor = System.Drawing.Color.White;
+            this.TasksGuiTable.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.TasksGuiTable.ColumnCount = 8;
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.TasksGuiTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.TasksGuiTable.Controls.Add(this.GTName, 0, 0);
+            this.TasksGuiTable.Controls.Add(this.GTStatus, 2, 0);
+            this.TasksGuiTable.Controls.Add(this.GTStart, 5, 0);
+            this.TasksGuiTable.Controls.Add(this.GTSelected, 0, 0);
+            this.TasksGuiTable.Controls.Add(this.GTProgress, 4, 0);
+            this.TasksGuiTable.Controls.Add(this.GTStatusIcon, 3, 0);
+            this.TasksGuiTable.Controls.Add(this.GTStop, 6, 0);
+            this.TasksGuiTable.Controls.Add(this.GTDelete, 7, 0);
+            this.TasksGuiTable.Location = new System.Drawing.Point(23, 175);
+            this.TasksGuiTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
+            this.TasksGuiTable.Name = "TasksGuiTable";
+            this.TasksGuiTable.RowCount = 2;
+            this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.TasksGuiTable.Size = new System.Drawing.Size(581, 309);
+            this.TasksGuiTable.TabIndex = 0;
+            this.TasksGuiTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
+            // 
+            // GTName
+            // 
+            this.GTName.BackColor = System.Drawing.SystemColors.Control;
+            this.GTName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTName.Location = new System.Drawing.Point(26, 1);
+            this.GTName.Margin = new System.Windows.Forms.Padding(0);
+            this.GTName.MaximumSize = new System.Drawing.Size(0, 24);
+            this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
+            this.GTName.Name = "GTName";
+            this.GTName.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.GTName.Size = new System.Drawing.Size(262, 24);
+            this.GTName.TabIndex = 13;
+            this.GTName.Text = "Тема/Раздел";
+            this.GTName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // GTStatus
+            // 
+            this.GTStatus.BackColor = System.Drawing.SystemColors.Control;
+            this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStatus.Location = new System.Drawing.Point(289, 1);
+            this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
+            this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
+            this.GTStatus.Name = "GTStatus";
+            this.GTStatus.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.GTStatus.Size = new System.Drawing.Size(120, 24);
+            this.GTStatus.TabIndex = 12;
+            this.GTStatus.Text = "Состояние";
+            this.GTStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // GTStart
+            // 
+            this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStart.Enabled = false;
+            this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
+            this.GTStart.Location = new System.Drawing.Point(506, 1);
+            this.GTStart.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStart.Name = "GTStart";
+            this.GTStart.Size = new System.Drawing.Size(24, 24);
+            this.GTStart.TabIndex = 8;
+            this.GTStart.UseVisualStyleBackColor = true;
+            this.GTStart.Click += new System.EventHandler(this.GTStartStop_Click);
+            // 
+            // GTSelected
+            // 
+            this.GTSelected.BackColor = System.Drawing.SystemColors.Control;
+            this.GTSelected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.GTSelected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTSelected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.GTSelected.Location = new System.Drawing.Point(1, 1);
+            this.GTSelected.Margin = new System.Windows.Forms.Padding(0);
+            this.GTSelected.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTSelected.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTSelected.Name = "GTSelected";
+            this.GTSelected.Size = new System.Drawing.Size(24, 24);
+            this.GTSelected.TabIndex = 0;
+            this.GTSelected.ThreeState = true;
+            this.GTSelected.UseVisualStyleBackColor = false;
+            this.GTSelected.Click += new System.EventHandler(this.GTSelected_Click);
+            // 
+            // GTProgress
+            // 
+            this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTProgress.Location = new System.Drawing.Point(438, 4);
+            this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
+            this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
+            this.GTProgress.Name = "GTProgress";
+            this.GTProgress.Size = new System.Drawing.Size(64, 18);
+            this.GTProgress.TabIndex = 2;
+            // 
+            // GTStatusIcon
+            // 
+            this.GTStatusIcon.BackColor = System.Drawing.SystemColors.Control;
+            this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+            this.GTStatusIcon.Location = new System.Drawing.Point(410, 1);
+            this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.Name = "GTStatusIcon";
+            this.GTStatusIcon.Size = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.GTStatusIcon.TabIndex = 9;
+            this.GTStatusIcon.TabStop = false;
+            // 
+            // GTStop
+            // 
+            this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStop.Enabled = false;
+            this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
+            this.GTStop.Location = new System.Drawing.Point(531, 1);
+            this.GTStop.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStop.Name = "GTStop";
+            this.GTStop.Size = new System.Drawing.Size(24, 24);
+            this.GTStop.TabIndex = 7;
+            this.GTStop.UseVisualStyleBackColor = true;
+            this.GTStop.Click += new System.EventHandler(this.GTStartStop_Click);
+            // 
+            // GTDelete
+            // 
+            this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTDelete.Enabled = false;
+            this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.GTDelete.Location = new System.Drawing.Point(556, 1);
+            this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
+            this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTDelete.Name = "GTDelete";
+            this.GTDelete.Size = new System.Drawing.Size(24, 24);
+            this.GTDelete.TabIndex = 10;
+            this.GTDelete.UseVisualStyleBackColor = true;
+            this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1248,8 +1247,6 @@
             this.TasksPage.ResumeLayout(false);
             this.TasksPage.PerformLayout();
             this.groupBox4.ResumeLayout(false);
-            this.TasksGuiTable.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.TaskPropertiesPage.ResumeLayout(false);
             this.TaskPropertiesPage.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -1266,6 +1263,8 @@
             this.panel1.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
+            this.TasksGuiTable.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1347,7 +1346,6 @@
         private System.Windows.Forms.Button DeleteScriptButton;
         private System.Windows.Forms.Button NewScriptButton;
         private System.Windows.Forms.Button SaveScriptButton;
-        private System.Windows.Forms.TextBox CodeBox;
         private System.Windows.Forms.TabPage TestTab;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label TestStatusLabel;
@@ -1361,6 +1359,7 @@
         private System.Windows.Forms.Button ScriptAcceptButton;
         private System.Windows.Forms.TextBox TestResultBox;
         private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox CodeBox;
 
     }
 }

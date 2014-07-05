@@ -79,6 +79,10 @@
     <Reference Include="Roslyn.Compilers.CSharp">
       <HintPath>..\packages\Roslyn.Compilers.CSharp.1.2.20906.2\lib\net45\Roslyn.Compilers.CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="ScintillaNET, Version=2.6.0.0, Culture=neutral, PublicKeyToken=948d6c9751444115, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\ScintillaNET.dll</HintPath>
+    </Reference>
     <Reference Include="ScriptCs.Contracts">
       <HintPath>..\packages\ScriptCs.Contracts.0.9.0\lib\net45\ScriptCs.Contracts.dll</HintPath>
     </Reference>
@@ -259,6 +263,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Execute_10024.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\License.txt" />
+    <Content Include="SciLexer.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Libraries\SciLexer64.dll" />
+    <Content Include="Libraries\ScintillaNET.dll" />
+    <Content Include="Libraries\ScintillaNET.pdb" />
+    <Content Include="Libraries\ScintillaNET.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -16,6 +16,7 @@ using System.Web;
 using System.Xml;
 using Roslyn.Scripting.CSharp;
 using System.Reflection;
+using ScintillaNET;
 
 namespace Voron_Poster
 {
@@ -25,6 +26,7 @@ namespace Voron_Poster
 
         public List<TaskGui> Tasks = new List<TaskGui>();
         public TaskGui CurrTask;
+        public Scintilla CodeEditor = new Scintilla();
 
         public MainForm()
         {
@@ -43,6 +45,22 @@ namespace Voron_Poster
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
             //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
             //null, Tabs, new object[] { true });
+
+            CodeEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            CodeEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
+            CodeEditor.Location = new System.Drawing.Point(0, 0);
+            CodeEditor.Margins.Margin1.AutoToggleMarkerNumber = 0;
+            CodeEditor.Margins.Margin1.IsClickable = true;
+            CodeEditor.Margins.Margin2.Width = 16;
+            CodeEditor.Name = "_scintilla";
+            CodeEditor.TabIndex = 0;
+            CodeEditor.ConfigurationManager.Language = "cs";
+            CodeEditor.Indentation.SmartIndentType = SmartIndent.CPP;
+            CodeEditor.Size = CodeBox.Size;
+            CodeEditor.Location = CodeBox.Location;
+            CodeEditor.Anchor = CodeBox.Anchor;
+            CodeBox.Dispose();
+            CodeTab.Controls.Add(CodeEditor);
         }
 
         private void RenderHtml(string Html)

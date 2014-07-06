@@ -123,7 +123,6 @@
     <Compile Include="CaptchaForm.Designer.cs">
       <DependentUpon>CaptchaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls.cs" />
     <Compile Include="DBTableLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>

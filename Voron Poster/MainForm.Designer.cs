@@ -1253,7 +1253,7 @@
             // 
             // Tabs
             // 
-            this.Tabs.Controls.Add(this.Scripts.Tab);
+            this.Tabs.Controls.Add(Scripts.Tab);
             this.Tabs.Controls.Add(this.tabPage1);
             this.Tabs.Controls.Add(this.tabPage4);
             this.Tabs.Controls.Add(this.TasksPage);
@@ -1308,6 +1308,7 @@
 
         #endregion
 
+        private global::Voron_Poster.ScriptsControls Scripts;
         private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Button button3;

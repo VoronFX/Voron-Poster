@@ -72,6 +72,7 @@
             this.PasswordBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.UsernameBox = new System.Windows.Forms.TextBox();
+            this.TaskPropApply = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.BrowseProfileButton = new System.Windows.Forms.Button();
             this.DeleteProfileButton = new System.Windows.Forms.Button();
@@ -84,14 +85,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.TargetUrlBox = new System.Windows.Forms.TextBox();
             this.TaskPropCancel = new System.Windows.Forms.Button();
-            this.TaskPropApply = new System.Windows.Forms.Button();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.ScriptsPage = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.ScriptTabs = new System.Windows.Forms.TabControl();
             this.CodeTab = new System.Windows.Forms.TabPage();
             this.DeleteScriptButton = new System.Windows.Forms.Button();
             this.NewScriptButton = new System.Windows.Forms.Button();
             this.SaveScriptButton = new System.Windows.Forms.Button();
+            this.CodeBox = new System.Windows.Forms.TextBox();
             this.TestTab = new System.Windows.Forms.TabPage();
             this.TestResultBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -102,12 +103,11 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.TestSubjectBox = new System.Windows.Forms.TextBox();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.ScriptsListBox = new System.Windows.Forms.ListBox();
+            this.ScriptNameBox = new System.Windows.Forms.TextBox();
+            this.AllScriptsListBox = new System.Windows.Forms.ListBox();
             this.ScriptAcceptButton = new System.Windows.Forms.Button();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.CodeBox = new System.Windows.Forms.TextBox();
             this.TasksGuiTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -125,7 +125,7 @@
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
+            this.ScriptsPage.SuspendLayout();
             this.ScriptTabs.SuspendLayout();
             this.CodeTab.SuspendLayout();
             this.TestTab.SuspendLayout();
@@ -141,12 +141,12 @@
             this.Tabs.Controls.Add(this.tabPage4);
             this.Tabs.Controls.Add(this.TasksPage);
             this.Tabs.Controls.Add(this.TaskPropertiesPage);
-            this.Tabs.Controls.Add(this.tabPage2);
+            this.Tabs.Controls.Add(this.ScriptsPage);
             this.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Tabs.Location = new System.Drawing.Point(3, 3);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(846, 533);
+            this.Tabs.Size = new System.Drawing.Size(636, 504);
             this.Tabs.TabIndex = 8;
             this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
@@ -163,7 +163,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(838, 507);
+            this.tabPage1.Size = new System.Drawing.Size(628, 478);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -240,7 +240,7 @@
             // 
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(838, 507);
+            this.tabPage4.Size = new System.Drawing.Size(628, 478);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Сообщение";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -255,7 +255,7 @@
             this.TasksPage.Location = new System.Drawing.Point(4, 22);
             this.TasksPage.Name = "TasksPage";
             this.TasksPage.Padding = new System.Windows.Forms.Padding(20);
-            this.TasksPage.Size = new System.Drawing.Size(838, 507);
+            this.TasksPage.Size = new System.Drawing.Size(628, 478);
             this.TasksPage.TabIndex = 2;
             this.TasksPage.Text = "Задачи";
             this.TasksPage.UseVisualStyleBackColor = true;
@@ -273,7 +273,7 @@
             this.groupBox4.Location = new System.Drawing.Point(23, 23);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(10, 3, 3, 5);
-            this.groupBox4.Size = new System.Drawing.Size(581, 79);
+            this.groupBox4.Size = new System.Drawing.Size(582, 79);
             this.groupBox4.TabIndex = 9;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Готовые профили";
@@ -282,7 +282,7 @@
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button4.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
-            this.button4.Location = new System.Drawing.Point(468, 17);
+            this.button4.Location = new System.Drawing.Point(469, 17);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(96, 24);
             this.button4.TabIndex = 5;
@@ -330,7 +330,7 @@
             // 
             this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button8.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.button8.Location = new System.Drawing.Point(417, 47);
+            this.button8.Location = new System.Drawing.Point(418, 47);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(147, 24);
             this.button8.TabIndex = 1;
@@ -347,7 +347,7 @@
             this.NewUrlComboBox.FormattingEnabled = true;
             this.NewUrlComboBox.Location = new System.Drawing.Point(13, 19);
             this.NewUrlComboBox.Name = "NewUrlComboBox";
-            this.NewUrlComboBox.Size = new System.Drawing.Size(449, 21);
+            this.NewUrlComboBox.Size = new System.Drawing.Size(450, 21);
             this.NewUrlComboBox.TabIndex = 0;
             // 
             // label8
@@ -366,14 +366,14 @@
             this.NewUrlTextBox.Location = new System.Drawing.Point(23, 129);
             this.NewUrlTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 13, 3);
             this.NewUrlTextBox.Name = "NewUrlTextBox";
-            this.NewUrlTextBox.Size = new System.Drawing.Size(475, 20);
+            this.NewUrlTextBox.Size = new System.Drawing.Size(476, 20);
             this.NewUrlTextBox.TabIndex = 1;
             // 
             // AddTaskButton
             // 
             this.AddTaskButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.AddTaskButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.AddTaskButton.Location = new System.Drawing.Point(514, 126);
+            this.AddTaskButton.Location = new System.Drawing.Point(515, 126);
             this.AddTaskButton.Name = "AddTaskButton";
             this.AddTaskButton.Size = new System.Drawing.Size(90, 24);
             this.AddTaskButton.TabIndex = 2;
@@ -389,17 +389,17 @@
             this.TaskPropertiesPage.Controls.Add(this.label7);
             this.TaskPropertiesPage.Controls.Add(this.groupBox3);
             this.TaskPropertiesPage.Controls.Add(this.groupBox2);
+            this.TaskPropertiesPage.Controls.Add(this.TaskPropApply);
             this.TaskPropertiesPage.Controls.Add(this.groupBox1);
             this.TaskPropertiesPage.Controls.Add(this.label3);
             this.TaskPropertiesPage.Controls.Add(this.MainPageBox);
             this.TaskPropertiesPage.Controls.Add(this.label2);
             this.TaskPropertiesPage.Controls.Add(this.TargetUrlBox);
             this.TaskPropertiesPage.Controls.Add(this.TaskPropCancel);
-            this.TaskPropertiesPage.Controls.Add(this.TaskPropApply);
             this.TaskPropertiesPage.Location = new System.Drawing.Point(4, 22);
             this.TaskPropertiesPage.Name = "TaskPropertiesPage";
             this.TaskPropertiesPage.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
-            this.TaskPropertiesPage.Size = new System.Drawing.Size(838, 507);
+            this.TaskPropertiesPage.Size = new System.Drawing.Size(628, 478);
             this.TaskPropertiesPage.TabIndex = 4;
             this.TaskPropertiesPage.Text = "Параметры задачи";
             this.TaskPropertiesPage.UseVisualStyleBackColor = true;
@@ -409,7 +409,7 @@
             this.DetectEngineButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.DetectEngineButton.Enabled = false;
             this.DetectEngineButton.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
-            this.DetectEngineButton.Location = new System.Drawing.Point(473, 191);
+            this.DetectEngineButton.Location = new System.Drawing.Point(263, 191);
             this.DetectEngineButton.Name = "DetectEngineButton";
             this.DetectEngineButton.Size = new System.Drawing.Size(99, 25);
             this.DetectEngineButton.TabIndex = 8;
@@ -428,7 +428,7 @@
             this.ForumEngineComboBox.FormattingEnabled = true;
             this.ForumEngineComboBox.Location = new System.Drawing.Point(122, 193);
             this.ForumEngineComboBox.Name = "ForumEngineComboBox";
-            this.ForumEngineComboBox.Size = new System.Drawing.Size(345, 21);
+            this.ForumEngineComboBox.Size = new System.Drawing.Size(135, 21);
             this.ForumEngineComboBox.TabIndex = 7;
             this.ForumEngineComboBox.SelectedIndexChanged += new System.EventHandler(this.ForumEngineComboBox_SelectedIndexChanged);
             // 
@@ -454,7 +454,7 @@
             this.groupBox3.Location = new System.Drawing.Point(23, 222);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
-            this.groupBox3.Size = new System.Drawing.Size(549, 262);
+            this.groupBox3.Size = new System.Drawing.Size(339, 233);
             this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Скрипты предобработки";
@@ -463,7 +463,7 @@
             // 
             this.ScriptMoveDownButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptMoveDownButton.Image = global::Voron_Poster.Properties.Resources.arrow_Down_16xLG;
-            this.ScriptMoveDownButton.Location = new System.Drawing.Point(510, 51);
+            this.ScriptMoveDownButton.Location = new System.Drawing.Point(300, 51);
             this.ScriptMoveDownButton.Name = "ScriptMoveDownButton";
             this.ScriptMoveDownButton.Size = new System.Drawing.Size(26, 26);
             this.ScriptMoveDownButton.TabIndex = 5;
@@ -474,7 +474,7 @@
             // 
             this.ScriptMoveUpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptMoveUpButton.Image = global::Voron_Poster.Properties.Resources.arrow_Up_16xLG;
-            this.ScriptMoveUpButton.Location = new System.Drawing.Point(510, 19);
+            this.ScriptMoveUpButton.Location = new System.Drawing.Point(300, 19);
             this.ScriptMoveUpButton.Name = "ScriptMoveUpButton";
             this.ScriptMoveUpButton.Size = new System.Drawing.Size(26, 26);
             this.ScriptMoveUpButton.TabIndex = 4;
@@ -485,7 +485,7 @@
             // 
             this.ScriptAddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptAddButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.ScriptAddButton.Location = new System.Drawing.Point(510, 188);
+            this.ScriptAddButton.Location = new System.Drawing.Point(300, 159);
             this.ScriptAddButton.Name = "ScriptAddButton";
             this.ScriptAddButton.Size = new System.Drawing.Size(26, 26);
             this.ScriptAddButton.TabIndex = 0;
@@ -496,7 +496,7 @@
             // 
             this.RemoveScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RemoveScriptButton.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
-            this.RemoveScriptButton.Location = new System.Drawing.Point(510, 219);
+            this.RemoveScriptButton.Location = new System.Drawing.Point(300, 190);
             this.RemoveScriptButton.Name = "RemoveScriptButton";
             this.RemoveScriptButton.Size = new System.Drawing.Size(26, 26);
             this.RemoveScriptButton.TabIndex = 1;
@@ -510,7 +510,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptListBox.Location = new System.Drawing.Point(13, 19);
             this.ScriptListBox.Name = "ScriptListBox";
-            this.ScriptListBox.Size = new System.Drawing.Size(491, 173);
+            this.ScriptListBox.Size = new System.Drawing.Size(281, 199);
             this.ScriptListBox.TabIndex = 3;
             // 
             // groupBox2
@@ -527,9 +527,9 @@
             this.groupBox2.Controls.Add(this.PasswordBox);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.UsernameBox);
-            this.groupBox2.Location = new System.Drawing.Point(578, 151);
+            this.groupBox2.Location = new System.Drawing.Point(368, 151);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(237, 333);
+            this.groupBox2.Size = new System.Drawing.Size(237, 260);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Авторизация";
@@ -646,6 +646,21 @@
             this.UsernameBox.TabIndex = 5;
             this.UsernameBox.TextChanged += new System.EventHandler(this.UsernameBox_TextChanged);
             // 
+            // TaskPropApply
+            // 
+            this.TaskPropApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.TaskPropApply.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.TaskPropApply.Enabled = false;
+            this.TaskPropApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.TaskPropApply.Location = new System.Drawing.Point(368, 417);
+            this.TaskPropApply.Name = "TaskPropApply";
+            this.TaskPropApply.Size = new System.Drawing.Size(115, 38);
+            this.TaskPropApply.TabIndex = 11;
+            this.TaskPropApply.Text = "Применить";
+            this.TaskPropApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.TaskPropApply.UseVisualStyleBackColor = true;
+            this.TaskPropApply.Click += new System.EventHandler(this.TaskPropApply_Click);
+            // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -659,7 +674,7 @@
             this.groupBox1.Location = new System.Drawing.Point(23, 59);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(10, 3, 3, 5);
-            this.groupBox1.Size = new System.Drawing.Size(792, 79);
+            this.groupBox1.Size = new System.Drawing.Size(582, 79);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Готовые профили";
@@ -668,7 +683,7 @@
             // 
             this.BrowseProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.BrowseProfileButton.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
-            this.BrowseProfileButton.Location = new System.Drawing.Point(679, 17);
+            this.BrowseProfileButton.Location = new System.Drawing.Point(469, 17);
             this.BrowseProfileButton.Name = "BrowseProfileButton";
             this.BrowseProfileButton.Size = new System.Drawing.Size(96, 24);
             this.BrowseProfileButton.TabIndex = 5;
@@ -719,7 +734,7 @@
             // 
             this.LoadProfileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.LoadProfileButton.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.LoadProfileButton.Location = new System.Drawing.Point(628, 47);
+            this.LoadProfileButton.Location = new System.Drawing.Point(418, 47);
             this.LoadProfileButton.Name = "LoadProfileButton";
             this.LoadProfileButton.Size = new System.Drawing.Size(147, 24);
             this.LoadProfileButton.TabIndex = 1;
@@ -737,7 +752,7 @@
             this.ProfileComboBox.FormattingEnabled = true;
             this.ProfileComboBox.Location = new System.Drawing.Point(13, 19);
             this.ProfileComboBox.Name = "ProfileComboBox";
-            this.ProfileComboBox.Size = new System.Drawing.Size(660, 21);
+            this.ProfileComboBox.Size = new System.Drawing.Size(450, 21);
             this.ProfileComboBox.TabIndex = 0;
             this.ProfileComboBox.TextChanged += new System.EventHandler(this.ProfileComboBox_TextChanged);
             this.ProfileComboBox.Enter += new System.EventHandler(this.ProfileComboBox_Enter);
@@ -759,7 +774,7 @@
             this.MainPageBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
             this.MainPageBox.Location = new System.Drawing.Point(23, 167);
             this.MainPageBox.Name = "MainPageBox";
-            this.MainPageBox.Size = new System.Drawing.Size(549, 20);
+            this.MainPageBox.Size = new System.Drawing.Size(339, 20);
             this.MainPageBox.TabIndex = 5;
             this.MainPageBox.Text = "http://";
             this.MainPageBox.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
@@ -781,7 +796,7 @@
             this.TargetUrlBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
             this.TargetUrlBox.Location = new System.Drawing.Point(23, 33);
             this.TargetUrlBox.Name = "TargetUrlBox";
-            this.TargetUrlBox.Size = new System.Drawing.Size(792, 20);
+            this.TargetUrlBox.Size = new System.Drawing.Size(582, 20);
             this.TargetUrlBox.TabIndex = 1;
             this.TargetUrlBox.Text = "http://";
             this.TargetUrlBox.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
@@ -791,7 +806,7 @@
             this.TaskPropCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.TaskPropCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.TaskPropCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.TaskPropCancel.Location = new System.Drawing.Point(637, 563);
+            this.TaskPropCancel.Location = new System.Drawing.Point(489, 417);
             this.TaskPropCancel.Name = "TaskPropCancel";
             this.TaskPropCancel.Size = new System.Drawing.Size(116, 38);
             this.TaskPropCancel.TabIndex = 12;
@@ -800,33 +815,19 @@
             this.TaskPropCancel.UseVisualStyleBackColor = true;
             this.TaskPropCancel.Click += new System.EventHandler(this.ClosePropertiesPage);
             // 
-            // TaskPropApply
+            // ScriptsPage
             // 
-            this.TaskPropApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.TaskPropApply.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.TaskPropApply.Enabled = false;
-            this.TaskPropApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.TaskPropApply.Location = new System.Drawing.Point(516, 563);
-            this.TaskPropApply.Name = "TaskPropApply";
-            this.TaskPropApply.Size = new System.Drawing.Size(115, 38);
-            this.TaskPropApply.TabIndex = 11;
-            this.TaskPropApply.Text = "Применить";
-            this.TaskPropApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.TaskPropApply.UseVisualStyleBackColor = true;
-            this.TaskPropApply.Click += new System.EventHandler(this.TaskPropApply_Click);
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.splitter1);
-            this.tabPage2.Controls.Add(this.ScriptTabs);
-            this.tabPage2.Controls.Add(this.panel3);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(838, 507);
-            this.tabPage2.TabIndex = 5;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.ScriptsPage.Controls.Add(this.splitter1);
+            this.ScriptsPage.Controls.Add(this.ScriptTabs);
+            this.ScriptsPage.Controls.Add(this.panel3);
+            this.ScriptsPage.Location = new System.Drawing.Point(4, 22);
+            this.ScriptsPage.Name = "ScriptsPage";
+            this.ScriptsPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ScriptsPage.Size = new System.Drawing.Size(628, 478);
+            this.ScriptsPage.TabIndex = 5;
+            this.ScriptsPage.Text = "tabPage2";
+            this.ScriptsPage.UseVisualStyleBackColor = true;
+            this.ScriptsPage.Enter += new System.EventHandler(this.ScriptsPage_Enter);
             // 
             // splitter1
             // 
@@ -834,7 +835,7 @@
             this.splitter1.MinExtra = 351;
             this.splitter1.MinSize = 131;
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 501);
+            this.splitter1.Size = new System.Drawing.Size(3, 472);
             this.splitter1.TabIndex = 16;
             this.splitter1.TabStop = false;
             // 
@@ -847,7 +848,7 @@
             this.ScriptTabs.MinimumSize = new System.Drawing.Size(350, 0);
             this.ScriptTabs.Name = "ScriptTabs";
             this.ScriptTabs.SelectedIndex = 0;
-            this.ScriptTabs.Size = new System.Drawing.Size(613, 501);
+            this.ScriptTabs.Size = new System.Drawing.Size(403, 472);
             this.ScriptTabs.TabIndex = 9;
             // 
             // CodeTab
@@ -859,7 +860,7 @@
             this.CodeTab.Location = new System.Drawing.Point(4, 22);
             this.CodeTab.Name = "CodeTab";
             this.CodeTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CodeTab.Size = new System.Drawing.Size(605, 475);
+            this.CodeTab.Size = new System.Drawing.Size(395, 446);
             this.CodeTab.TabIndex = 0;
             this.CodeTab.Text = "Код";
             this.CodeTab.UseVisualStyleBackColor = true;
@@ -868,37 +869,54 @@
             // 
             this.DeleteScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteScriptButton.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.DeleteScriptButton.Location = new System.Drawing.Point(137, 445);
+            this.DeleteScriptButton.Location = new System.Drawing.Point(137, 416);
             this.DeleteScriptButton.Name = "DeleteScriptButton";
             this.DeleteScriptButton.Size = new System.Drawing.Size(97, 24);
             this.DeleteScriptButton.TabIndex = 7;
             this.DeleteScriptButton.Text = "Удалить";
             this.DeleteScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.DeleteScriptButton.UseVisualStyleBackColor = true;
+            this.DeleteScriptButton.Click += new System.EventHandler(this.DeleteScriptButton_Click);
             // 
             // NewScriptButton
             // 
             this.NewScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.NewScriptButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.NewScriptButton.Location = new System.Drawing.Point(6, 445);
+            this.NewScriptButton.Location = new System.Drawing.Point(6, 416);
             this.NewScriptButton.Name = "NewScriptButton";
             this.NewScriptButton.Size = new System.Drawing.Size(125, 24);
             this.NewScriptButton.TabIndex = 6;
             this.NewScriptButton.Text = "Создать новый";
             this.NewScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.NewScriptButton.UseVisualStyleBackColor = true;
+            this.NewScriptButton.Click += new System.EventHandler(this.NewScriptButton_Click);
             // 
             // SaveScriptButton
             // 
             this.SaveScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveScriptButton.Enabled = false;
             this.SaveScriptButton.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.SaveScriptButton.Location = new System.Drawing.Point(502, 445);
+            this.SaveScriptButton.Location = new System.Drawing.Point(292, 416);
             this.SaveScriptButton.Name = "SaveScriptButton";
             this.SaveScriptButton.Size = new System.Drawing.Size(97, 24);
             this.SaveScriptButton.TabIndex = 5;
             this.SaveScriptButton.Text = "Сохранить";
             this.SaveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.SaveScriptButton.UseVisualStyleBackColor = true;
+            this.SaveScriptButton.Click += new System.EventHandler(this.SaveScriptButton_Click);
+            // 
+            // CodeBox
+            // 
+            this.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CodeBox.Location = new System.Drawing.Point(6, 6);
+            this.CodeBox.Multiline = true;
+            this.CodeBox.Name = "CodeBox";
+            this.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.CodeBox.Size = new System.Drawing.Size(383, 404);
+            this.CodeBox.TabIndex = 1;
+            this.CodeBox.TextChanged += new System.EventHandler(this.CodeEditor_TextChanged);
             // 
             // TestTab
             // 
@@ -911,7 +929,7 @@
             this.TestTab.Location = new System.Drawing.Point(4, 22);
             this.TestTab.Name = "TestTab";
             this.TestTab.Padding = new System.Windows.Forms.Padding(10);
-            this.TestTab.Size = new System.Drawing.Size(605, 475);
+            this.TestTab.Size = new System.Drawing.Size(395, 446);
             this.TestTab.TabIndex = 1;
             this.TestTab.Text = "Проверка";
             this.TestTab.UseVisualStyleBackColor = true;
@@ -923,7 +941,7 @@
             this.TestResultBox.Multiline = true;
             this.TestResultBox.Name = "TestResultBox";
             this.TestResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.TestResultBox.Size = new System.Drawing.Size(585, 284);
+            this.TestResultBox.Size = new System.Drawing.Size(375, 255);
             this.TestResultBox.TabIndex = 42;
             this.TestResultBox.WordWrap = false;
             // 
@@ -935,7 +953,7 @@
             this.panel1.Location = new System.Drawing.Point(10, 145);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(0, 5, 5, 5);
-            this.panel1.Size = new System.Drawing.Size(585, 36);
+            this.panel1.Size = new System.Drawing.Size(375, 36);
             this.panel1.TabIndex = 37;
             // 
             // TestStatusLabel
@@ -967,7 +985,7 @@
             this.splitter3.MinSize = 37;
             this.splitter3.Name = "splitter3";
             this.splitter3.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
-            this.splitter3.Size = new System.Drawing.Size(585, 3);
+            this.splitter3.Size = new System.Drawing.Size(375, 3);
             this.splitter3.TabIndex = 35;
             this.splitter3.TabStop = false;
             // 
@@ -980,11 +998,13 @@
             this.TestMessageBox.Multiline = true;
             this.TestMessageBox.Name = "TestMessageBox";
             this.TestMessageBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TestMessageBox.Size = new System.Drawing.Size(585, 102);
+            this.TestMessageBox.Size = new System.Drawing.Size(375, 102);
             this.TestMessageBox.TabIndex = 40;
             this.TestMessageBox.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]хорошая[/color] погода.\r\nМы пойдем [" +
     "color=#12830a]купаться[/color] на речку.";
             this.TestMessageBox.WordWrap = false;
+            this.TestMessageBox.Enter += new System.EventHandler(this.TestBox_Enter);
+            this.TestMessageBox.Leave += new System.EventHandler(this.TestMessageBox_Leave);
             // 
             // panel2
             // 
@@ -1003,50 +1023,54 @@
             this.TestSubjectBox.ForeColor = System.Drawing.SystemColors.GrayText;
             this.TestSubjectBox.Location = new System.Drawing.Point(10, 10);
             this.TestSubjectBox.Name = "TestSubjectBox";
-            this.TestSubjectBox.Size = new System.Drawing.Size(585, 20);
+            this.TestSubjectBox.Size = new System.Drawing.Size(375, 20);
             this.TestSubjectBox.TabIndex = 33;
             this.TestSubjectBox.Text = "Тема сообщения";
-            this.TestSubjectBox.Enter += new System.EventHandler(this.textBox4_Enter);
+            this.TestSubjectBox.Enter += new System.EventHandler(this.TestBox_Enter);
+            this.TestSubjectBox.Leave += new System.EventHandler(this.TestSubjectBox_Leave);
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.textBox3);
-            this.panel3.Controls.Add(this.ScriptsListBox);
+            this.panel3.Controls.Add(this.ScriptNameBox);
+            this.panel3.Controls.Add(this.AllScriptsListBox);
             this.panel3.Controls.Add(this.ScriptAcceptButton);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel3.Location = new System.Drawing.Point(3, 3);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(219, 501);
+            this.panel3.Size = new System.Drawing.Size(219, 472);
             this.panel3.TabIndex = 7;
             // 
-            // textBox3
+            // ScriptNameBox
             // 
-            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ScriptNameBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox3.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.textBox3.Location = new System.Drawing.Point(3, 6);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(210, 20);
-            this.textBox3.TabIndex = 34;
+            this.ScriptNameBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.ScriptNameBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.ScriptNameBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.ScriptNameBox.Location = new System.Drawing.Point(3, 6);
+            this.ScriptNameBox.Name = "ScriptNameBox";
+            this.ScriptNameBox.Size = new System.Drawing.Size(210, 20);
+            this.ScriptNameBox.TabIndex = 34;
+            this.ScriptNameBox.TextChanged += new System.EventHandler(this.ScriptNameBox_TextChanged);
             // 
-            // ScriptsListBox
+            // AllScriptsListBox
             // 
-            this.ScriptsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.AllScriptsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScriptsListBox.Location = new System.Drawing.Point(3, 29);
-            this.ScriptsListBox.Name = "ScriptsListBox";
-            this.ScriptsListBox.Size = new System.Drawing.Size(210, 407);
-            this.ScriptsListBox.Sorted = true;
-            this.ScriptsListBox.TabIndex = 14;
+            this.AllScriptsListBox.Location = new System.Drawing.Point(3, 29);
+            this.AllScriptsListBox.Name = "AllScriptsListBox";
+            this.AllScriptsListBox.Size = new System.Drawing.Size(210, 381);
+            this.AllScriptsListBox.Sorted = true;
+            this.AllScriptsListBox.TabIndex = 14;
+            this.AllScriptsListBox.SelectedIndexChanged += new System.EventHandler(this.AllScriptsListBox_SelectedIndexChanged);
             // 
             // ScriptAcceptButton
             // 
             this.ScriptAcceptButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.ScriptAcceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.ScriptAcceptButton.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.ScriptAcceptButton.Location = new System.Drawing.Point(51, 453);
+            this.ScriptAcceptButton.Location = new System.Drawing.Point(44, 424);
             this.ScriptAcceptButton.MaximumSize = new System.Drawing.Size(115, 38);
             this.ScriptAcceptButton.MinimumSize = new System.Drawing.Size(115, 38);
             this.ScriptAcceptButton.Name = "ScriptAcceptButton";
@@ -1065,18 +1089,6 @@
             this.ToolTip.AutoPopDelay = 5000;
             this.ToolTip.InitialDelay = 250;
             this.ToolTip.ReshowDelay = 100;
-            // 
-            // CodeBox
-            // 
-            this.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.CodeBox.Location = new System.Drawing.Point(6, 6);
-            this.CodeBox.Multiline = true;
-            this.CodeBox.Name = "CodeBox";
-            this.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.CodeBox.Size = new System.Drawing.Size(593, 433);
-            this.CodeBox.TabIndex = 1;
             // 
             // TasksGuiTable
             // 
@@ -1110,7 +1122,7 @@
             this.TasksGuiTable.RowCount = 2;
             this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.TasksGuiTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.TasksGuiTable.Size = new System.Drawing.Size(581, 309);
+            this.TasksGuiTable.Size = new System.Drawing.Size(582, 280);
             this.TasksGuiTable.TabIndex = 0;
             this.TasksGuiTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
             // 
@@ -1124,7 +1136,7 @@
             this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
             this.GTName.Name = "GTName";
             this.GTName.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.GTName.Size = new System.Drawing.Size(262, 24);
+            this.GTName.Size = new System.Drawing.Size(263, 24);
             this.GTName.TabIndex = 13;
             this.GTName.Text = "Тема/Раздел";
             this.GTName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1133,7 +1145,7 @@
             // 
             this.GTStatus.BackColor = System.Drawing.SystemColors.Control;
             this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatus.Location = new System.Drawing.Point(289, 1);
+            this.GTStatus.Location = new System.Drawing.Point(290, 1);
             this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
             this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
             this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
@@ -1149,7 +1161,7 @@
             this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStart.Enabled = false;
             this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-            this.GTStart.Location = new System.Drawing.Point(506, 1);
+            this.GTStart.Location = new System.Drawing.Point(507, 1);
             this.GTStart.Margin = new System.Windows.Forms.Padding(0);
             this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1179,7 +1191,7 @@
             // GTProgress
             // 
             this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTProgress.Location = new System.Drawing.Point(438, 4);
+            this.GTProgress.Location = new System.Drawing.Point(439, 4);
             this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.Name = "GTProgress";
@@ -1191,7 +1203,7 @@
             this.GTStatusIcon.BackColor = System.Drawing.SystemColors.Control;
             this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            this.GTStatusIcon.Location = new System.Drawing.Point(410, 1);
+            this.GTStatusIcon.Location = new System.Drawing.Point(411, 1);
             this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
             this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1206,7 +1218,7 @@
             this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStop.Enabled = false;
             this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-            this.GTStop.Location = new System.Drawing.Point(531, 1);
+            this.GTStop.Location = new System.Drawing.Point(532, 1);
             this.GTStop.Margin = new System.Windows.Forms.Padding(0);
             this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1221,7 +1233,7 @@
             this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTDelete.Enabled = false;
             this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.GTDelete.Location = new System.Drawing.Point(556, 1);
+            this.GTDelete.Location = new System.Drawing.Point(557, 1);
             this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
             this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1235,7 +1247,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(852, 539);
+            this.ClientSize = new System.Drawing.Size(642, 510);
             this.Controls.Add(this.Tabs);
             this.MinimumSize = new System.Drawing.Size(590, 539);
             this.Name = "MainForm";
@@ -1253,7 +1265,7 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
+            this.ScriptsPage.ResumeLayout(false);
             this.ScriptTabs.ResumeLayout(false);
             this.CodeTab.ResumeLayout(false);
             this.CodeTab.PerformLayout();
@@ -1339,7 +1351,7 @@
         private System.Windows.Forms.Timer TasksUpdater;
         public DBTableLayoutPanel TasksGuiTable;
         public System.Windows.Forms.ToolTip ToolTip;
-        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage ScriptsPage;
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.TabControl ScriptTabs;
         private System.Windows.Forms.TabPage CodeTab;
@@ -1355,11 +1367,12 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.TextBox TestSubjectBox;
         private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.ListBox ScriptsListBox;
+        private System.Windows.Forms.ListBox AllScriptsListBox;
         private System.Windows.Forms.Button ScriptAcceptButton;
         private System.Windows.Forms.TextBox TestResultBox;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox ScriptNameBox;
         private System.Windows.Forms.TextBox CodeBox;
+
 
     }
 }

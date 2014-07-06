@@ -12,7 +12,6 @@ namespace Voron_Poster
 {
     class ForumSMF : Forum
     {
-
         private Uri CaptchaUri;
         private string CurrSessionID;
         private string AnotherID;

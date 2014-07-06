@@ -59,6 +59,7 @@ namespace Voron_Poster
             CodeEditor.Size = CodeBox.Size;
             CodeEditor.Location = CodeBox.Location;
             CodeEditor.Anchor = CodeBox.Anchor;
+            CodeEditor.TextChanged += CodeEditor_TextChanged;
             CodeBox.Dispose();
             CodeTab.Controls.Add(CodeEditor);
         }
@@ -155,7 +156,7 @@ namespace Voron_Poster
         {
             string Domain = new String(Url.Replace("http://", String.Empty)
                 .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
-            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length-1)
+            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
                 return Domain;
             return String.Empty;
         }
@@ -213,17 +214,17 @@ namespace Voron_Poster
                     {
                         string Domain = GetDomain(TargetUrlBox.Text).ToLower();
                         if (MainPageBox.Text.IndexOf("https://") >= 0)
-                        MainPageBox.Text = "https://" + Domain;
+                            MainPageBox.Text = "https://" + Domain;
                         else MainPageBox.Text = "http://" + Domain;
-                            if (Domain != String.Empty) //suggest profile
-                                foreach (Object s in ProfileComboBox.Items)
+                        if (Domain != String.Empty) //suggest profile
+                            foreach (Object s in ProfileComboBox.Items)
+                            {
+                                if ((s as String).ToLower().IndexOf(Domain) >= 0)
                                 {
-                                    if ((s as String).ToLower().IndexOf(Domain) >= 0)
-                                    {
-                                        ProfileComboBox.Text = (s as String);
-                                        break;
-                                    }
+                                    ProfileComboBox.Text = (s as String);
+                                    break;
                                 }
+                            }
                     }
                 }
                 else
@@ -416,7 +417,7 @@ namespace Voron_Poster
                 TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
             else
                 TempProperties = new Forum.TaskBaseProperties();
-            LoadTaskBaseProperties(TempProperties);   
+            LoadTaskBaseProperties(TempProperties);
             TargetUrlBox.Text = CurrTask.TargetUrl;
             TargetUrlBox.Focus();
             //this.AcceptButton = TaskPropApply;
@@ -503,6 +504,8 @@ namespace Voron_Poster
 
         private void DeleteProfileButton_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show("Удалить профиль "+ProfileComboBox.Text+"?", 
+                "Удалить профиль?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             try
             {
                 File.Delete(GetProfilePath(ProfileComboBox.Text));
@@ -700,9 +703,201 @@ namespace Voron_Poster
 
         #endregion
 
-        private void textBox4_Enter(object sender, EventArgs e)
+        string OpenedScript;
+
+        private void TestBox_Enter(object sender, EventArgs e)
         {
-          //  if ()
+            if ((sender as TextBox).ForeColor == SystemColors.GrayText)
+            {
+                (sender as TextBox).Text = String.Empty;
+                (sender as TextBox).ForeColor = SystemColors.WindowText;
+                (sender as TextBox).Font = new Font((sender as TextBox).Font, FontStyle.Regular);
+            }
+        }
+
+        private void TestSubjectBox_Leave(object sender, EventArgs e)
+        {
+            if (TestSubjectBox.Text == String.Empty)
+            {
+                TestSubjectBox.Text = "Тема сообщения";
+                TestSubjectBox.ForeColor = SystemColors.GrayText;
+                TestSubjectBox.Font = new Font(TestSubjectBox.Font, FontStyle.Italic);
+            }
+        }
+
+        private void TestMessageBox_Leave(object sender, EventArgs e)
+        {
+            if (TestMessageBox.Text == String.Empty)
+            {
+                TestMessageBox.Text = "[b]Тестовое сообщение[b]\nСегодня [color=red]" +
+                    "хорошая[/color] погода.\nМы пойдем [color=#12830a]купаться[/color] на речку.";
+                TestMessageBox.ForeColor = SystemColors.GrayText;
+                TestMessageBox.Font = new Font(TestMessageBox.Font, FontStyle.Italic);
+            }
+        }
+
+        private void ScriptsPage_Enter(object sender, EventArgs e)
+        {
+            AllScriptsListBox.Items.Clear();
+            ScriptNameBox.AutoCompleteCustomSource.Clear();
+            Directory.CreateDirectory(".\\Scripts\\");
+            string[] Paths = Directory.GetFiles(".\\Scripts\\", "*.cs");
+            //trying complicated constructions =D
+            Array.ForEach<string>(Paths, s =>
+            {
+                s = s.Replace(".\\Scripts\\", String.Empty).Replace(".cs", String.Empty);
+                AllScriptsListBox.Items.Add(s);
+                ScriptNameBox.AutoCompleteCustomSource.Add(s);
+            });
+            AllScriptsListBox.SelectedIndex = AllScriptsListBox.Items.Count - 1;
+        }
+
+        private void SelectScriptInList()
+        {
+            //if (!ScriptNameBox.Text.Equals((string)AllScriptsListBox.SelectedItem,
+            //        StringComparison.OrdinalIgnoreCase) ^ SaveScriptButton.Enabled)
+            //{
+            int i;
+            //if () i = int.MaxValue;
+            //else
+            if (SaveScriptButton.Enabled) AllScriptsListBox.SelectedIndexChanged -= AllScriptsListBox_SelectedIndexChanged;
+            for (i = 0; i < AllScriptsListBox.Items.Count; i++)
+            {
+                if (ScriptNameBox.Text.Equals((string)AllScriptsListBox.Items[i],
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    AllScriptsListBox.SelectedItem = AllScriptsListBox.Items[i];
+                    break;
+                }
+            }
+            if (i >= AllScriptsListBox.Items.Count)
+            {
+                AllScriptsListBox.SelectedIndexChanged -= AllScriptsListBox_SelectedIndexChanged;
+                AllScriptsListBox.SelectedIndex = -1;
+                if (CodeEditor.Text != String.Empty)
+                {
+                    OpenedScript = (string)AllScriptsListBox.SelectedItem;
+                    if (ScriptNameBox.Text != String.Empty)
+                        SaveScriptButton.Enabled = true;
+                }
+            }
+            AllScriptsListBox.SelectedIndexChanged += AllScriptsListBox_SelectedIndexChanged;
+            //}
+
+        }
+
+        private void ScriptNameBox_TextChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine(ScriptNameBox.Text);
+            if (!ScriptNameBox.Text.Equals((string)AllScriptsListBox.SelectedItem,
+                   StringComparison.OrdinalIgnoreCase) && CodeEditor.Text != String.Empty && ScriptNameBox.Text != String.Empty)
+                SaveScriptButton.Enabled = true;
+            SelectScriptInList();
+        }
+
+        private bool AskSave()
+        {
+            switch (MessageBox.Show("Сохранить изменения?", "Изменения", MessageBoxButtons.YesNoCancel))
+            {
+                case System.Windows.Forms.DialogResult.Yes:
+                    SaveScriptButton_Click(SaveScriptButton, EventArgs.Empty);
+                    break;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    if (OpenedScript == null)
+                    {
+                        AllScriptsListBox.SelectedIndexChanged -= AllScriptsListBox_SelectedIndexChanged;
+                        AllScriptsListBox.SelectedIndex = -1;
+                        AllScriptsListBox.SelectedIndexChanged += AllScriptsListBox_SelectedIndexChanged;
+                    }
+                    else
+                    {
+                        ScriptNameBox.Text = OpenedScript;
+                        SelectScriptInList();
+                    }
+                    return false;
+            }
+            return true;
+        }
+
+        private void AllScriptsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine(AllScriptsListBox.SelectedIndex);
+            if (OpenedScript != (string)AllScriptsListBox.SelectedItem)
+            {
+                if (SaveScriptButton.Enabled && !AskSave()) return;
+                CodeEditor.Text = String.Empty;
+                try
+                {
+                    CodeEditor.Text = System.IO.File.ReadAllText(GetScriptPath((string)AllScriptsListBox.SelectedItem));
+                    OpenedScript = (string)AllScriptsListBox.SelectedItem;
+                }
+                catch (Exception Error)
+                {
+                    MessageBox.Show(Error.Message);
+                }
+            }
+            DeleteScriptButton.Enabled = AllScriptsListBox.SelectedIndex != -1;
+            ScriptNameBox.TextChanged -= ScriptNameBox_TextChanged;
+            ScriptNameBox.Text = (string)AllScriptsListBox.SelectedItem;
+            ScriptNameBox.TextChanged += ScriptNameBox_TextChanged;
+            CodeEditor.TextChanged -= CodeEditor_TextChanged;
+            SaveScriptButton.Enabled = false;
+            CodeEditor.TextChanged += CodeEditor_TextChanged;
+        }
+
+        private void CodeEditor_TextChanged(object sender, EventArgs e)
+        {
+            SaveScriptButton.Enabled = true;
+        }
+        private void SaveScriptButton_Click(object sender, EventArgs e)
+        {
+            SaveScriptButton.Enabled = false;
+            try
+            {
+                if (ScriptNameBox.Text == String.Empty) NewScriptButton_Click(sender, e);
+                System.IO.File.WriteAllText(GetScriptPath(ScriptNameBox.Text), CodeEditor.Text);
+                OpenedScript = ScriptNameBox.Text;
+                ScriptsPage_Enter(sender, e);
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+                SaveScriptButton.Enabled = true;
+            }
+        }
+
+        private string GetScriptPath(string Path)
+        {
+            if (!Path.EndsWith(".cs")) Path += ".cs";
+            if (Path.IndexOf('\\') < 0) Path = "Scripts\\" + Path;
+            return Path;
+        }
+
+        private void NewScriptButton_Click(object sender, EventArgs e)
+        {
+            if (SaveScriptButton.Enabled && !AskSave()) return;
+            CodeEditor.Text = String.Empty;
+            int i = 1;
+            while (File.Exists(GetScriptPath("Script #" + i.ToString()))) i++;
+            ScriptNameBox.Text = "Script #" + i.ToString();
+        }
+
+        private void DeleteScriptButton_Click(object sender, EventArgs e)
+        {
+            DeleteScriptButton.Enabled = false;
+            if (MessageBox.Show(this,"Удалить скрипт " + OpenedScript + "?",
+                "Удалить скрипт?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                try
+                {
+                    File.Delete(GetScriptPath(OpenedScript));
+                    ScriptsPage_Enter(sender, e);
+                        ScriptListBox.SelectedIndex = ScriptListBox.Items.Count - 1;
+                }
+                catch (Exception Error)
+                {
+                    DeleteScriptButton.Enabled = true;
+                    MessageBox.Show(Error.Message);
+                }
         }
 
     }

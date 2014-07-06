@@ -5,8 +5,8 @@
         /// <summary>
         /// Требуется переменная конструктора.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
+        private System.ComponentModel.IContainer components = null;     
+            
         /// <summary>
         /// Освободить все используемые ресурсы.
         /// </summary>
@@ -26,8 +26,10 @@
         /// Обязательный метод для поддержки конструктора - не изменяйте
         /// содержимое данного метода при помощи редактора кода.
         /// </summary>
+        /// 
+        
         private void InitializeComponent()
-        {
+        {          
             this.components = new System.ComponentModel.Container();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -85,27 +87,28 @@
             this.label2 = new System.Windows.Forms.Label();
             this.TargetUrlBox = new System.Windows.Forms.TextBox();
             this.TaskPropCancel = new System.Windows.Forms.Button();
-            this.ScriptsPage = new System.Windows.Forms.TabPage();
-            this.splitter1 = new System.Windows.Forms.Splitter();
-            this.ScriptTabs = new System.Windows.Forms.TabControl();
-            this.CodeTab = new System.Windows.Forms.TabPage();
-            this.DeleteScriptButton = new System.Windows.Forms.Button();
-            this.NewScriptButton = new System.Windows.Forms.Button();
-            this.SaveScriptButton = new System.Windows.Forms.Button();
-            this.CodeBox = new System.Windows.Forms.TextBox();
-            this.TestTab = new System.Windows.Forms.TabPage();
-            this.TestResultBox = new System.Windows.Forms.TextBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.TestStatusLabel = new System.Windows.Forms.Label();
-            this.RunTestButton = new System.Windows.Forms.Button();
-            this.splitter3 = new System.Windows.Forms.Splitter();
-            this.TestMessageBox = new System.Windows.Forms.TextBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.TestSubjectBox = new System.Windows.Forms.TextBox();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.ScriptNameBox = new System.Windows.Forms.TextBox();
-            this.AllScriptsListBox = new System.Windows.Forms.ListBox();
-            this.ScriptAcceptButton = new System.Windows.Forms.Button();
+            this.Scripts.Tab = new System.Windows.Forms.TabPage();
+            this.Scripts.TestSplitter = new System.Windows.Forms.Splitter();
+            this.Scripts.Tabs = new System.Windows.Forms.TabControl();
+            this.Scripts.CodeTab = new System.Windows.Forms.TabPage();
+            this.Scripts.DeleteButton = new System.Windows.Forms.Button();
+            this.Scripts.NewButton = new System.Windows.Forms.Button();
+            this.Scripts.SaveButton = new System.Windows.Forms.Button();
+            this.Scripts.CodeBox = new System.Windows.Forms.TextBox();
+            this.Scripts.TestTab = new System.Windows.Forms.TabPage();
+            this.Scripts.ResultBox = new System.Windows.Forms.TextBox();
+            this.Scripts.ListPanel = new System.Windows.Forms.Panel();
+            this.Scripts.StatusLabel = new System.Windows.Forms.Label();
+            this.Scripts.RunButton = new System.Windows.Forms.Button();
+            this.Scripts.ListSplitter = new System.Windows.Forms.Splitter();
+            this.Scripts.MessageBox = new System.Windows.Forms.TextBox();
+            this.Scripts.TestPanel1 = new System.Windows.Forms.Panel();
+            this.Scripts.SubjectBox = new System.Windows.Forms.TextBox();
+            this.Scripts.TestPanel2 = new System.Windows.Forms.Panel();
+            this.Scripts.NameBox = new System.Windows.Forms.TextBox();
+            this.Scripts.ListBox = new System.Windows.Forms.ListBox();
+            this.Scripts.AcceptButton = new System.Windows.Forms.Button();
+            this.Scripts.CodeEditor = new ScintillaNET.Scintilla(); 
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.TasksGuiTable = new Voron_Poster.DBTableLayoutPanel();
@@ -125,30 +128,16 @@
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.ScriptsPage.SuspendLayout();
-            this.ScriptTabs.SuspendLayout();
-            this.CodeTab.SuspendLayout();
-            this.TestTab.SuspendLayout();
-            this.panel1.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.Scripts.Tab.SuspendLayout();
+            this.Scripts.Tabs.SuspendLayout();
+            this.Scripts.CodeTab.SuspendLayout();
+            this.Scripts.TestTab.SuspendLayout();
+            this.Scripts.ListPanel.SuspendLayout();
+            this.Scripts.TestPanel1.SuspendLayout();
+            this.Scripts.TestPanel2.SuspendLayout();
             this.TasksGuiTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.SuspendLayout();
-            // 
-            // Tabs
-            // 
-            this.Tabs.Controls.Add(this.tabPage1);
-            this.Tabs.Controls.Add(this.tabPage4);
-            this.Tabs.Controls.Add(this.TasksPage);
-            this.Tabs.Controls.Add(this.TaskPropertiesPage);
-            this.Tabs.Controls.Add(this.ScriptsPage);
-            this.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Tabs.Location = new System.Drawing.Point(3, 3);
-            this.Tabs.Name = "Tabs";
-            this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(636, 504);
-            this.Tabs.TabIndex = 8;
-            this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
             // tabPage1
             // 
@@ -262,7 +251,7 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.button4);
             this.groupBox4.Controls.Add(this.button5);
@@ -340,7 +329,7 @@
             // 
             // NewUrlComboBox
             // 
-            this.NewUrlComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.NewUrlComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NewUrlComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.NewUrlComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
@@ -361,7 +350,7 @@
             // 
             // NewUrlTextBox
             // 
-            this.NewUrlTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.NewUrlTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NewUrlTextBox.Location = new System.Drawing.Point(23, 129);
             this.NewUrlTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 13, 3);
@@ -420,7 +409,7 @@
             // 
             // ForumEngineComboBox
             // 
-            this.ForumEngineComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ForumEngineComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ForumEngineComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.ForumEngineComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
@@ -443,8 +432,8 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.ScriptMoveDownButton);
             this.groupBox3.Controls.Add(this.ScriptMoveUpButton);
@@ -505,17 +494,17 @@
             // 
             // ScriptListBox
             // 
-            this.ScriptListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.ScriptListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptListBox.Location = new System.Drawing.Point(13, 19);
             this.ScriptListBox.Name = "ScriptListBox";
             this.ScriptListBox.Size = new System.Drawing.Size(281, 199);
             this.ScriptListBox.TabIndex = 3;
-            // 
+             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.TryLoginButton);
             this.groupBox2.Controls.Add(this.label6);
@@ -559,7 +548,7 @@
             // 
             // textBox8
             // 
-            this.textBox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox8.Location = new System.Drawing.Point(11, 58);
             this.textBox8.Name = "textBox8";
@@ -616,7 +605,7 @@
             // 
             // PasswordBox
             // 
-            this.PasswordBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.PasswordBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PasswordBox.Enabled = false;
             this.PasswordBox.Location = new System.Drawing.Point(11, 159);
@@ -637,7 +626,7 @@
             // 
             // UsernameBox
             // 
-            this.UsernameBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.UsernameBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.UsernameBox.Enabled = false;
             this.UsernameBox.Location = new System.Drawing.Point(11, 120);
@@ -663,7 +652,7 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.BrowseProfileButton);
             this.groupBox1.Controls.Add(this.DeleteProfileButton);
@@ -745,7 +734,7 @@
             // 
             // ProfileComboBox
             // 
-            this.ProfileComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ProfileComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProfileComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.ProfileComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
@@ -768,7 +757,7 @@
             // 
             // MainPageBox
             // 
-            this.MainPageBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.MainPageBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MainPageBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.MainPageBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
@@ -790,7 +779,7 @@
             // 
             // TargetUrlBox
             // 
-            this.TargetUrlBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.TargetUrlBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TargetUrlBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.TargetUrlBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
@@ -815,270 +804,270 @@
             this.TaskPropCancel.UseVisualStyleBackColor = true;
             this.TaskPropCancel.Click += new System.EventHandler(this.ClosePropertiesPage);
             // 
-            // ScriptsPage
+            // Scripts
             // 
-            this.ScriptsPage.Controls.Add(this.splitter1);
-            this.ScriptsPage.Controls.Add(this.ScriptTabs);
-            this.ScriptsPage.Controls.Add(this.panel3);
-            this.ScriptsPage.Location = new System.Drawing.Point(4, 22);
-            this.ScriptsPage.Name = "ScriptsPage";
-            this.ScriptsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ScriptsPage.Size = new System.Drawing.Size(628, 478);
-            this.ScriptsPage.TabIndex = 5;
-            this.ScriptsPage.Text = "tabPage2";
-            this.ScriptsPage.UseVisualStyleBackColor = true;
-            this.ScriptsPage.Enter += new System.EventHandler(this.ScriptsPage_Enter);
+            this.Scripts.Tab.Controls.Add(this.Scripts.ListSplitter);
+            this.Scripts.Tab.Controls.Add(this.Scripts.Tabs);
+            this.Scripts.Tab.Controls.Add(this.Scripts.ListPanel);
+            this.Scripts.Tab.Location = new System.Drawing.Point(4, 22);
+            this.Scripts.Tab.Name = "ScriptsPage";
+            this.Scripts.Tab.Padding = new System.Windows.Forms.Padding(3);
+            this.Scripts.Tab.Size = new System.Drawing.Size(628, 478);
+            this.Scripts.Tab.TabIndex = 5;
+            this.Scripts.Tab.Text = "tabPage2";
+            this.Scripts.Tab.UseVisualStyleBackColor = true;
+            this.Scripts.Tab.Enter += new System.EventHandler(this.Scripts.ScriptsPage_Enter);
             // 
-            // splitter1
+            // ListSplitter
             // 
-            this.splitter1.Location = new System.Drawing.Point(222, 3);
-            this.splitter1.MinExtra = 351;
-            this.splitter1.MinSize = 131;
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 472);
-            this.splitter1.TabIndex = 16;
-            this.splitter1.TabStop = false;
+            this.Scripts.ListSplitter.Location = new System.Drawing.Point(222, 3);
+            this.Scripts.ListSplitter.MinExtra = 351;
+            this.Scripts.ListSplitter.MinSize = 131;
+            this.Scripts.ListSplitter.Name = "ListSplitter";
+            this.Scripts.ListSplitter.Size = new System.Drawing.Size(3, 472);
+            this.Scripts.ListSplitter.TabIndex = 16;
+            this.Scripts.ListSplitter.TabStop = false;
             // 
-            // ScriptTabs
+            // Tabs
             // 
-            this.ScriptTabs.Controls.Add(this.CodeTab);
-            this.ScriptTabs.Controls.Add(this.TestTab);
-            this.ScriptTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ScriptTabs.Location = new System.Drawing.Point(222, 3);
-            this.ScriptTabs.MinimumSize = new System.Drawing.Size(350, 0);
-            this.ScriptTabs.Name = "ScriptTabs";
-            this.ScriptTabs.SelectedIndex = 0;
-            this.ScriptTabs.Size = new System.Drawing.Size(403, 472);
-            this.ScriptTabs.TabIndex = 9;
+            this.Scripts.Tabs.Controls.Add(this.Scripts.CodeTab);
+            this.Scripts.Tabs.Controls.Add(this.Scripts.TestTab);
+            this.Scripts.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Scripts.Tabs.Location = new System.Drawing.Point(222, 3);
+            this.Scripts.Tabs.MinimumSize = new System.Drawing.Size(350, 0);
+            this.Scripts.Tabs.Name = "ScriptTabs";
+            this.Scripts.Tabs.SelectedIndex = 0;
+            this.Scripts.Tabs.Size = new System.Drawing.Size(403, 472);
+            this.Scripts.Tabs.TabIndex = 9;
             // 
             // CodeTab
             // 
-            this.CodeTab.Controls.Add(this.DeleteScriptButton);
-            this.CodeTab.Controls.Add(this.NewScriptButton);
-            this.CodeTab.Controls.Add(this.SaveScriptButton);
-            this.CodeTab.Controls.Add(this.CodeBox);
-            this.CodeTab.Location = new System.Drawing.Point(4, 22);
-            this.CodeTab.Name = "CodeTab";
-            this.CodeTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CodeTab.Size = new System.Drawing.Size(395, 446);
-            this.CodeTab.TabIndex = 0;
-            this.CodeTab.Text = "Код";
-            this.CodeTab.UseVisualStyleBackColor = true;
+            this.Scripts.CodeTab.Controls.Add(this.Scripts.DeleteButton);
+            this.Scripts.CodeTab.Controls.Add(this.Scripts.NewButton);
+            this.Scripts.CodeTab.Controls.Add(this.Scripts.SaveButton);
+            this.Scripts.CodeTab.Controls.Add(this.Scripts.CodeBox);
+            this.Scripts.CodeTab.Location = new System.Drawing.Point(4, 22);
+            this.Scripts.CodeTab.Name = "CodeTab";
+            this.Scripts.CodeTab.Padding = new System.Windows.Forms.Padding(3);
+            this.Scripts.CodeTab.Size = new System.Drawing.Size(395, 446);
+            this.Scripts.CodeTab.TabIndex = 0;
+            this.Scripts.CodeTab.Text = "Код";
+            this.Scripts.CodeTab.UseVisualStyleBackColor = true;
             // 
-            // DeleteScriptButton
+            // DeleteButton
             // 
-            this.DeleteScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteScriptButton.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.DeleteScriptButton.Location = new System.Drawing.Point(137, 416);
-            this.DeleteScriptButton.Name = "DeleteScriptButton";
-            this.DeleteScriptButton.Size = new System.Drawing.Size(97, 24);
-            this.DeleteScriptButton.TabIndex = 7;
-            this.DeleteScriptButton.Text = "Удалить";
-            this.DeleteScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.DeleteScriptButton.UseVisualStyleBackColor = true;
-            this.DeleteScriptButton.Click += new System.EventHandler(this.DeleteScriptButton_Click);
+            this.Scripts.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Scripts.DeleteButton.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.Scripts.DeleteButton.Location = new System.Drawing.Point(137, 416);
+            this.Scripts.DeleteButton.Name = "DeleteButton";
+            this.Scripts.DeleteButton.Size = new System.Drawing.Size(97, 24);
+            this.Scripts.DeleteButton.TabIndex = 7;
+            this.Scripts.DeleteButton.Text = "Удалить";
+            this.Scripts.DeleteButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.Scripts.DeleteButton.UseVisualStyleBackColor = true;
+            this.Scripts.DeleteButton.Click += new System.EventHandler(this.Scripts.DeleteButton_Click);
             // 
-            // NewScriptButton
+            // NewButton
             // 
-            this.NewScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NewScriptButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.NewScriptButton.Location = new System.Drawing.Point(6, 416);
-            this.NewScriptButton.Name = "NewScriptButton";
-            this.NewScriptButton.Size = new System.Drawing.Size(125, 24);
-            this.NewScriptButton.TabIndex = 6;
-            this.NewScriptButton.Text = "Создать новый";
-            this.NewScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.NewScriptButton.UseVisualStyleBackColor = true;
-            this.NewScriptButton.Click += new System.EventHandler(this.NewScriptButton_Click);
+            this.Scripts.NewButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Scripts.NewButton.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.Scripts.NewButton.Location = new System.Drawing.Point(6, 416);
+            this.Scripts.NewButton.Name = "NewButton";
+            this.Scripts.NewButton.Size = new System.Drawing.Size(125, 24);
+            this.Scripts.NewButton.TabIndex = 6;
+            this.Scripts.NewButton.Text = "Создать новый";
+            this.Scripts.NewButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.Scripts.NewButton.UseVisualStyleBackColor = true;
+            this.Scripts.NewButton.Click += new System.EventHandler(this.Scripts.NewScriptButton_Click);
             // 
-            // SaveScriptButton
+            // SaveButton
             // 
-            this.SaveScriptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveScriptButton.Enabled = false;
-            this.SaveScriptButton.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.SaveScriptButton.Location = new System.Drawing.Point(292, 416);
-            this.SaveScriptButton.Name = "SaveScriptButton";
-            this.SaveScriptButton.Size = new System.Drawing.Size(97, 24);
-            this.SaveScriptButton.TabIndex = 5;
-            this.SaveScriptButton.Text = "Сохранить";
-            this.SaveScriptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.SaveScriptButton.UseVisualStyleBackColor = true;
-            this.SaveScriptButton.Click += new System.EventHandler(this.SaveScriptButton_Click);
+            this.Scripts.SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Scripts.SaveButton.Enabled = false;
+            this.Scripts.SaveButton.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.Scripts.SaveButton.Location = new System.Drawing.Point(292, 416);
+            this.Scripts.SaveButton.Name = "SaveButton";
+            this.Scripts.SaveButton.Size = new System.Drawing.Size(97, 24);
+            this.Scripts.SaveButton.TabIndex = 5;
+            this.Scripts.SaveButton.Text = "Сохранить";
+            this.Scripts.SaveButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.Scripts.SaveButton.UseVisualStyleBackColor = true;
+            this.Scripts.SaveButton.Click += new System.EventHandler(this.Scripts.SaveButton_Click);
             // 
-            // CodeBox
+            // Scripts.CodeBox
             // 
-            this.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.Scripts.CodeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.CodeBox.Location = new System.Drawing.Point(6, 6);
-            this.CodeBox.Multiline = true;
-            this.CodeBox.Name = "CodeBox";
-            this.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.CodeBox.Size = new System.Drawing.Size(383, 404);
-            this.CodeBox.TabIndex = 1;
-            this.CodeBox.TextChanged += new System.EventHandler(this.CodeEditor_TextChanged);
+            this.Scripts.CodeBox.Location = new System.Drawing.Point(6, 6);
+            this.Scripts.CodeBox.Multiline = true;
+            this.Scripts.CodeBox.Name = "CodeBox";
+            this.Scripts.CodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.Scripts.CodeBox.Size = new System.Drawing.Size(383, 404);
+            this.Scripts.CodeBox.TabIndex = 1;
+            this.Scripts.CodeBox.TextChanged += new System.EventHandler(this.Scripts.CodeEditor_TextChanged);
             // 
             // TestTab
             // 
-            this.TestTab.Controls.Add(this.TestResultBox);
-            this.TestTab.Controls.Add(this.panel1);
-            this.TestTab.Controls.Add(this.splitter3);
-            this.TestTab.Controls.Add(this.TestMessageBox);
-            this.TestTab.Controls.Add(this.panel2);
-            this.TestTab.Controls.Add(this.TestSubjectBox);
-            this.TestTab.Location = new System.Drawing.Point(4, 22);
-            this.TestTab.Name = "TestTab";
-            this.TestTab.Padding = new System.Windows.Forms.Padding(10);
-            this.TestTab.Size = new System.Drawing.Size(395, 446);
-            this.TestTab.TabIndex = 1;
-            this.TestTab.Text = "Проверка";
-            this.TestTab.UseVisualStyleBackColor = true;
+            this.Scripts.TestTab.Controls.Add(this.Scripts.ResultBox);
+            this.Scripts.TestTab.Controls.Add(this.Scripts.ListPanel);
+            this.Scripts.TestTab.Controls.Add(this.Scripts.TestSplitter);
+            this.Scripts.TestTab.Controls.Add(this.Scripts.MessageBox);
+            this.Scripts.TestTab.Controls.Add(this.Scripts.TestPanel1);
+            this.Scripts.TestTab.Controls.Add(this.Scripts.SubjectBox);
+            this.Scripts.TestTab.Location = new System.Drawing.Point(4, 22);
+            this.Scripts.TestTab.Name = "TestTab";
+            this.Scripts.TestTab.Padding = new System.Windows.Forms.Padding(10);
+            this.Scripts.TestTab.Size = new System.Drawing.Size(395, 446);
+            this.Scripts.TestTab.TabIndex = 1;
+            this.Scripts.TestTab.Text = "Проверка";
+            this.Scripts.TestTab.UseVisualStyleBackColor = true;
             // 
             // TestResultBox
             // 
-            this.TestResultBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.TestResultBox.Location = new System.Drawing.Point(10, 181);
-            this.TestResultBox.Multiline = true;
-            this.TestResultBox.Name = "TestResultBox";
-            this.TestResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.TestResultBox.Size = new System.Drawing.Size(375, 255);
-            this.TestResultBox.TabIndex = 42;
-            this.TestResultBox.WordWrap = false;
+            this.Scripts.ResultBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Scripts.ResultBox.Location = new System.Drawing.Point(10, 181);
+            this.Scripts.ResultBox.Multiline = true;
+            this.Scripts.ResultBox.Name = "ResultBox";
+            this.Scripts.ResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
+            this.Scripts.ResultBox.Size = new System.Drawing.Size(375, 255);
+            this.Scripts.ResultBox.TabIndex = 42;
+            this.Scripts.ResultBox.WordWrap = false;
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.TestStatusLabel);
-            this.panel1.Controls.Add(this.RunTestButton);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(10, 145);
-            this.panel1.Name = "panel1";
-            this.panel1.Padding = new System.Windows.Forms.Padding(0, 5, 5, 5);
-            this.panel1.Size = new System.Drawing.Size(375, 36);
-            this.panel1.TabIndex = 37;
+            this.Scripts.ListPanel.Controls.Add(this.Scripts.StatusLabel);
+            this.Scripts.ListPanel.Controls.Add(this.Scripts.RunButton);
+            this.Scripts.ListPanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.Scripts.ListPanel.Location = new System.Drawing.Point(10, 145);
+            this.Scripts.ListPanel.Name = "ListPanel";
+            this.Scripts.ListPanel.Padding = new System.Windows.Forms.Padding(0, 5, 5, 5);
+            this.Scripts.ListPanel.Size = new System.Drawing.Size(375, 36);
+            this.Scripts.ListPanel.TabIndex = 37;
             // 
             // TestStatusLabel
             // 
-            this.TestStatusLabel.AutoSize = true;
-            this.TestStatusLabel.Location = new System.Drawing.Point(105, 11);
-            this.TestStatusLabel.Name = "TestStatusLabel";
-            this.TestStatusLabel.Size = new System.Drawing.Size(0, 13);
-            this.TestStatusLabel.TabIndex = 33;
+            this.Scripts.StatusLabel.AutoSize = true;
+            this.Scripts.StatusLabel.Location = new System.Drawing.Point(105, 11);
+            this.Scripts.StatusLabel.Name = "StatusLabel";
+            this.Scripts.StatusLabel.Size = new System.Drawing.Size(0, 13);
+            this.Scripts.StatusLabel.TabIndex = 33;
             // 
             // RunTestButton
             // 
-            this.RunTestButton.Dock = System.Windows.Forms.DockStyle.Left;
-            this.RunTestButton.Image = global::Voron_Poster.Properties.Resources.Execute_10024;
-            this.RunTestButton.Location = new System.Drawing.Point(0, 5);
-            this.RunTestButton.MaximumSize = new System.Drawing.Size(99, 25);
-            this.RunTestButton.Name = "RunTestButton";
-            this.RunTestButton.Size = new System.Drawing.Size(99, 25);
-            this.RunTestButton.TabIndex = 32;
-            this.RunTestButton.Text = "Запустить";
-            this.RunTestButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.RunTestButton.UseVisualStyleBackColor = true;
+            this.Scripts.RunButton.Dock = System.Windows.Forms.DockStyle.Left;
+            this.Scripts.RunButton.Image = global::Voron_Poster.Properties.Resources.Execute_10024;
+            this.Scripts.RunButton.Location = new System.Drawing.Point(0, 5);
+            this.Scripts.RunButton.MaximumSize = new System.Drawing.Size(99, 25);
+            this.Scripts.RunButton.Name = "RunButton";
+            this.Scripts.RunButton.Size = new System.Drawing.Size(99, 25);
+            this.Scripts.RunButton.TabIndex = 32;
+            this.Scripts.RunButton.Text = "Запустить";
+            this.Scripts.RunButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.Scripts.RunButton.UseVisualStyleBackColor = true;
             // 
             // splitter3
             // 
-            this.splitter3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.splitter3.Location = new System.Drawing.Point(10, 142);
-            this.splitter3.Margin = new System.Windows.Forms.Padding(3, 30, 3, 3);
-            this.splitter3.MinSize = 37;
-            this.splitter3.Name = "splitter3";
-            this.splitter3.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
-            this.splitter3.Size = new System.Drawing.Size(375, 3);
-            this.splitter3.TabIndex = 35;
-            this.splitter3.TabStop = false;
+            this.Scripts.TestSplitter.Dock = System.Windows.Forms.DockStyle.Top;
+            this.Scripts.TestSplitter.Location = new System.Drawing.Point(10, 142);
+            this.Scripts.TestSplitter.Margin = new System.Windows.Forms.Padding(3, 30, 3, 3);
+            this.Scripts.TestSplitter.MinSize = 37;
+            this.Scripts.TestSplitter.Name = "TestSplitter";
+            this.Scripts.TestSplitter.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
+            this.Scripts.TestSplitter.Size = new System.Drawing.Size(375, 3);
+            this.Scripts.TestSplitter.TabIndex = 35;
+            this.Scripts.TestSplitter.TabStop = false;
             // 
-            // TestMessageBox
+            // Scripts.MessageBox
             // 
-            this.TestMessageBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.TestMessageBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.TestMessageBox.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.TestMessageBox.Location = new System.Drawing.Point(10, 40);
-            this.TestMessageBox.Multiline = true;
-            this.TestMessageBox.Name = "TestMessageBox";
-            this.TestMessageBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TestMessageBox.Size = new System.Drawing.Size(375, 102);
-            this.TestMessageBox.TabIndex = 40;
-            this.TestMessageBox.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]хорошая[/color] погода.\r\nМы пойдем [" +
+            this.Scripts.MessageBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.Scripts.MessageBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Scripts.MessageBox.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.Scripts.MessageBox.Location = new System.Drawing.Point(10, 40);
+            this.Scripts.MessageBox.Multiline = true;
+            this.Scripts.MessageBox.Name = "MessageBox";
+            this.Scripts.MessageBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.Scripts.MessageBox.Size = new System.Drawing.Size(375, 102);
+            this.Scripts.MessageBox.TabIndex = 40;
+            this.Scripts.MessageBox.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]хорошая[/color] погода.\r\nМы пойдем [" +
     "color=#12830a]купаться[/color] на речку.";
-            this.TestMessageBox.WordWrap = false;
-            this.TestMessageBox.Enter += new System.EventHandler(this.TestBox_Enter);
-            this.TestMessageBox.Leave += new System.EventHandler(this.TestMessageBox_Leave);
+            this.Scripts.MessageBox.WordWrap = false;
+            this.Scripts.MessageBox.Enter += new System.EventHandler(this.Scripts.TestBox_Enter);
+            this.Scripts.MessageBox.Leave += new System.EventHandler(this.Scripts.MessageBox_Leave);
             // 
             // panel2
             // 
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel2.Location = new System.Drawing.Point(10, 30);
-            this.panel2.MaximumSize = new System.Drawing.Size(0, 10);
-            this.panel2.MinimumSize = new System.Drawing.Size(0, 10);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(0, 10);
-            this.panel2.TabIndex = 39;
+            this.Scripts.TestPanel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.Scripts.TestPanel1.Location = new System.Drawing.Point(10, 30);
+            this.Scripts.TestPanel1.MaximumSize = new System.Drawing.Size(0, 10);
+            this.Scripts.TestPanel1.MinimumSize = new System.Drawing.Size(0, 10);
+            this.Scripts.TestPanel1.Name = "TestPanel1";
+            this.Scripts.TestPanel1.Size = new System.Drawing.Size(0, 10);
+            this.Scripts.TestPanel1.TabIndex = 39;
             // 
-            // TestSubjectBox
+            // Scripts.SubjectBox
             // 
-            this.TestSubjectBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.TestSubjectBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.TestSubjectBox.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.TestSubjectBox.Location = new System.Drawing.Point(10, 10);
-            this.TestSubjectBox.Name = "TestSubjectBox";
-            this.TestSubjectBox.Size = new System.Drawing.Size(375, 20);
-            this.TestSubjectBox.TabIndex = 33;
-            this.TestSubjectBox.Text = "Тема сообщения";
-            this.TestSubjectBox.Enter += new System.EventHandler(this.TestBox_Enter);
-            this.TestSubjectBox.Leave += new System.EventHandler(this.TestSubjectBox_Leave);
+            this.Scripts.SubjectBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.Scripts.SubjectBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Scripts.SubjectBox.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.Scripts.SubjectBox.Location = new System.Drawing.Point(10, 10);
+            this.Scripts.SubjectBox.Name = "SubjectBox";
+            this.Scripts.SubjectBox.Size = new System.Drawing.Size(375, 20);
+            this.Scripts.SubjectBox.TabIndex = 33;
+            this.Scripts.SubjectBox.Text = "Тема сообщения";
+            this.Scripts.SubjectBox.Enter += new System.EventHandler(this.Scripts.TestBox_Enter);
+            this.Scripts.SubjectBox.Leave += new System.EventHandler(this.Scripts.SubjectBox_Leave);
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.ScriptNameBox);
-            this.panel3.Controls.Add(this.AllScriptsListBox);
-            this.panel3.Controls.Add(this.ScriptAcceptButton);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panel3.Location = new System.Drawing.Point(3, 3);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(219, 472);
-            this.panel3.TabIndex = 7;
+            this.Scripts.TestPanel2.Controls.Add(this.Scripts.NameBox);
+            this.Scripts.TestPanel2.Controls.Add(this.Scripts.ListBox);
+            this.Scripts.TestPanel2.Controls.Add(this.Scripts.AcceptButton);
+            this.Scripts.TestPanel2.Dock = System.Windows.Forms.DockStyle.Left;
+            this.Scripts.TestPanel2.Location = new System.Drawing.Point(3, 3);
+            this.Scripts.TestPanel2.Name = "TestPanel2";
+            this.Scripts.TestPanel2.Size = new System.Drawing.Size(219, 472);
+            this.Scripts.TestPanel2.TabIndex = 7;
             // 
-            // ScriptNameBox
+            // NameBox
             // 
-            this.ScriptNameBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.Scripts.NameBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScriptNameBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
-            this.ScriptNameBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.ScriptNameBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.ScriptNameBox.Location = new System.Drawing.Point(3, 6);
-            this.ScriptNameBox.Name = "ScriptNameBox";
-            this.ScriptNameBox.Size = new System.Drawing.Size(210, 20);
-            this.ScriptNameBox.TabIndex = 34;
-            this.ScriptNameBox.TextChanged += new System.EventHandler(this.ScriptNameBox_TextChanged);
+            this.Scripts.NameBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.Scripts.NameBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.Scripts.NameBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Scripts.NameBox.Location = new System.Drawing.Point(3, 6);
+            this.Scripts.NameBox.Name = "NameBox";
+            this.Scripts.NameBox.Size = new System.Drawing.Size(210, 20);
+            this.Scripts.NameBox.TabIndex = 34;
+            this.Scripts.NameBox.TextChanged += new System.EventHandler(this.Scripts.NameBox_TextChanged);
             // 
-            // AllScriptsListBox
+            // ListBox
             // 
-            this.AllScriptsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.Scripts.ListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AllScriptsListBox.Location = new System.Drawing.Point(3, 29);
-            this.AllScriptsListBox.Name = "AllScriptsListBox";
-            this.AllScriptsListBox.Size = new System.Drawing.Size(210, 381);
-            this.AllScriptsListBox.Sorted = true;
-            this.AllScriptsListBox.TabIndex = 14;
-            this.AllScriptsListBox.SelectedIndexChanged += new System.EventHandler(this.AllScriptsListBox_SelectedIndexChanged);
+            this.Scripts.ListBox.Location = new System.Drawing.Point(3, 29);
+            this.Scripts.ListBox.Name = "ListBox";
+            this.Scripts.ListBox.Size = new System.Drawing.Size(210, 381);
+            this.Scripts.ListBox.Sorted = true;
+            this.Scripts.ListBox.TabIndex = 14;
+            this.Scripts.ListBox.SelectedIndexChanged += new System.EventHandler(this.Scripts.ListBox_SelectedIndexChanged);
             // 
-            // ScriptAcceptButton
+            // AcceptButton
             // 
-            this.ScriptAcceptButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.ScriptAcceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.ScriptAcceptButton.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.ScriptAcceptButton.Location = new System.Drawing.Point(44, 424);
-            this.ScriptAcceptButton.MaximumSize = new System.Drawing.Size(115, 38);
-            this.ScriptAcceptButton.MinimumSize = new System.Drawing.Size(115, 38);
-            this.ScriptAcceptButton.Name = "ScriptAcceptButton";
-            this.ScriptAcceptButton.Size = new System.Drawing.Size(115, 38);
-            this.ScriptAcceptButton.TabIndex = 13;
-            this.ScriptAcceptButton.Text = "Выбрать";
-            this.ScriptAcceptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.ScriptAcceptButton.UseVisualStyleBackColor = true;
+            this.Scripts.AcceptButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.Scripts.AcceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Scripts.AcceptButton.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.Scripts.AcceptButton.Location = new System.Drawing.Point(44, 424);
+            this.Scripts.AcceptButton.MaximumSize = new System.Drawing.Size(115, 38);
+            this.Scripts.AcceptButton.MinimumSize = new System.Drawing.Size(115, 38);
+            this.Scripts.AcceptButton.Name = "AcceptButton";
+            this.Scripts.AcceptButton.Size = new System.Drawing.Size(115, 38);
+            this.Scripts.AcceptButton.TabIndex = 13;
+            this.Scripts.AcceptButton.Text = "Выбрать";
+            this.Scripts.AcceptButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.Scripts.AcceptButton.UseVisualStyleBackColor = true;
             // 
             // TasksUpdater
             // 
@@ -1092,8 +1081,8 @@
             // 
             // TasksGuiTable
             // 
-            this.TasksGuiTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.TasksGuiTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TasksGuiTable.AutoScroll = true;
             this.TasksGuiTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -1242,6 +1231,40 @@
             this.GTDelete.TabIndex = 10;
             this.GTDelete.UseVisualStyleBackColor = true;
             this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
+            //
+            // Scintilla
+            //
+            this.Scripts.CodeEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Scripts.CodeEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
+            this.Scripts.CodeEditor.Location = new System.Drawing.Point(0, 0);
+            this.Scripts.CodeEditor.Margins.Margin1.AutoToggleMarkerNumber = 0;
+            this.Scripts.CodeEditor.Margins.Margin1.IsClickable = true;
+            this.Scripts.CodeEditor.Margins.Margin2.Width = 16;
+            this.Scripts.CodeEditor.Name = "_scintilla";
+            this.Scripts.CodeEditor.TabIndex = 0;
+            this.Scripts.CodeEditor.ConfigurationManager.Language = "cs";
+            this.Scripts.CodeEditor.Indentation.SmartIndentType = ScintillaNET.SmartIndent.CPP;
+            this.Scripts.CodeEditor.Size = this.Scripts.CodeBox.Size;
+            this.Scripts.CodeEditor.Location = this.Scripts.CodeBox.Location;
+            this.Scripts.CodeEditor.Anchor = this.Scripts.CodeBox.Anchor;
+            this.Scripts.CodeEditor.TextChanged += this.Scripts.CodeEditor_TextChanged;
+            this.Scripts.CodeBox.Dispose();
+            this.Scripts.CodeTab.Controls.Add(this.Scripts.CodeEditor);
+            // 
+            // Tabs
+            // 
+            this.Tabs.Controls.Add(Scripts.Tab);
+            this.Tabs.Controls.Add(this.tabPage1);
+            this.Tabs.Controls.Add(this.tabPage4);
+            this.Tabs.Controls.Add(this.TasksPage);
+            this.Tabs.Controls.Add(this.TaskPropertiesPage);
+            this.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Tabs.Location = new System.Drawing.Point(3, 3);
+            this.Tabs.Name = "Tabs";
+            this.Tabs.SelectedIndex = 0;
+            this.Tabs.Size = new System.Drawing.Size(636, 504);
+            this.Tabs.TabIndex = 8;
+            this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
             // MainForm
             // 
@@ -1265,16 +1288,18 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
-            this.ScriptsPage.ResumeLayout(false);
-            this.ScriptTabs.ResumeLayout(false);
-            this.CodeTab.ResumeLayout(false);
-            this.CodeTab.PerformLayout();
-            this.TestTab.ResumeLayout(false);
-            this.TestTab.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
+            this.Scripts.Tab.ResumeLayout(false);
+            this.Scripts.Tabs.ResumeLayout(false);
+            this.Scripts.CodeTab.ResumeLayout(false);
+            this.Scripts.CodeTab.PerformLayout();
+            this.Scripts.TestTab.ResumeLayout(false);
+            this.Scripts.TestTab.PerformLayout();
+            this.Scripts.ListPanel.ResumeLayout(false);
+            this.Scripts.ListPanel.PerformLayout();
+            this.Scripts.TestPanel1.ResumeLayout(false);
+            this.Scripts.TestPanel1.PerformLayout();
+            this.Scripts.TestPanel2.ResumeLayout(false);
+            this.Scripts.TestPanel2.PerformLayout();
             this.TasksGuiTable.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.ResumeLayout(false);
@@ -1283,6 +1308,7 @@
 
         #endregion
 
+        private global::Voron_Poster.ScriptsControls Scripts;
         private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Button button3;
@@ -1351,28 +1377,8 @@
         private System.Windows.Forms.Timer TasksUpdater;
         public DBTableLayoutPanel TasksGuiTable;
         public System.Windows.Forms.ToolTip ToolTip;
-        private System.Windows.Forms.TabPage ScriptsPage;
-        private System.Windows.Forms.Splitter splitter1;
-        private System.Windows.Forms.TabControl ScriptTabs;
-        private System.Windows.Forms.TabPage CodeTab;
-        private System.Windows.Forms.Button DeleteScriptButton;
-        private System.Windows.Forms.Button NewScriptButton;
-        private System.Windows.Forms.Button SaveScriptButton;
-        private System.Windows.Forms.TabPage TestTab;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label TestStatusLabel;
-        private System.Windows.Forms.Button RunTestButton;
-        private System.Windows.Forms.Splitter splitter3;
-        private System.Windows.Forms.TextBox TestMessageBox;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.TextBox TestSubjectBox;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.ListBox AllScriptsListBox;
-        private System.Windows.Forms.Button ScriptAcceptButton;
-        private System.Windows.Forms.TextBox TestResultBox;
-        private System.Windows.Forms.TextBox ScriptNameBox;
-        private System.Windows.Forms.TextBox CodeBox;
 
+  
 
     }
 }

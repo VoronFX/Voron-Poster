@@ -108,13 +108,13 @@
             this.scriptsSpacePanel = new System.Windows.Forms.Panel();
             this.scriptsSubject = new System.Windows.Forms.TextBox();
             this.scriptsListPanel = new System.Windows.Forms.Panel();
+            this.scriptsAccept = new System.Windows.Forms.Button();
+            this.scriptsCancel = new System.Windows.Forms.Button();
             this.scriptsName = new System.Windows.Forms.TextBox();
             this.scriptsList = new System.Windows.Forms.ListBox();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
-            this.scriptsCancel = new System.Windows.Forms.Button();
-            this.scriptsAccept = new System.Windows.Forms.Button();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -124,6 +124,7 @@
             this.GTStatusIcon = new System.Windows.Forms.PictureBox();
             this.GTStop = new System.Windows.Forms.Button();
             this.GTDelete = new System.Windows.Forms.Button();
+            this.propScriptsEdit = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage4.SuspendLayout();
@@ -156,7 +157,7 @@
             this.Tabs.Location = new System.Drawing.Point(3, 3);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(599, 530);
+            this.Tabs.Size = new System.Drawing.Size(599, 494);
             this.Tabs.TabIndex = 8;
             this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
@@ -173,7 +174,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(591, 504);
+            this.tabPage1.Size = new System.Drawing.Size(591, 468);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -252,7 +253,7 @@
             this.tabPage4.Controls.Add(this.tasksProfileGroup);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(591, 504);
+            this.tabPage4.Size = new System.Drawing.Size(591, 468);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Сообщение";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -370,7 +371,7 @@
             this.tasksTab.Location = new System.Drawing.Point(4, 22);
             this.tasksTab.Name = "tasksTab";
             this.tasksTab.Padding = new System.Windows.Forms.Padding(20, 15, 20, 20);
-            this.tasksTab.Size = new System.Drawing.Size(591, 504);
+            this.tasksTab.Size = new System.Drawing.Size(591, 468);
             this.tasksTab.TabIndex = 2;
             this.tasksTab.Text = "Публикация";
             this.tasksTab.UseVisualStyleBackColor = true;
@@ -468,7 +469,7 @@
             this.propTab.Location = new System.Drawing.Point(4, 22);
             this.propTab.Name = "propTab";
             this.propTab.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
-            this.propTab.Size = new System.Drawing.Size(591, 504);
+            this.propTab.Size = new System.Drawing.Size(591, 468);
             this.propTab.TabIndex = 4;
             this.propTab.Text = "Параметры задачи";
             this.propTab.UseVisualStyleBackColor = true;
@@ -485,7 +486,7 @@
             this.propEngineDetect.Text = "Определить";
             this.propEngineDetect.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propEngineDetect.UseVisualStyleBackColor = true;
-            this.propEngineDetect.Click += new System.EventHandler(this.DetectEngineButton_Click);
+            this.propEngineDetect.Click += new System.EventHandler(this.propEngineDetect_Click);
             // 
             // propEngine
             // 
@@ -499,7 +500,7 @@
             this.propEngine.Name = "propEngine";
             this.propEngine.Size = new System.Drawing.Size(98, 21);
             this.propEngine.TabIndex = 7;
-            this.propEngine.SelectedIndexChanged += new System.EventHandler(this.ForumEngineComboBox_SelectedIndexChanged);
+            this.propEngine.SelectedIndexChanged += new System.EventHandler(this.propEngine_SelectedIndexChanged);
             // 
             // propEngineLabel
             // 
@@ -515,6 +516,7 @@
             this.propScriptsGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsGroup.Controls.Add(this.propScriptsEdit);
             this.propScriptsGroup.Controls.Add(this.propScriptsDown);
             this.propScriptsGroup.Controls.Add(this.propScriptsUp);
             this.propScriptsGroup.Controls.Add(this.propScriptsAdd);
@@ -523,7 +525,7 @@
             this.propScriptsGroup.Location = new System.Drawing.Point(23, 222);
             this.propScriptsGroup.Name = "propScriptsGroup";
             this.propScriptsGroup.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
-            this.propScriptsGroup.Size = new System.Drawing.Size(302, 259);
+            this.propScriptsGroup.Size = new System.Drawing.Size(302, 223);
             this.propScriptsGroup.TabIndex = 9;
             this.propScriptsGroup.TabStop = false;
             this.propScriptsGroup.Text = "Скрипты предобработки";
@@ -538,6 +540,7 @@
             this.propScriptsDown.TabIndex = 5;
             this.propScriptsDown.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propScriptsDown.UseVisualStyleBackColor = true;
+            this.propScriptsDown.Click += new System.EventHandler(this.propScriptsDown_Click);
             // 
             // propScriptsUp
             // 
@@ -549,28 +552,31 @@
             this.propScriptsUp.TabIndex = 4;
             this.propScriptsUp.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propScriptsUp.UseVisualStyleBackColor = true;
+            this.propScriptsUp.Click += new System.EventHandler(this.propScriptsUp_Click);
             // 
             // propScriptsAdd
             // 
             this.propScriptsAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.propScriptsAdd.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.propScriptsAdd.Location = new System.Drawing.Point(263, 185);
+            this.propScriptsAdd.Location = new System.Drawing.Point(263, 125);
             this.propScriptsAdd.Name = "propScriptsAdd";
             this.propScriptsAdd.Size = new System.Drawing.Size(26, 26);
             this.propScriptsAdd.TabIndex = 0;
             this.propScriptsAdd.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propScriptsAdd.UseVisualStyleBackColor = true;
+            this.propScriptsAdd.Click += new System.EventHandler(this.propScriptsAdd_Click);
             // 
             // propScriptsRemove
             // 
             this.propScriptsRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.propScriptsRemove.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
-            this.propScriptsRemove.Location = new System.Drawing.Point(263, 216);
+            this.propScriptsRemove.Location = new System.Drawing.Point(263, 189);
             this.propScriptsRemove.Name = "propScriptsRemove";
             this.propScriptsRemove.Size = new System.Drawing.Size(26, 26);
             this.propScriptsRemove.TabIndex = 1;
             this.propScriptsRemove.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propScriptsRemove.UseVisualStyleBackColor = true;
+            this.propScriptsRemove.Click += new System.EventHandler(this.propScriptsRemove_Click);
             // 
             // propScriptsList
             // 
@@ -579,8 +585,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.propScriptsList.Location = new System.Drawing.Point(13, 19);
             this.propScriptsList.Name = "propScriptsList";
-            this.propScriptsList.Size = new System.Drawing.Size(244, 225);
+            this.propScriptsList.Size = new System.Drawing.Size(244, 186);
             this.propScriptsList.TabIndex = 3;
+            this.propScriptsList.SelectedIndexChanged += new System.EventHandler(this.propScriptsList_SelectedIndexChanged);
             // 
             // propAuthGroup
             // 
@@ -598,7 +605,7 @@
             this.propAuthGroup.Controls.Add(this.propUsername);
             this.propAuthGroup.Location = new System.Drawing.Point(331, 151);
             this.propAuthGroup.Name = "propAuthGroup";
-            this.propAuthGroup.Size = new System.Drawing.Size(237, 286);
+            this.propAuthGroup.Size = new System.Drawing.Size(237, 250);
             this.propAuthGroup.TabIndex = 10;
             this.propAuthGroup.TabStop = false;
             this.propAuthGroup.Text = "Авторизация";
@@ -615,7 +622,7 @@
             this.propAuthTryLogin.Text = "Пробная авторизация";
             this.propAuthTryLogin.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propAuthTryLogin.UseVisualStyleBackColor = true;
-            this.propAuthTryLogin.Click += new System.EventHandler(this.TryLoginButton_Click);
+            this.propAuthTryLogin.Click += new System.EventHandler(this.propAuthTryLogin_Click);
             // 
             // propAuthGlobalLabel
             // 
@@ -646,7 +653,7 @@
             this.propAuthLocal.TabIndex = 3;
             this.propAuthLocal.Text = "Отдельную учетную запись:";
             this.propAuthLocal.UseVisualStyleBackColor = true;
-            this.propAuthLocal.CheckedChanged += new System.EventHandler(this.GlobalAccountCheckbox_CheckedChanged);
+            this.propAuthLocal.CheckedChanged += new System.EventHandler(this.propAuthGlobal_CheckedChanged);
             // 
             // propAuthGlobal
             // 
@@ -659,7 +666,7 @@
             this.propAuthGlobal.TabStop = true;
             this.propAuthGlobal.Text = "Глобальную учетную запись:";
             this.propAuthGlobal.UseVisualStyleBackColor = true;
-            this.propAuthGlobal.CheckedChanged += new System.EventHandler(this.GlobalAccountCheckbox_CheckedChanged);
+            this.propAuthGlobal.CheckedChanged += new System.EventHandler(this.propAuthGlobal_CheckedChanged);
             // 
             // propAuthShowPassword
             // 
@@ -672,7 +679,7 @@
             this.propAuthShowPassword.Tag = "";
             this.propAuthShowPassword.Text = "Показывать пароль";
             this.propAuthShowPassword.UseVisualStyleBackColor = true;
-            this.propAuthShowPassword.CheckedChanged += new System.EventHandler(this.ShowPassword_CheckedChanged);
+            this.propAuthShowPassword.CheckedChanged += new System.EventHandler(this.propAuthShowPassword_CheckedChanged);
             // 
             // label5
             // 
@@ -693,7 +700,7 @@
             this.propPassword.Size = new System.Drawing.Size(209, 20);
             this.propPassword.TabIndex = 7;
             this.propPassword.UseSystemPasswordChar = true;
-            this.propPassword.TextChanged += new System.EventHandler(this.PasswordBox_TextChanged);
+            this.propPassword.TextChanged += new System.EventHandler(this.propAuthPassword_TextChanged);
             // 
             // label4
             // 
@@ -713,7 +720,7 @@
             this.propUsername.Name = "propUsername";
             this.propUsername.Size = new System.Drawing.Size(209, 20);
             this.propUsername.TabIndex = 5;
-            this.propUsername.TextChanged += new System.EventHandler(this.UsernameBox_TextChanged);
+            this.propUsername.TextChanged += new System.EventHandler(this.propAuthUsername_TextChanged);
             // 
             // propProfilesGroup
             // 
@@ -831,7 +838,7 @@
             this.propMainUrl.Size = new System.Drawing.Size(302, 20);
             this.propMainUrl.TabIndex = 5;
             this.propMainUrl.Text = "http://";
-            this.propMainUrl.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
+            this.propMainUrl.TextChanged += new System.EventHandler(this.propUrl_TextChanged);
             // 
             // propTargetLabel
             // 
@@ -853,7 +860,7 @@
             this.propTargetUrl.Size = new System.Drawing.Size(545, 20);
             this.propTargetUrl.TabIndex = 1;
             this.propTargetUrl.Text = "http://";
-            this.propTargetUrl.TextChanged += new System.EventHandler(this.UrlBox_TextChanged);
+            this.propTargetUrl.TextChanged += new System.EventHandler(this.propUrl_TextChanged);
             // 
             // propApply
             // 
@@ -861,21 +868,21 @@
             this.propApply.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.propApply.Enabled = false;
             this.propApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.propApply.Location = new System.Drawing.Point(331, 443);
+            this.propApply.Location = new System.Drawing.Point(331, 407);
             this.propApply.Name = "propApply";
             this.propApply.Size = new System.Drawing.Size(115, 38);
             this.propApply.TabIndex = 11;
             this.propApply.Text = "Применить";
             this.propApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.propApply.UseVisualStyleBackColor = true;
-            this.propApply.Click += new System.EventHandler(this.TaskPropApply_Click);
+            this.propApply.Click += new System.EventHandler(this.propApply_Click);
             // 
             // propCancel
             // 
             this.propCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.propCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.propCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.propCancel.Location = new System.Drawing.Point(452, 443);
+            this.propCancel.Location = new System.Drawing.Point(455, 407);
             this.propCancel.Name = "propCancel";
             this.propCancel.Size = new System.Drawing.Size(116, 38);
             this.propCancel.TabIndex = 12;
@@ -892,7 +899,7 @@
             this.scriptsTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsTab.Name = "scriptsTab";
             this.scriptsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.scriptsTab.Size = new System.Drawing.Size(591, 504);
+            this.scriptsTab.Size = new System.Drawing.Size(591, 468);
             this.scriptsTab.TabIndex = 5;
             this.scriptsTab.Text = "Скрипты";
             this.scriptsTab.UseVisualStyleBackColor = true;
@@ -904,7 +911,7 @@
             this.splitter1.MinExtra = 351;
             this.splitter1.MinSize = 131;
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 498);
+            this.splitter1.Size = new System.Drawing.Size(3, 462);
             this.splitter1.TabIndex = 16;
             this.splitter1.TabStop = false;
             // 
@@ -917,7 +924,7 @@
             this.scriptsTabs.MinimumSize = new System.Drawing.Size(350, 0);
             this.scriptsTabs.Name = "scriptsTabs";
             this.scriptsTabs.SelectedIndex = 0;
-            this.scriptsTabs.Size = new System.Drawing.Size(436, 498);
+            this.scriptsTabs.Size = new System.Drawing.Size(436, 462);
             this.scriptsTabs.TabIndex = 9;
             // 
             // scriptsCodeTab
@@ -929,7 +936,7 @@
             this.scriptsCodeTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsCodeTab.Name = "scriptsCodeTab";
             this.scriptsCodeTab.Padding = new System.Windows.Forms.Padding(3);
-            this.scriptsCodeTab.Size = new System.Drawing.Size(428, 472);
+            this.scriptsCodeTab.Size = new System.Drawing.Size(428, 436);
             this.scriptsCodeTab.TabIndex = 0;
             this.scriptsCodeTab.Text = "Код";
             this.scriptsCodeTab.UseVisualStyleBackColor = true;
@@ -938,7 +945,7 @@
             // 
             this.scriptsDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.scriptsDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.scriptsDelete.Location = new System.Drawing.Point(137, 442);
+            this.scriptsDelete.Location = new System.Drawing.Point(137, 406);
             this.scriptsDelete.Name = "scriptsDelete";
             this.scriptsDelete.Size = new System.Drawing.Size(97, 24);
             this.scriptsDelete.TabIndex = 7;
@@ -951,7 +958,7 @@
             // 
             this.scriptsNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.scriptsNew.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.scriptsNew.Location = new System.Drawing.Point(6, 442);
+            this.scriptsNew.Location = new System.Drawing.Point(6, 406);
             this.scriptsNew.Name = "scriptsNew";
             this.scriptsNew.Size = new System.Drawing.Size(125, 24);
             this.scriptsNew.TabIndex = 6;
@@ -965,7 +972,7 @@
             this.scriptsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scriptsSave.Enabled = false;
             this.scriptsSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.scriptsSave.Location = new System.Drawing.Point(325, 442);
+            this.scriptsSave.Location = new System.Drawing.Point(325, 406);
             this.scriptsSave.Name = "scriptsSave";
             this.scriptsSave.Size = new System.Drawing.Size(97, 24);
             this.scriptsSave.TabIndex = 5;
@@ -983,7 +990,7 @@
             this.scriptsCodeBox.Multiline = true;
             this.scriptsCodeBox.Name = "scriptsCodeBox";
             this.scriptsCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.scriptsCodeBox.Size = new System.Drawing.Size(416, 430);
+            this.scriptsCodeBox.Size = new System.Drawing.Size(416, 394);
             this.scriptsCodeBox.TabIndex = 1;
             this.scriptsCodeBox.TextChanged += new System.EventHandler(this.scriptsEditor_TextChanged);
             // 
@@ -998,7 +1005,7 @@
             this.scriptsTestTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsTestTab.Name = "scriptsTestTab";
             this.scriptsTestTab.Padding = new System.Windows.Forms.Padding(10);
-            this.scriptsTestTab.Size = new System.Drawing.Size(428, 472);
+            this.scriptsTestTab.Size = new System.Drawing.Size(428, 436);
             this.scriptsTestTab.TabIndex = 1;
             this.scriptsTestTab.Text = "Проверка";
             this.scriptsTestTab.UseVisualStyleBackColor = true;
@@ -1010,7 +1017,7 @@
             this.scriptsResult.Multiline = true;
             this.scriptsResult.Name = "scriptsResult";
             this.scriptsResult.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.scriptsResult.Size = new System.Drawing.Size(408, 281);
+            this.scriptsResult.Size = new System.Drawing.Size(408, 245);
             this.scriptsResult.TabIndex = 42;
             this.scriptsResult.WordWrap = false;
             // 
@@ -1084,7 +1091,7 @@
             this.scriptsSpacePanel.MaximumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.MinimumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.Name = "scriptsSpacePanel";
-            this.scriptsSpacePanel.Size = new System.Drawing.Size(0, 10);
+            this.scriptsSpacePanel.Size = new System.Drawing.Size(408, 10);
             this.scriptsSpacePanel.TabIndex = 39;
             // 
             // scriptsSubject
@@ -1111,8 +1118,37 @@
             this.scriptsListPanel.Location = new System.Drawing.Point(3, 3);
             this.scriptsListPanel.MinimumSize = new System.Drawing.Size(149, 0);
             this.scriptsListPanel.Name = "scriptsListPanel";
-            this.scriptsListPanel.Size = new System.Drawing.Size(149, 498);
+            this.scriptsListPanel.Size = new System.Drawing.Size(149, 462);
             this.scriptsListPanel.TabIndex = 7;
+            // 
+            // scriptsAccept
+            // 
+            this.scriptsAccept.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.scriptsAccept.Enabled = false;
+            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.scriptsAccept.Location = new System.Drawing.Point(3, 420);
+            this.scriptsAccept.Name = "scriptsAccept";
+            this.scriptsAccept.Size = new System.Drawing.Size(96, 38);
+            this.scriptsAccept.TabIndex = 16;
+            this.scriptsAccept.Text = "Выбрать";
+            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsAccept.UseVisualStyleBackColor = true;
+            this.scriptsAccept.Click += new System.EventHandler(this.scriptsAccept_Click);
+            // 
+            // scriptsCancel
+            // 
+            this.scriptsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.scriptsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.scriptsCancel.Location = new System.Drawing.Point(105, 420);
+            this.scriptsCancel.Name = "scriptsCancel";
+            this.scriptsCancel.Size = new System.Drawing.Size(38, 38);
+            this.scriptsCancel.TabIndex = 14;
+            this.scriptsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsCancel.UseVisualStyleBackColor = true;
+            this.scriptsCancel.Click += new System.EventHandler(this.scriptsCancel_Click);
             // 
             // scriptsName
             // 
@@ -1134,7 +1170,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.scriptsList.Location = new System.Drawing.Point(3, 29);
             this.scriptsList.Name = "scriptsList";
-            this.scriptsList.Size = new System.Drawing.Size(140, 420);
+            this.scriptsList.Size = new System.Drawing.Size(140, 381);
             this.scriptsList.Sorted = true;
             this.scriptsList.TabIndex = 2;
             this.scriptsList.SelectedIndexChanged += new System.EventHandler(this.scriptsList_SelectedIndexChanged);
@@ -1153,34 +1189,6 @@
             // 
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
-            // 
-            // scriptsCancel
-            // 
-            this.scriptsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.scriptsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.scriptsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.scriptsCancel.Location = new System.Drawing.Point(105, 456);
-            this.scriptsCancel.Name = "scriptsCancel";
-            this.scriptsCancel.Size = new System.Drawing.Size(38, 38);
-            this.scriptsCancel.TabIndex = 14;
-            this.scriptsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsCancel.UseVisualStyleBackColor = true;
-            this.scriptsCancel.Click += new System.EventHandler(this.scriptsCancel_Click);
-            // 
-            // scriptsAccept
-            // 
-            this.scriptsAccept.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.scriptsAccept.Enabled = false;
-            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.scriptsAccept.Location = new System.Drawing.Point(3, 456);
-            this.scriptsAccept.Name = "scriptsAccept";
-            this.scriptsAccept.Size = new System.Drawing.Size(96, 38);
-            this.scriptsAccept.TabIndex = 16;
-            this.scriptsAccept.Text = "Выбрать";
-            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsAccept.UseVisualStyleBackColor = true;
             // 
             // tasksTable
             // 
@@ -1214,7 +1222,7 @@
             this.tasksTable.RowCount = 2;
             this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tasksTable.Size = new System.Drawing.Size(545, 375);
+            this.tasksTable.Size = new System.Drawing.Size(545, 339);
             this.tasksTable.TabIndex = 0;
             this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
             // 
@@ -1335,11 +1343,23 @@
             this.GTDelete.UseVisualStyleBackColor = true;
             this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
             // 
+            // propScriptsEdit
+            // 
+            this.propScriptsEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsEdit.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
+            this.propScriptsEdit.Location = new System.Drawing.Point(263, 157);
+            this.propScriptsEdit.Name = "propScriptsEdit";
+            this.propScriptsEdit.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsEdit.TabIndex = 6;
+            this.propScriptsEdit.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsEdit.UseVisualStyleBackColor = true;
+            this.propScriptsEdit.Click += new System.EventHandler(this.propScriptsEdit_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(605, 536);
+            this.ClientSize = new System.Drawing.Size(605, 500);
             this.Controls.Add(this.Tabs);
             this.MinimumSize = new System.Drawing.Size(590, 539);
             this.Name = "MainForm";
@@ -1474,6 +1494,7 @@
         private System.Windows.Forms.Timer scriptsTestAbortTimer;
         private System.Windows.Forms.Button scriptsCancel;
         private System.Windows.Forms.Button scriptsAccept;
+        private System.Windows.Forms.Button propScriptsEdit;
 
 
     }

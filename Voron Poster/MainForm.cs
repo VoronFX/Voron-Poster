@@ -20,6 +20,7 @@ using Roslyn.Scripting;
 using System.Reflection;
 using ScintillaNET;
 
+
 namespace Voron_Poster
 {
 
@@ -41,6 +42,7 @@ namespace Voron_Poster
 
             }
             Tabs.TabPages.Remove(propTab);
+            Tabs.TabPages.Remove(scriptsTab);
             propEngine.Items.AddRange(Enum.GetNames(typeof(Forum.ForumEngine)));
             propEngine.Items.RemoveAt(0);
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
@@ -124,8 +126,6 @@ namespace Voron_Poster
             //RenderHtml(f.h);
         }
 
-
-
         #region Tasks Page
 
         private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
@@ -137,455 +137,6 @@ namespace Voron_Poster
                 g.FillRectangle(SystemBrushes.Control, r);
             }
         }
-
-        #endregion
-
-        #region Task Properties Page
-
-
-        string TempTargetUrl;
-        bool DetectMainPage;
-        bool RecheckBlock;
-        bool PropertiesActivity;
-        bool PropertiesLoginActivity;
-        Task PropertiesActivityTask;
-        Forum TempForum;
-        Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
-        CancellationTokenSource StopProperties;
-
-        private string GetDomain(string Url)
-        {
-            string Domain = new String(Url.Replace("http://", String.Empty)
-                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
-            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
-                return Domain;
-            return String.Empty;
-        }
-
-        private void GlobalAccountCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            TempProperties.UseLocalAccount = propAuthLocal.Checked;
-            ResetIcon(sender, e);
-            ValidateProperties();
-        }
-
-        private void ShowPassword_CheckedChanged(object sender, EventArgs e)
-        {
-            propPassword.UseSystemPasswordChar = !propAuthShowPassword.Checked;
-        }
-
-        private void UrlBox_TextChanged(object sender, EventArgs e)
-        {
-            string Text = (sender as TextBox).Text;
-            int CaretPos = (sender as TextBox).SelectionStart;
-            if (!RecheckBlock)
-            {
-                RecheckBlock = true;
-                Text = new String(Text.Skip(Math.Max(Text.LastIndexOf("https://"), Text.LastIndexOf("http://"))).ToArray());
-                if (CaretPos > 0 && CaretPos < 9 && CaretPos < Text.Length &&
-                    !(CaretPos == 5 && Text.ToLower()[4] == 's')) Text = Text.Remove(CaretPos - 1, 1);
-                int i = 0;
-                int https = 0;
-                while (i < Text.Length && i < 4 && Text.ToLower()[i] == "http"[i]) i++;
-                if (i == 4 && Text.Length > 4 && Text.ToLower()[4] == 's') { i = 5; https = 1; }
-                if (i == 4 + https) while (i < Text.Length && i < 7 + https && Text.ToLower()[i] == "://"[i - 4 - https]) i++;
-                // Text = Text.Remove(0, i).Replace("http://",String.Empty).Replace("https://", String.Empty);
-                if (https == 1)
-                    Text = "https://" + Text.Remove(0, i);
-                else Text = "http://" + Text.Remove(0, i);
-                (sender as TextBox).Text = Text;
-                CaretPos += 7 + https;
-                RecheckBlock = false;
-            }
-            //if (!(sender as TextBox).Text.StartsWith("http://".Substring(0,Math.Min(, StringComparison.OrdinalIgnoreCase)
-            //    && !(sender as TextBox).Text.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    CaretPos += 7;
-            //    (sender as TextBox).Text = "http://" + (sender as TextBox).Text;
-            //}
-            Uri Url;
-            if (Uri.TryCreate((sender as TextBox).Text, UriKind.Absolute, out Url)
-                && (Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps))
-            {
-                (sender as TextBox).ForeColor = Color.Black;
-                if (sender == propTargetUrl)
-                {
-                    TempTargetUrl = (sender as TextBox).Text;
-                    if (DetectMainPage)
-                    {
-                        string Domain = GetDomain(propTargetUrl.Text).ToLower();
-                        if (propMainUrl.Text.IndexOf("https://") >= 0)
-                            propMainUrl.Text = "https://" + Domain;
-                        else propMainUrl.Text = "http://" + Domain;
-                        if (Domain != String.Empty) //suggest profile
-                            foreach (Object s in propProfiles.Items)
-                            {
-                                if ((s as String).ToLower().IndexOf(Domain) >= 0)
-                                {
-                                    propProfiles.Text = (s as String);
-                                    break;
-                                }
-                            }
-                    }
-                }
-                else
-                    TempProperties.ForumMainPage = (sender as TextBox).Text;
-            }
-            else (sender as TextBox).ForeColor = Color.Red;
-            (sender as TextBox).SelectionStart = CaretPos;
-            if (sender == propMainUrl && propMainUrl.Focused) DetectMainPage = false;
-            if (propMainUrl.Text == "http://" || propMainUrl.Text == "https://") DetectMainPage = true;
-            ResetIcon(sender, e);
-            ValidateProperties();
-        }
-
-        private void UsernameBox_TextChanged(object sender, EventArgs e)
-        {
-            TempProperties.Username = propUsername.Text;
-            ResetIcon(sender, e);
-        }
-
-        private void PasswordBox_TextChanged(object sender, EventArgs e)
-        {
-            TempProperties.Password = propPassword.Text;
-            ResetIcon(sender, e);
-        }
-
-        private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (propEngine.SelectedIndex >= 0)
-                TempProperties.Engine = (Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
-            (string)propEngine.SelectedItem);
-            ValidateProperties();
-            ResetIcon(sender, e);
-        }
-
-        //private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    TryLoginButton.Enabled = MainPageBox.ForeColor == Color.Black;
-        //}
-
-        private async void DetectEngineButton_Click(object sender, EventArgs e)
-        {
-            PropertiesActivity = true;
-            ValidateProperties();
-            propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
-            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
-            HttpClient Client = new HttpClient();
-            StopProperties = new CancellationTokenSource();
-            Client.Timeout = new TimeSpan(0, 0, 10);
-            bool Error = false;
-            try
-            {
-                Task<Forum.ForumEngine> DetectTask = Forum.DetectForumEngine(TempProperties.ForumMainPage, Client, StopProperties.Token);
-                PropertiesActivityTask = DetectTask;
-                Detected = await DetectTask;
-            }
-            catch
-            {
-                Error = true;
-                propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
-            }
-            finally
-            {
-                Client.Dispose();
-            }
-            if (!Error)
-            {
-                if (Detected == Forum.ForumEngine.Unknown)
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Question);
-                else
-                {
-                    TempProperties.Engine = Detected;
-                    propEngine.SelectedIndex =
-                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.ForumEngine), Detected));
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
-                }
-            }
-            else propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
-            PropertiesActivity = false;
-            ValidateProperties();
-        }
-
-        private async void TryLoginButton_Click(object sender, EventArgs e)
-        {
-            PropertiesActivity = true;
-            PropertiesLoginActivity = true;
-            ValidateProperties();
-            propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
-            TempForum = Forum.New(TempProperties.Engine);
-            StopProperties = new CancellationTokenSource();
-            TempForum.Properties = TempProperties;
-            TempForum.Cancel = StopProperties;
-            TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
-            try
-            {
-                Task<bool> LoginTask = TempForum.Login();
-                PropertiesActivityTask = LoginTask;
-                if (await LoginTask)
-                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
-                else
-                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
-            }
-            catch { propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error); }
-            TempForum = null;
-            PropertiesActivity = false;
-            PropertiesLoginActivity = false;
-            ValidateProperties();
-        }
-
-        private void ResetIcon(object sender, EventArgs e)
-        {
-            if (!PropertiesActivity)
-            {
-                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Login);
-                if (sender == propMainUrl || sender == propEngine)
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Gear);
-            }
-        }
-
-        private void ValidateProperties()
-        {
-            //if (PropertiesActivity == null)
-            //{
-            //    if (File.Exists(GetProfilePath(ProfileComboBox.Text)))
-            //    {
-            //        DeleteProfileButton.Enabled = false;
-            //        LoadProfileButton.Enabled = false;
-            //    }
-            //    //   MainPageBox.Enabled
-            //    //       ForumEngineComboBox.Enabled
-            //}
-            propAuthGlobal.Enabled = !PropertiesLoginActivity;
-            propAuthLocal.Enabled = !PropertiesLoginActivity;
-            propUsername.Enabled = propAuthLocal.Checked &&
-                propAuthLocal.Enabled && !PropertiesLoginActivity;
-            propPassword.Enabled = propUsername.Enabled;
-            propAuthShowPassword.Enabled = propUsername.Enabled;
-
-            propProfileDelete.Enabled =
-                File.Exists(GetProfilePath(propProfiles.Text)) &&
-                !PropertiesActivity;
-            propProfileLoad.Enabled = propProfileDelete.Enabled;
-
-            propMainUrl.Enabled = !PropertiesActivity;
-            propEngine.Enabled = !PropertiesActivity;
-            propEngineDetect.Enabled =
-                propMainUrl.ForeColor == Color.Black &&
-                !PropertiesActivity;
-            propAuthTryLogin.Enabled =
-                propMainUrl.ForeColor == Color.Black &&
-                propEngine.SelectedIndex >= 0 &&
-                !PropertiesActivity;
-
-            propApply.Enabled =
-                propTargetUrl.ForeColor == Color.Black &&
-                propMainUrl.ForeColor == Color.Black &&
-                propEngine.SelectedIndex >= 0 &&
-                !PropertiesActivity;
-            propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Save);
-            //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
-            //    TryLoginButton.Enabled;
-        }
-
-        private void TaskPropApply_Click(object sender, EventArgs e)
-        {
-            propApply.Enabled = false;
-            TempForum = Forum.New(TempProperties.Engine);
-            TempForum.Properties = TempProperties;
-            CurrTask.Forum = TempForum;
-            CurrTask.TargetUrl = TempTargetUrl;
-            TempForum = null;
-            CurrTask.New = false;
-            ClosePropertiesPage(sender, e);
-            propApply.Enabled = true;
-        }
-
-        public void ShowPropertiesPage()
-        {
-            //
-            Tabs.TabPages.Add(propTab);
-            //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
-            Tabs.SelectTab(propTab);
-            for (int i = 0; i < Tabs.TabPages.Count; i++)
-                Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == propTab;
-            //  TaskPropertiesPage.Enabled = true;
-            // this.ResumeLayout();
-            ProfileComboBox_Enter(propProfiles, EventArgs.Empty);
-            PropertiesActivity = false;
-            PropertiesLoginActivity = false;
-            if (CurrTask.Forum != null)
-                TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
-            else
-                TempProperties = new Forum.TaskBaseProperties();
-            LoadTaskBaseProperties(TempProperties);
-            propTargetUrl.Text = CurrTask.TargetUrl;
-            propTargetUrl.Focus();
-            //this.AcceptButton = TaskPropApply;
-            //this.CancelButton = TaskPropCancel;
-        }
-
-        private void LoadTaskBaseProperties(Forum.TaskBaseProperties Properties)
-        {
-            if (TempProperties.UseLocalAccount)
-                propAuthLocal.Select();
-            else propAuthGlobal.Select();
-            propMainUrl.Text = TempProperties.ForumMainPage;
-            DetectMainPage = TempProperties.ForumMainPage == null
-                || TempProperties.ForumMainPage == "https://"
-                || TempProperties.ForumMainPage == "http://"
-                || TempProperties.ForumMainPage == String.Empty;
-            propEngine.SelectedIndex = propEngine.Items.IndexOf(
-                Enum.GetName(typeof(Forum.ForumEngine), TempProperties.Engine));
-            propUsername.Text = TempProperties.Username;
-            propPassword.Text = TempProperties.Password;
-        }
-
-        private async void ClosePropertiesPage(object sender, EventArgs e)
-        {
-            propCancel.Enabled = false;
-            propTab.Enabled = false;
-
-            if (PropertiesActivityTask != null && StopProperties != null)
-            {
-                StopProperties.Cancel();
-                try
-                {
-                    await PropertiesActivityTask;
-                }
-                catch (Exception)
-                {
-                }
-            }
-
-            tasksTab.Enabled = true;
-            Tabs.SelectTab(tasksTab);
-            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
-            Tabs.TabPages.Remove(propTab);
-            if (CurrTask.New)
-            {
-                CurrTask.Delete(sender, e);
-            }
-            propCancel.Enabled = true;
-        }
-
-        #region PropertiesProfiles
-
-        bool ProfilesLocked;
-
-        private string GetProfilePath(string Path)
-        {
-            if (!Path.EndsWith(".xml")) Path += ".xml";
-            if (Path.IndexOf('\\') < 0) Path = "Profiles\\" + Path;
-            return Path;
-        }
-
-        private void ProfileComboBox_TextChanged(object sender, EventArgs e)
-        {
-            ValidateProperties();
-        }
-
-        private void ProfileComboBox_Enter(object sender, EventArgs e)
-        {
-            if (!ProfilesLocked)
-            {
-                ProfilesLocked = true;
-                lock (propProfiles.Items)
-                {
-                    propProfiles.Items.Clear();
-                    Directory.CreateDirectory(".\\Profiles\\");
-                    string[] Paths = Directory.GetFiles(".\\Profiles\\", "*.xml");
-                    //trying complicated constructions =D
-                    Array.ForEach<string>(Paths, s => propProfiles.Items.Add(
-                        s.Replace(".\\Profiles\\", String.Empty).Replace(".xml", String.Empty)));
-                }
-                ProfilesLocked = false;
-            }
-        }
-
-        private void DeleteProfileButton_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Удалить профиль " + propProfiles.Text + "?",
-                "Удалить профиль?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                try
-                {
-                    File.Delete(GetProfilePath(propProfiles.Text));
-                }
-                catch (Exception Error)
-                {
-                    MessageBox.Show(Error.Message);
-                }
-                finally
-                {
-                    propProfileDelete.Enabled = false;
-                    propProfileLoad.Enabled = false;
-                }
-        }
-
-        private void SaveProfileButton_Click(object sender, EventArgs e)
-        {
-            propProfileSave.Enabled = false;
-            try
-            {
-                if (propProfiles.Text == String.Empty) NewProfileButton_Click(sender, e);
-                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
-                using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
-                    Xml.Serialize(F, TempProperties);
-                ValidateProperties();
-                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
-            }
-            catch (Exception Error)
-            {
-                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
-                MessageBox.Show(Error.Message);
-            }
-            finally
-            {
-                propProfileSave.Enabled = true;
-            }
-        }
-
-        private void LoadProfileButton_Click(object sender, EventArgs e)
-        {
-            propProfileSave.Enabled = false;
-            propProfileLoad.Enabled = false;
-            try
-            {
-                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
-                using (FileStream F = File.OpenRead(GetProfilePath(propProfiles.Text)))
-                    TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
-                LoadTaskBaseProperties(TempProperties);
-            }
-            catch (Exception Error)
-            {
-                MessageBox.Show(Error.Message);
-            }
-            finally
-            {
-                propProfileLoad.Enabled = true;
-                propProfileSave.Enabled = true;
-            }
-        }
-
-        private void NewProfileButton_Click(object sender, EventArgs e)
-        {
-            string NameBase = GetDomain(propMainUrl.Text);
-            if (NameBase == String.Empty) NameBase = GetDomain(propTargetUrl.Text);
-            if (NameBase == String.Empty) NameBase = "Профиль";
-            int i = 2;
-            if (File.Exists(GetProfilePath(NameBase)))
-            {
-                while (File.Exists(GetProfilePath(NameBase + "(" + i.ToString() + ")"))) i++;
-                NameBase += "(" + i.ToString() + ")";
-            }
-            propProfiles.Text = NameBase;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region TasksPage
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
@@ -704,6 +255,494 @@ namespace Voron_Poster
 
         #endregion
 
+        #region Task Properties Page
+
+        string TempTargetUrl;
+        bool DetectMainPage;
+        bool RecheckBlock;
+        bool PropertiesActivity;
+        bool PropertiesLoginActivity;
+        Task PropertiesActivityTask;
+        Forum TempForum;
+        Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
+        CancellationTokenSource StopProperties;
+
+        private string GetDomain(string Url)
+        {
+            string Domain = new String(Url.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
+                return Domain;
+            return String.Empty;
+        }
+
+        private void propAuthGlobal_CheckedChanged(object sender, EventArgs e)
+        {
+            TempProperties.UseLocalAccount = propAuthLocal.Checked;
+            ResetIcon(sender, e);
+            ValidateProperties();
+        }
+
+        private void propAuthShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            propPassword.UseSystemPasswordChar = !propAuthShowPassword.Checked;
+        }
+
+        private void propUrl_TextChanged(object sender, EventArgs e)
+        {
+            string Text = (sender as TextBox).Text;
+            int CaretPos = (sender as TextBox).SelectionStart;
+            if (!RecheckBlock)
+            {
+                RecheckBlock = true;
+                Text = new String(Text.Skip(Math.Max(Text.LastIndexOf("https://"), Text.LastIndexOf("http://"))).ToArray());
+                if (CaretPos > 0 && CaretPos < 9 && CaretPos < Text.Length &&
+                    !(CaretPos == 5 && Text.ToLower()[4] == 's')) Text = Text.Remove(CaretPos - 1, 1);
+                int i = 0;
+                int https = 0;
+                while (i < Text.Length && i < 4 && Text.ToLower()[i] == "http"[i]) i++;
+                if (i == 4 && Text.Length > 4 && Text.ToLower()[4] == 's') { i = 5; https = 1; }
+                if (i == 4 + https) while (i < Text.Length && i < 7 + https && Text.ToLower()[i] == "://"[i - 4 - https]) i++;
+                // Text = Text.Remove(0, i).Replace("http://",String.Empty).Replace("https://", String.Empty);
+                if (https == 1)
+                    Text = "https://" + Text.Remove(0, i);
+                else Text = "http://" + Text.Remove(0, i);
+                (sender as TextBox).Text = Text;
+                CaretPos += 7 + https;
+                RecheckBlock = false;
+            }
+            //if (!(sender as TextBox).Text.StartsWith("http://".Substring(0,Math.Min(, StringComparison.OrdinalIgnoreCase)
+            //    && !(sender as TextBox).Text.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    CaretPos += 7;
+            //    (sender as TextBox).Text = "http://" + (sender as TextBox).Text;
+            //}
+            Uri Url;
+            if (Uri.TryCreate((sender as TextBox).Text, UriKind.Absolute, out Url)
+                && (Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps))
+            {
+                (sender as TextBox).ForeColor = Color.Black;
+                if (sender == propTargetUrl)
+                {
+                    TempTargetUrl = (sender as TextBox).Text;
+                    if (DetectMainPage)
+                    {
+                        string Domain = GetDomain(propTargetUrl.Text).ToLower();
+                        if (propMainUrl.Text.IndexOf("https://") >= 0)
+                            propMainUrl.Text = "https://" + Domain;
+                        else propMainUrl.Text = "http://" + Domain;
+                        if (Domain != String.Empty) //suggest profile
+                            foreach (Object s in propProfiles.Items)
+                            {
+                                if ((s as String).ToLower().IndexOf(Domain) >= 0)
+                                {
+                                    propProfiles.Text = (s as String);
+                                    break;
+                                }
+                            }
+                    }
+                }
+                else
+                    TempProperties.ForumMainPage = (sender as TextBox).Text;
+            }
+            else (sender as TextBox).ForeColor = Color.Red;
+            (sender as TextBox).SelectionStart = CaretPos;
+            if (sender == propMainUrl && propMainUrl.Focused) DetectMainPage = false;
+            if (propMainUrl.Text == "http://" || propMainUrl.Text == "https://") DetectMainPage = true;
+            ResetIcon(sender, e);
+            ValidateProperties();
+        }
+
+        private void propAuthUsername_TextChanged(object sender, EventArgs e)
+        {
+            TempProperties.Username = propUsername.Text;
+            ResetIcon(sender, e);
+        }
+
+        private void propAuthPassword_TextChanged(object sender, EventArgs e)
+        {
+            TempProperties.Password = propPassword.Text;
+            ResetIcon(sender, e);
+        }
+
+        private void propEngine_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (propEngine.SelectedIndex >= 0)
+                TempProperties.Engine = (Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
+            (string)propEngine.SelectedItem);
+            ValidateProperties();
+            ResetIcon(sender, e);
+        }
+
+        //private void ForumEngineComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    TryLoginButton.Enabled = MainPageBox.ForeColor == Color.Black;
+        //}
+
+        private async void propEngineDetect_Click(object sender, EventArgs e)
+        {
+            PropertiesActivity = true;
+            ValidateProperties();
+            propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
+            HttpClient Client = new HttpClient();
+            StopProperties = new CancellationTokenSource();
+            Client.Timeout = new TimeSpan(0, 0, 10);
+            bool Error = false;
+            try
+            {
+                Task<Forum.ForumEngine> DetectTask = Forum.DetectForumEngine(TempProperties.ForumMainPage, Client, StopProperties.Token);
+                PropertiesActivityTask = DetectTask;
+                Detected = await DetectTask;
+            }
+            catch
+            {
+                Error = true;
+                propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            }
+            finally
+            {
+                Client.Dispose();
+            }
+            if (!Error)
+            {
+                if (Detected == Forum.ForumEngine.Unknown)
+                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Question);
+                else
+                {
+                    TempProperties.Engine = Detected;
+                    propEngine.SelectedIndex =
+                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.ForumEngine), Detected));
+                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                }
+            }
+            else propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            PropertiesActivity = false;
+            ValidateProperties();
+        }
+
+        private async void propAuthTryLogin_Click(object sender, EventArgs e)
+        {
+            PropertiesActivity = true;
+            PropertiesLoginActivity = true;
+            ValidateProperties();
+            propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            TempForum = Forum.New(TempProperties.Engine);
+            StopProperties = new CancellationTokenSource();
+            TempForum.Properties = TempProperties;
+            TempForum.Cancel = StopProperties;
+            TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
+            try
+            {
+                Task<bool> LoginTask = TempForum.Login();
+                PropertiesActivityTask = LoginTask;
+                if (await LoginTask)
+                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                else
+                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            }
+            catch { propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error); }
+            TempForum = null;
+            PropertiesActivity = false;
+            PropertiesLoginActivity = false;
+            ValidateProperties();
+        }
+
+        private void ResetIcon(object sender, EventArgs e)
+        {
+            if (!PropertiesActivity)
+            {
+                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Login);
+                if (sender == propMainUrl || sender == propEngine)
+                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Gear);
+            }
+        }
+
+        private void ValidateProperties()
+        {
+            //if (PropertiesActivity == null)
+            //{
+            //    if (File.Exists(GetProfilePath(ProfileComboBox.Text)))
+            //    {
+            //        DeleteProfileButton.Enabled = false;
+            //        LoadProfileButton.Enabled = false;
+            //    }
+            //    //   MainPageBox.Enabled
+            //    //       ForumEngineComboBox.Enabled
+            //}
+            propAuthGlobal.Enabled = !PropertiesLoginActivity;
+            propAuthLocal.Enabled = !PropertiesLoginActivity;
+            propUsername.Enabled = propAuthLocal.Checked &&
+                propAuthLocal.Enabled && !PropertiesLoginActivity;
+            propPassword.Enabled = propUsername.Enabled;
+            propAuthShowPassword.Enabled = propUsername.Enabled;
+
+            propProfileDelete.Enabled =
+                File.Exists(GetProfilePath(propProfiles.Text)) &&
+                !PropertiesActivity;
+            propProfileLoad.Enabled = propProfileDelete.Enabled;
+
+            propMainUrl.Enabled = !PropertiesActivity;
+            propEngine.Enabled = !PropertiesActivity;
+            propEngineDetect.Enabled =
+                propMainUrl.ForeColor == Color.Black &&
+                !PropertiesActivity;
+            propAuthTryLogin.Enabled =
+                propMainUrl.ForeColor == Color.Black &&
+                propEngine.SelectedIndex >= 0 &&
+                !PropertiesActivity;
+
+            propScriptsEdit.Enabled =
+                propScriptsList.SelectedIndex > -1;
+            propScriptsRemove.Enabled =
+                propScriptsList.SelectedIndex > -1;
+            propScriptsUp.Enabled = propScriptsList.SelectedIndex > 0;
+            propScriptsDown.Enabled = propScriptsList.SelectedIndex < propScriptsList.Items.Count - 1;
+
+            propApply.Enabled =
+                propTargetUrl.ForeColor == Color.Black &&
+                propMainUrl.ForeColor == Color.Black &&
+                propEngine.SelectedIndex >= 0 &&
+                propScriptsList.Items.Count > 0 &&
+                !PropertiesActivity;
+            propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Save);
+            //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
+            //    TryLoginButton.Enabled;
+        }
+
+        private void propApply_Click(object sender, EventArgs e)
+        {
+            propApply.Enabled = false;
+            TempForum = Forum.New(TempProperties.Engine);
+            TempForum.Properties = TempProperties;
+            CurrTask.Forum = TempForum;
+            CurrTask.TargetUrl = TempTargetUrl;
+            TempForum = null;
+            CurrTask.New = false;
+            ClosePropertiesPage(sender, e);
+            propApply.Enabled = true;
+        }
+
+        public void ShowPropertiesPage()
+        {
+            //
+            Tabs.TabPages.Add(propTab);
+            //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
+            Tabs.SelectTab(propTab);
+            for (int i = 0; i < Tabs.TabPages.Count; i++)
+                Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == propTab;
+            //  TaskPropertiesPage.Enabled = true;
+            // this.ResumeLayout();
+            ProfileComboBox_Enter(propProfiles, EventArgs.Empty);
+            PropertiesActivity = false;
+            PropertiesLoginActivity = false;
+            if (CurrTask.Forum != null)
+                TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
+            else
+                TempProperties = new Forum.TaskBaseProperties();
+            LoadTaskBaseProperties(TempProperties);
+            propTargetUrl.Text = CurrTask.TargetUrl;
+            propTargetUrl.Focus();
+            //this.AcceptButton = TaskPropApply;
+            //this.CancelButton = TaskPropCancel;
+        }
+
+        private void LoadTaskBaseProperties(Forum.TaskBaseProperties Properties)
+        {
+            if (TempProperties.UseLocalAccount)
+                propAuthLocal.Select();
+            else propAuthGlobal.Select();
+            propMainUrl.Text = TempProperties.ForumMainPage;
+            DetectMainPage = TempProperties.ForumMainPage == null
+                || TempProperties.ForumMainPage == "https://"
+                || TempProperties.ForumMainPage == "http://"
+                || TempProperties.ForumMainPage == String.Empty;
+            propEngine.SelectedIndex = propEngine.Items.IndexOf(
+                Enum.GetName(typeof(Forum.ForumEngine), TempProperties.Engine));
+            propUsername.Text = TempProperties.Username;
+            propPassword.Text = TempProperties.Password;
+        }
+
+        private async void ClosePropertiesPage(object sender, EventArgs e)
+        {
+            propCancel.Enabled = false;
+            propTab.Enabled = false;
+
+            if (PropertiesActivityTask != null && StopProperties != null)
+            {
+                StopProperties.Cancel();
+                try
+                {
+                    await PropertiesActivityTask;
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            tasksTab.Enabled = true;
+            Tabs.SelectTab(tasksTab);
+            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
+            Tabs.TabPages.Remove(propTab);
+            if (CurrTask.New)
+            {
+                CurrTask.Delete(sender, e);
+            }
+            propCancel.Enabled = true;
+        }
+
+        private void propScriptsRemove_Click(object sender, EventArgs e)
+        {
+            propScriptsList.SelectedIndex -= 1;
+            propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex + 1);
+            ValidateProperties();
+        }
+
+        private void propScriptsUp_Click(object sender, EventArgs e)
+        {
+            propScriptsList.Items.Insert(propScriptsList.SelectedIndex - 1, propScriptsList.SelectedItem);
+            propScriptsList.SelectedIndex = propScriptsList.SelectedIndex - 2;
+            propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex + 2);
+            ValidateProperties();
+        }
+
+        private void propScriptsDown_Click(object sender, EventArgs e)
+        {
+            propScriptsList.Items.Insert(propScriptsList.SelectedIndex + 2, propScriptsList.SelectedItem);
+            propScriptsList.SelectedIndex = propScriptsList.SelectedIndex + 2;
+            propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex - 2);
+            ValidateProperties();
+        }
+
+        private void propScriptsList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ValidateProperties();
+        }
+
+        private void propScriptsEdit_Click(object sender, EventArgs e)
+        {
+            scriptsName.Text = (String)propScriptsList.SelectedItem;
+            propScriptsRemove_Click(sender, e);
+            propScriptsAdd_Click(sender, e);
+            scriptsSave.Enabled = false;
+        }
+
+        #region PropertiesProfiles
+
+        bool ProfilesLocked;
+
+        private string GetProfilePath(string Path)
+        {
+            if (!Path.EndsWith(".xml")) Path += ".xml";
+            if (Path.IndexOf('\\') < 0) Path = "Profiles\\" + Path;
+            return Path;
+        }
+
+        private void ProfileComboBox_TextChanged(object sender, EventArgs e)
+        {
+            ValidateProperties();
+        }
+
+        private void ProfileComboBox_Enter(object sender, EventArgs e)
+        {
+            if (!ProfilesLocked)
+            {
+                ProfilesLocked = true;
+                lock (propProfiles.Items)
+                {
+                    propProfiles.Items.Clear();
+                    Directory.CreateDirectory(".\\Profiles\\");
+                    string[] Paths = Directory.GetFiles(".\\Profiles\\", "*.xml");
+                    //trying complicated constructions =D
+                    Array.ForEach<string>(Paths, s => propProfiles.Items.Add(
+                        s.Replace(".\\Profiles\\", String.Empty).Replace(".xml", String.Empty)));
+                }
+                ProfilesLocked = false;
+            }
+        }
+
+        private void DeleteProfileButton_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Удалить профиль " + propProfiles.Text + "?",
+                "Удалить профиль?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                try
+                {
+                    File.Delete(GetProfilePath(propProfiles.Text));
+                }
+                catch (Exception Error)
+                {
+                    MessageBox.Show(Error.Message);
+                }
+                finally
+                {
+                    propProfileDelete.Enabled = false;
+                    propProfileLoad.Enabled = false;
+                }
+        }
+
+        private void SaveProfileButton_Click(object sender, EventArgs e)
+        {
+            propProfileSave.Enabled = false;
+            try
+            {
+                if (propProfiles.Text == String.Empty) NewProfileButton_Click(sender, e);
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
+                    Xml.Serialize(F, TempProperties);
+                ValidateProperties();
+                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+            }
+            catch (Exception Error)
+            {
+                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                MessageBox.Show(Error.Message);
+            }
+            finally
+            {
+                propProfileSave.Enabled = true;
+            }
+        }
+
+        private void LoadProfileButton_Click(object sender, EventArgs e)
+        {
+            propProfileSave.Enabled = false;
+            propProfileLoad.Enabled = false;
+            try
+            {
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                using (FileStream F = File.OpenRead(GetProfilePath(propProfiles.Text)))
+                    TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
+                LoadTaskBaseProperties(TempProperties);
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            finally
+            {
+                propProfileLoad.Enabled = true;
+                propProfileSave.Enabled = true;
+            }
+        }
+
+        private void NewProfileButton_Click(object sender, EventArgs e)
+        {
+            string NameBase = GetDomain(propMainUrl.Text);
+            if (NameBase == String.Empty) NameBase = GetDomain(propTargetUrl.Text);
+            if (NameBase == String.Empty) NameBase = "Профиль";
+            int i = 2;
+            if (File.Exists(GetProfilePath(NameBase)))
+            {
+                while (File.Exists(GetProfilePath(NameBase + "(" + i.ToString() + ")"))) i++;
+                NameBase += "(" + i.ToString() + ")";
+            }
+            propProfiles.Text = NameBase;
+        }
+
+        #endregion
+
+        #endregion
+
         #region Scripts
 
         string OpenedScript;
@@ -737,7 +776,7 @@ namespace Voron_Poster
         private bool AskSave()
         {
             switch (MessageBox.Show("Сохранить изменения в файле \""
-                +scriptsName.Text+"\"?", "Изменения", MessageBoxButtons.YesNoCancel))
+                + scriptsName.Text + "\"?", "Изменения", MessageBoxButtons.YesNoCancel))
             {
                 case System.Windows.Forms.DialogResult.Yes:
                     scriptsSave_Click(scriptsSave, EventArgs.Empty);
@@ -881,7 +920,7 @@ namespace Voron_Poster
                     File.Delete(GetScriptPath(OpenedScript));
                     scriptsTab_Enter(sender, e);
                     scriptsSave.Enabled = false;
-                    scriptsList.SelectedIndex = scriptsList.Items.Count -1;
+                    scriptsList.SelectedIndex = scriptsList.Items.Count - 1;
 
                 }
                 catch (Exception Error)
@@ -889,6 +928,21 @@ namespace Voron_Poster
                     scriptsDelete.Enabled = true;
                     MessageBox.Show(Error.Message);
                 }
+        }
+
+        private void scriptsCancel_Click(object sender, EventArgs e)
+        {
+            if (scriptsSave.Enabled && !AskSave()) return;
+            propTab.Enabled = true;
+            Tabs.TabPages.Remove(scriptsTab);
+            Tabs.SelectedTab = propTab;
+        }
+
+        private void scriptsAccept_Click(object sender, EventArgs e)
+        {
+            scriptsCancel_Click(sender, e);
+            propScriptsList.Items.Insert(propScriptsList.SelectedIndex+1, scriptsName.Text);
+            propScriptsList.SelectedIndex = propScriptsList.SelectedIndex + 1;
         }
 
         #region TestTab
@@ -1068,10 +1122,12 @@ namespace Voron_Poster
 
         #endregion
 
-        private void scriptsCancel_Click(object sender, EventArgs e)
+        private void propScriptsAdd_Click(object sender, EventArgs e)
         {
-            if (scriptsSave.Enabled && !AskSave()) return;
-            Tabs.TabPages.Remove(scriptsTab);
+            Tabs.TabPages.Add(scriptsTab);
+            Tabs.SelectedTab = scriptsTab;
+            propTab.Enabled = false;
+            ValidateProperties();
         }
 
         #endregion

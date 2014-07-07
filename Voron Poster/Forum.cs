@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Threading;
 using System.Net;
+using Roslyn.Scripting.CSharp;
 
 namespace Voron_Poster
 {
@@ -39,7 +40,7 @@ namespace Voron_Poster
         }
 
         public static async Task<ForumEngine> DetectForumEngine(string Url, HttpClient Client, CancellationToken Cancel)
-        {          
+        {
             int[] Match = new int[Enum.GetNames(typeof(ForumEngine))
                      .Length];
             string Html = await (await Client.GetAsync(Url, Cancel)).Content.ReadAsStringAsync();
@@ -116,13 +117,85 @@ namespace Voron_Poster
 
         public abstract Task<bool> Login();
         public abstract Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText);
-        public async Task<bool> Run(Uri TargetBoard, string Subject, string BBText)
+
+        public class ScriptData
+        {
+            public ScriptData(PostMessage InputData)
+            {
+                Input = InputData;
+                Output = new List<PostMessage>();
+            }
+            public struct PostMessage
+            {
+                public string Subject;
+                public string Message;
+                public PostMessage(string nSubject, string nMessage)
+                {
+                    Subject = nSubject;
+                    Message = nMessage;
+                }
+            }
+            public PostMessage Input;
+            public List<PostMessage> Output;
+            public void Post(string Subject, string Message)
+            {
+                Output.Add(new PostMessage(Subject, Message));
+            }
+        }
+
+        private static string[] References = new string[]{"System","System.IO","System.Linq","System.Data",
+           "System.Xml","System.Web"};
+
+        public static Roslyn.Scripting.Session InitScriptEngine(ScriptData ScriptData)
+        {
+            var ScriptEngine = new ScriptEngine();
+            var Session = ScriptEngine.CreateSession(ScriptData);
+            Session.AddReference(ScriptData.GetType().Assembly);
+            foreach (string Reference in References)
+            {
+                Session.AddReference(Reference);
+                Session.ImportNamespace(Reference);
+            }
+            Session.ImportNamespace("System.Text");
+            Session.ImportNamespace("System.Collections.Generic");
+            Session.ImportNamespace("System.Security.Cryptography");
+            return Session;
+        }
+
+        public Task<bool> ExecuteScripts(ScriptData ScriptData)
+        {
+            Task<bool> Processing = new Task<bool>(() =>
+            {
+                var Session = InitScriptEngine(ScriptData);
+                for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+                {
+                    Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+                    if (Cancel.IsCancellationRequested) return false;
+                }
+                return true;
+            });
+            Processing.Start();
+            return Processing;
+        }
+
+        public async Task<bool> Run(Uri TargetBoard, string Subject, string Message)
         {
             try
             {
                 Cancel = new CancellationTokenSource();
-                await Login();
-                return await PostMessage(TargetBoard, Subject, BBText);
+                Task<bool> LoginProcess = Login();
+                LoginProcess.Start();
+                var ScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
+                await ExecuteScripts(ScriptData);
+                if (Cancel.IsCancellationRequested) return false;
+                await LoginProcess;
+                if (Cancel.IsCancellationRequested) return false;
+                for (int i = 0; i < ScriptData.Output.Count; i++)
+                {
+                    await PostMessage(TargetBoard, ScriptData.Output[i].Subject, ScriptData.Output[i].Message);
+                    if (Cancel.IsCancellationRequested) return false;
+                }
+                return true;
             }
             catch (Exception e)
             {

@@ -301,8 +301,9 @@ namespace Voron_Poster
             Ctrls.InitializeControls();
             MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
             MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
-            Ctrls.Delete.Click += new EventHandler(Delete);
-            Ctrls.Properties.Click += new EventHandler(Properties);
+            Ctrls.StartStop.Click += Start;
+            Ctrls.Delete.Click += Delete;
+            Ctrls.Properties.Click += Properties;
             AddToGuiTable();
         }
 
@@ -357,12 +358,16 @@ namespace Voron_Poster
             Ctrls.Properties.Enabled = false;
             Ctrls.StartStop.Click -= Start;
             Ctrls.StartStop.Click += Cancel;
-           // Forum.Task = Forum.Run();
+            Forum.Task = Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
             SetStatusIcon();
             Ctrls.StartStop.Enabled = true;
             await Forum.Task;
+            SetStatusIcon();
+            Ctrls.StartStop.Click += Start;
+            Ctrls.StartStop.Click -= Cancel;
             Ctrls.Delete.Enabled = true;
             Ctrls.Properties.Enabled = true;
+            Ctrls.StartStop.Enabled = true;
         }
 
 

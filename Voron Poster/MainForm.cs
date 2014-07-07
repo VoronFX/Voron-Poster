@@ -20,10 +20,8 @@ using Roslyn.Scripting;
 using System.Reflection;
 using ScintillaNET;
 
-
 namespace Voron_Poster
 {
-
     public partial class MainForm : Form
     {
         public List<TaskGui> Tasks = new List<TaskGui>();
@@ -513,6 +511,7 @@ namespace Voron_Poster
         private void propApply_Click(object sender, EventArgs e)
         {
             propApply.Enabled = false;
+            TempProperties.PreProcessingScripts = propScriptsList.Items.Cast<string>().ToList<string>();
             TempForum = Forum.New(TempProperties.Engine);
             TempForum.Properties = TempProperties;
             CurrTask.Forum = TempForum;
@@ -561,6 +560,8 @@ namespace Voron_Poster
                 Enum.GetName(typeof(Forum.ForumEngine), TempProperties.Engine));
             propUsername.Text = TempProperties.Username;
             propPassword.Text = TempProperties.Password;
+            propScriptsList.Items.Clear();
+            propScriptsList.Items.AddRange(TempProperties.PreProcessingScripts.ToArray());
         }
 
         private async void ClosePropertiesPage(object sender, EventArgs e)
@@ -685,6 +686,7 @@ namespace Voron_Poster
             propProfileSave.Enabled = false;
             try
             {
+                TempProperties.PreProcessingScripts = propScriptsList.Items.Cast<string>().ToList<string>();
                 if (propProfiles.Text == String.Empty) NewProfileButton_Click(sender, e);
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
@@ -713,6 +715,7 @@ namespace Voron_Poster
                 using (FileStream F = File.OpenRead(GetProfilePath(propProfiles.Text)))
                     TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
                 LoadTaskBaseProperties(TempProperties);
+                ValidateProperties();
             }
             catch (Exception Error)
             {
@@ -766,7 +769,7 @@ namespace Voron_Poster
             IgnoreEvents = false;
         }
 
-        private string GetScriptPath(string Path)
+        public static string GetScriptPath(string Path)
         {
             if (!Path.EndsWith(".cs")) Path += ".cs";
             if (Path.IndexOf('\\') < 0) Path = "Scripts\\" + Path;
@@ -947,34 +950,6 @@ namespace Voron_Poster
 
         #region TestTab
 
-        public class ScriptData
-        {
-            public ScriptData(PostMessage InputData)
-            {
-                Input = InputData;
-                Output = new List<PostMessage>();
-            }
-            public struct PostMessage
-            {
-                public string Subject;
-                public string Message;
-                public PostMessage(string nSubject, string nMessage)
-                {
-                    Subject = nSubject;
-                    Message = nMessage;
-                }
-            }
-            public PostMessage Input;
-            public List<PostMessage> Output;
-            public void Post(string Subject, string Message)
-            {
-                Output.Add(new PostMessage(Subject, Message));
-            }
-        }
-
-        string[] References = new string[]{"System","System.IO","System.Linq","System.Data",
-           "System.Xml","System.Web"};
-        delegate bool dels();
         Thread TestThread;
 
         private async void scriptsRun_Click(object sender, EventArgs e)
@@ -997,18 +972,8 @@ namespace Voron_Poster
             {
                 try
                 {
-                    var ScriptData = new ScriptData(new ScriptData.PostMessage(scriptsSubject.Text, scriptsMessage.Text));
-                    var ScriptEngine = new ScriptEngine();
-                    var Session = ScriptEngine.CreateSession(ScriptData);
-                    Session.AddReference(ScriptData.GetType().Assembly);
-                    foreach (string Reference in References)
-                    {
-                        Session.AddReference(Reference);
-                        Session.ImportNamespace(Reference);
-                    }
-                    Session.ImportNamespace("System.Text");
-                    Session.ImportNamespace("System.Collections.Generic");
-                    Session.ImportNamespace("System.Security.Cryptography");
+                    var ScriptData = new Forum.ScriptData(new Forum.ScriptData.PostMessage(scriptsSubject.Text, scriptsMessage.Text));
+                    var Session = Forum.InitScriptEngine(ScriptData);
                     Session.Execute(Code);
                     for (int i = 0; i < ScriptData.Output.Count; i++)
                     {

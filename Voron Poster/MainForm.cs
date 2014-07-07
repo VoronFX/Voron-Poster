@@ -1097,5 +1097,26 @@ namespace Voron_Poster
 
         #endregion
 
+        struct TaskList
+        {
+            public Forum.TaskBaseProperties[] Properties;
+            public string[] TargetUrl;
+        }
+
+        private void tasksSave_Click(object sender, EventArgs e)
+        {
+            Directory.CreateDirectory(@".\TaskLists\");
+            var SaveFileDialog = new SaveFileDialog();
+            SaveFileDialog.DefaultExt = "xml";
+            SaveFileDialog.Filter = "xml";
+            SaveFileDialog.InitialDirectory = @".\TaskLists\";
+            if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                TaskList TaskList;
+                TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
+
+            } 
+        }
+
     }
 }

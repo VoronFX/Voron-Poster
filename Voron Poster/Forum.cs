@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Net;
 using Roslyn.Scripting.CSharp;
+using System.Runtime.Remoting.Messaging;
 
 namespace Voron_Poster
 {
@@ -88,7 +89,7 @@ namespace Voron_Poster
 
         public Task<bool> Task;
         public TaskBaseProperties Properties = new TaskBaseProperties();
-        public TimeSpan RequestTimeout;
+        public TimeSpan RequestTimeout = new TimeSpan(0,0,10);
         public List<string> Log;
         public int Progress;
         public CancellationTokenSource Cancel;
@@ -178,13 +179,11 @@ namespace Voron_Poster
             return Processing;
         }
 
+
         public async Task<bool> Run(Uri TargetBoard, string Subject, string Message)
         {
-            try
-            {
                 Cancel = new CancellationTokenSource();
                 Task<bool> LoginProcess = Login();
-                LoginProcess.Start();
                 var ScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
                 await ExecuteScripts(ScriptData);
                 if (Cancel.IsCancellationRequested) return false;
@@ -196,11 +195,7 @@ namespace Voron_Poster
                     if (Cancel.IsCancellationRequested) return false;
                 }
                 return true;
-            }
-            catch (Exception e)
-            {
-            }
-            return true;
+   
         }
     }
 

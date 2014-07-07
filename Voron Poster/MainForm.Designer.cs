@@ -110,10 +110,11 @@
             this.scriptsListPanel = new System.Windows.Forms.Panel();
             this.scriptsName = new System.Windows.Forms.TextBox();
             this.scriptsList = new System.Windows.Forms.ListBox();
-            this.scriptsAccept = new System.Windows.Forms.Button();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
+            this.scriptsCancel = new System.Windows.Forms.Button();
+            this.scriptsAccept = new System.Windows.Forms.Button();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -895,11 +896,11 @@
             this.scriptsTab.TabIndex = 5;
             this.scriptsTab.Text = "Скрипты";
             this.scriptsTab.UseVisualStyleBackColor = true;
-            this.scriptsTab.Enter += new System.EventHandler(this.ScriptsPage_Enter);
+            this.scriptsTab.Enter += new System.EventHandler(this.scriptsTab_Enter);
             // 
             // splitter1
             // 
-            this.splitter1.Location = new System.Drawing.Point(222, 3);
+            this.splitter1.Location = new System.Drawing.Point(152, 3);
             this.splitter1.MinExtra = 351;
             this.splitter1.MinSize = 131;
             this.splitter1.Name = "splitter1";
@@ -912,11 +913,11 @@
             this.scriptsTabs.Controls.Add(this.scriptsCodeTab);
             this.scriptsTabs.Controls.Add(this.scriptsTestTab);
             this.scriptsTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scriptsTabs.Location = new System.Drawing.Point(222, 3);
+            this.scriptsTabs.Location = new System.Drawing.Point(152, 3);
             this.scriptsTabs.MinimumSize = new System.Drawing.Size(350, 0);
             this.scriptsTabs.Name = "scriptsTabs";
             this.scriptsTabs.SelectedIndex = 0;
-            this.scriptsTabs.Size = new System.Drawing.Size(366, 498);
+            this.scriptsTabs.Size = new System.Drawing.Size(436, 498);
             this.scriptsTabs.TabIndex = 9;
             // 
             // scriptsCodeTab
@@ -928,7 +929,7 @@
             this.scriptsCodeTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsCodeTab.Name = "scriptsCodeTab";
             this.scriptsCodeTab.Padding = new System.Windows.Forms.Padding(3);
-            this.scriptsCodeTab.Size = new System.Drawing.Size(358, 472);
+            this.scriptsCodeTab.Size = new System.Drawing.Size(428, 472);
             this.scriptsCodeTab.TabIndex = 0;
             this.scriptsCodeTab.Text = "Код";
             this.scriptsCodeTab.UseVisualStyleBackColor = true;
@@ -957,21 +958,21 @@
             this.scriptsNew.Text = "Создать новый";
             this.scriptsNew.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.scriptsNew.UseVisualStyleBackColor = true;
-            this.scriptsNew.Click += new System.EventHandler(this.NewScriptButton_Click);
+            this.scriptsNew.Click += new System.EventHandler(this.scriptsNew_Click);
             // 
             // scriptsSave
             // 
             this.scriptsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.scriptsSave.Enabled = false;
             this.scriptsSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.scriptsSave.Location = new System.Drawing.Point(255, 442);
+            this.scriptsSave.Location = new System.Drawing.Point(325, 442);
             this.scriptsSave.Name = "scriptsSave";
             this.scriptsSave.Size = new System.Drawing.Size(97, 24);
             this.scriptsSave.TabIndex = 5;
             this.scriptsSave.Text = "Сохранить";
             this.scriptsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.scriptsSave.UseVisualStyleBackColor = true;
-            this.scriptsSave.Click += new System.EventHandler(this.SaveScriptButton_Click);
+            this.scriptsSave.Click += new System.EventHandler(this.scriptsSave_Click);
             // 
             // scriptsCodeBox
             // 
@@ -982,9 +983,9 @@
             this.scriptsCodeBox.Multiline = true;
             this.scriptsCodeBox.Name = "scriptsCodeBox";
             this.scriptsCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.scriptsCodeBox.Size = new System.Drawing.Size(346, 430);
+            this.scriptsCodeBox.Size = new System.Drawing.Size(416, 430);
             this.scriptsCodeBox.TabIndex = 1;
-            this.scriptsCodeBox.TextChanged += new System.EventHandler(this.CodeEditor_TextChanged);
+            this.scriptsCodeBox.TextChanged += new System.EventHandler(this.scriptsEditor_TextChanged);
             // 
             // scriptsTestTab
             // 
@@ -997,7 +998,7 @@
             this.scriptsTestTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsTestTab.Name = "scriptsTestTab";
             this.scriptsTestTab.Padding = new System.Windows.Forms.Padding(10);
-            this.scriptsTestTab.Size = new System.Drawing.Size(358, 472);
+            this.scriptsTestTab.Size = new System.Drawing.Size(428, 472);
             this.scriptsTestTab.TabIndex = 1;
             this.scriptsTestTab.Text = "Проверка";
             this.scriptsTestTab.UseVisualStyleBackColor = true;
@@ -1009,7 +1010,7 @@
             this.scriptsResult.Multiline = true;
             this.scriptsResult.Name = "scriptsResult";
             this.scriptsResult.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.scriptsResult.Size = new System.Drawing.Size(338, 281);
+            this.scriptsResult.Size = new System.Drawing.Size(408, 281);
             this.scriptsResult.TabIndex = 42;
             this.scriptsResult.WordWrap = false;
             // 
@@ -1021,14 +1022,14 @@
             this.scriptsRunPanel.Location = new System.Drawing.Point(10, 145);
             this.scriptsRunPanel.Name = "scriptsRunPanel";
             this.scriptsRunPanel.Padding = new System.Windows.Forms.Padding(0, 5, 5, 5);
-            this.scriptsRunPanel.Size = new System.Drawing.Size(338, 36);
+            this.scriptsRunPanel.Size = new System.Drawing.Size(408, 36);
             this.scriptsRunPanel.TabIndex = 37;
             // 
             // scriptsStatusLabel
             // 
             this.scriptsStatusLabel.Location = new System.Drawing.Point(105, 5);
             this.scriptsStatusLabel.Name = "scriptsStatusLabel";
-            this.scriptsStatusLabel.Size = new System.Drawing.Size(225, 25);
+            this.scriptsStatusLabel.Size = new System.Drawing.Size(225, 31);
             this.scriptsStatusLabel.TabIndex = 33;
             this.scriptsStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -1054,7 +1055,7 @@
             this.splitter3.MinSize = 37;
             this.splitter3.Name = "splitter3";
             this.splitter3.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
-            this.splitter3.Size = new System.Drawing.Size(338, 3);
+            this.splitter3.Size = new System.Drawing.Size(408, 3);
             this.splitter3.TabIndex = 35;
             this.splitter3.TabStop = false;
             // 
@@ -1067,14 +1068,14 @@
             this.scriptsMessage.Multiline = true;
             this.scriptsMessage.Name = "scriptsMessage";
             this.scriptsMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.scriptsMessage.Size = new System.Drawing.Size(338, 102);
+            this.scriptsMessage.Size = new System.Drawing.Size(408, 102);
             this.scriptsMessage.TabIndex = 40;
             this.scriptsMessage.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]хорошая[/color] погода.\r\nМы пойдем [" +
     "color=#12830a]купаться[/color] на речку.";
             this.scriptsMessage.WordWrap = false;
             this.scriptsMessage.TextChanged += new System.EventHandler(this.scriptsSubject_TextChanged);
-            this.scriptsMessage.Enter += new System.EventHandler(this.TestBox_Enter);
-            this.scriptsMessage.Leave += new System.EventHandler(this.TestMessageBox_Leave);
+            this.scriptsMessage.Enter += new System.EventHandler(this.scriptsTestBox_Enter);
+            this.scriptsMessage.Leave += new System.EventHandler(this.scriptsMessage_Leave);
             // 
             // scriptsSpacePanel
             // 
@@ -1083,7 +1084,7 @@
             this.scriptsSpacePanel.MaximumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.MinimumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.Name = "scriptsSpacePanel";
-            this.scriptsSpacePanel.Size = new System.Drawing.Size(338, 10);
+            this.scriptsSpacePanel.Size = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.TabIndex = 39;
             // 
             // scriptsSubject
@@ -1093,22 +1094,24 @@
             this.scriptsSubject.ForeColor = System.Drawing.SystemColors.GrayText;
             this.scriptsSubject.Location = new System.Drawing.Point(10, 10);
             this.scriptsSubject.Name = "scriptsSubject";
-            this.scriptsSubject.Size = new System.Drawing.Size(338, 20);
+            this.scriptsSubject.Size = new System.Drawing.Size(408, 20);
             this.scriptsSubject.TabIndex = 33;
             this.scriptsSubject.Text = "Тема сообщения";
             this.scriptsSubject.TextChanged += new System.EventHandler(this.scriptsSubject_TextChanged);
-            this.scriptsSubject.Enter += new System.EventHandler(this.TestBox_Enter);
-            this.scriptsSubject.Leave += new System.EventHandler(this.TestSubjectBox_Leave);
+            this.scriptsSubject.Enter += new System.EventHandler(this.scriptsTestBox_Enter);
+            this.scriptsSubject.Leave += new System.EventHandler(this.scriptsSubject_Leave);
             // 
             // scriptsListPanel
             // 
+            this.scriptsListPanel.Controls.Add(this.scriptsAccept);
+            this.scriptsListPanel.Controls.Add(this.scriptsCancel);
             this.scriptsListPanel.Controls.Add(this.scriptsName);
             this.scriptsListPanel.Controls.Add(this.scriptsList);
-            this.scriptsListPanel.Controls.Add(this.scriptsAccept);
             this.scriptsListPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.scriptsListPanel.Location = new System.Drawing.Point(3, 3);
+            this.scriptsListPanel.MinimumSize = new System.Drawing.Size(149, 0);
             this.scriptsListPanel.Name = "scriptsListPanel";
-            this.scriptsListPanel.Size = new System.Drawing.Size(219, 498);
+            this.scriptsListPanel.Size = new System.Drawing.Size(149, 498);
             this.scriptsListPanel.TabIndex = 7;
             // 
             // scriptsName
@@ -1120,9 +1123,9 @@
             this.scriptsName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.scriptsName.Location = new System.Drawing.Point(3, 6);
             this.scriptsName.Name = "scriptsName";
-            this.scriptsName.Size = new System.Drawing.Size(210, 20);
+            this.scriptsName.Size = new System.Drawing.Size(140, 20);
             this.scriptsName.TabIndex = 0;
-            this.scriptsName.TextChanged += new System.EventHandler(this.ScriptNameBox_TextChanged);
+            this.scriptsName.TextChanged += new System.EventHandler(this.scriptsName_TextChanged);
             // 
             // scriptsList
             // 
@@ -1131,25 +1134,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.scriptsList.Location = new System.Drawing.Point(3, 29);
             this.scriptsList.Name = "scriptsList";
-            this.scriptsList.Size = new System.Drawing.Size(210, 407);
+            this.scriptsList.Size = new System.Drawing.Size(140, 420);
             this.scriptsList.Sorted = true;
             this.scriptsList.TabIndex = 2;
             this.scriptsList.SelectedIndexChanged += new System.EventHandler(this.scriptsList_SelectedIndexChanged);
-            // 
-            // scriptsAccept
-            // 
-            this.scriptsAccept.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.scriptsAccept.Location = new System.Drawing.Point(44, 450);
-            this.scriptsAccept.MaximumSize = new System.Drawing.Size(115, 38);
-            this.scriptsAccept.MinimumSize = new System.Drawing.Size(115, 38);
-            this.scriptsAccept.Name = "scriptsAccept";
-            this.scriptsAccept.Size = new System.Drawing.Size(115, 38);
-            this.scriptsAccept.TabIndex = 13;
-            this.scriptsAccept.Text = "Выбрать";
-            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsAccept.UseVisualStyleBackColor = true;
             // 
             // TasksUpdater
             // 
@@ -1165,6 +1153,34 @@
             // 
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
+            // 
+            // scriptsCancel
+            // 
+            this.scriptsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.scriptsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.scriptsCancel.Location = new System.Drawing.Point(105, 456);
+            this.scriptsCancel.Name = "scriptsCancel";
+            this.scriptsCancel.Size = new System.Drawing.Size(38, 38);
+            this.scriptsCancel.TabIndex = 14;
+            this.scriptsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsCancel.UseVisualStyleBackColor = true;
+            this.scriptsCancel.Click += new System.EventHandler(this.scriptsCancel_Click);
+            // 
+            // scriptsAccept
+            // 
+            this.scriptsAccept.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.scriptsAccept.Enabled = false;
+            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.scriptsAccept.Location = new System.Drawing.Point(3, 456);
+            this.scriptsAccept.Name = "scriptsAccept";
+            this.scriptsAccept.Size = new System.Drawing.Size(96, 38);
+            this.scriptsAccept.TabIndex = 16;
+            this.scriptsAccept.Text = "Выбрать";
+            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsAccept.UseVisualStyleBackColor = true;
             // 
             // tasksTable
             // 
@@ -1440,7 +1456,6 @@
         private System.Windows.Forms.TextBox scriptsSubject;
         private System.Windows.Forms.Panel scriptsListPanel;
         private System.Windows.Forms.ListBox scriptsList;
-        private System.Windows.Forms.Button scriptsAccept;
         private System.Windows.Forms.TextBox scriptsResult;
         private System.Windows.Forms.TextBox scriptsName;
         private System.Windows.Forms.TextBox scriptsCodeBox;
@@ -1457,6 +1472,8 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Timer scriptsTestAbortTimer;
+        private System.Windows.Forms.Button scriptsCancel;
+        private System.Windows.Forms.Button scriptsAccept;
 
 
     }

@@ -60,7 +60,7 @@ namespace Voron_Poster
             scriptsEditor.Size = scriptsCodeBox.Size;
             scriptsEditor.Location = scriptsCodeBox.Location;
             scriptsEditor.Anchor = scriptsCodeBox.Anchor;
-            scriptsEditor.TextChanged += CodeEditor_TextChanged;
+            scriptsEditor.TextChanged += scriptsEditor_TextChanged;
             scriptsCodeBox.Dispose();
             scriptsCodeTab.Controls.Add(scriptsEditor);
         }
@@ -704,41 +704,14 @@ namespace Voron_Poster
 
         #endregion
 
+        #region Scripts
+
         string OpenedScript;
+        bool IgnoreEvents;
 
-        private void TestBox_Enter(object sender, EventArgs e)
+        private void scriptsTab_Enter(object sender, EventArgs e)
         {
-            if ((sender as TextBox).ForeColor == SystemColors.GrayText)
-            {
-                (sender as TextBox).Text = String.Empty;
-                (sender as TextBox).ForeColor = SystemColors.WindowText;
-                (sender as TextBox).Font = new Font((sender as TextBox).Font, FontStyle.Regular);
-            }
-        }
-
-        private void TestSubjectBox_Leave(object sender, EventArgs e)
-        {
-            if (scriptsSubject.Text == String.Empty)
-            {
-                scriptsSubject.Text = "Тема сообщения";
-                scriptsSubject.ForeColor = SystemColors.GrayText;
-                scriptsSubject.Font = new Font(scriptsSubject.Font, FontStyle.Italic);
-            }
-        }
-
-        private void TestMessageBox_Leave(object sender, EventArgs e)
-        {
-            if (scriptsMessage.Text == String.Empty)
-            {
-                scriptsMessage.Text = "[b]Тестовое сообщение[b]\nСегодня [color=red]" +
-                    "хорошая[/color] погода.\nМы пойдем [color=#12830a]купаться[/color] на речку.";
-                scriptsMessage.ForeColor = SystemColors.GrayText;
-                scriptsMessage.Font = new Font(scriptsMessage.Font, FontStyle.Italic);
-            }
-        }
-
-        private void ScriptsPage_Enter(object sender, EventArgs e)
-        {
+            IgnoreEvents = true;
             scriptsList.Items.Clear();
             scriptsName.AutoCompleteCustomSource.Clear();
             Directory.CreateDirectory(".\\Scripts\\");
@@ -749,20 +722,46 @@ namespace Voron_Poster
                 s = s.Replace(".\\Scripts\\", String.Empty).Replace(".cs", String.Empty);
                 scriptsList.Items.Add(s);
                 scriptsName.AutoCompleteCustomSource.Add(s);
-            });
-            scriptsList.SelectedIndex = scriptsList.Items.Count - 1;
+            }); ;
+            SelectScriptInList();
+            IgnoreEvents = false;
+        }
+
+        private string GetScriptPath(string Path)
+        {
+            if (!Path.EndsWith(".cs")) Path += ".cs";
+            if (Path.IndexOf('\\') < 0) Path = "Scripts\\" + Path;
+            return Path;
+        }
+
+        private bool AskSave()
+        {
+            switch (MessageBox.Show("Сохранить изменения в файле \""
+                +scriptsName.Text+"\"?", "Изменения", MessageBoxButtons.YesNoCancel))
+            {
+                case System.Windows.Forms.DialogResult.Yes:
+                    scriptsSave_Click(scriptsSave, EventArgs.Empty);
+                    break;
+                case System.Windows.Forms.DialogResult.Cancel:
+                    IgnoreEvents = true;
+                    if (OpenedScript == null)
+                        scriptsList.SelectedIndex = -1;
+                    else
+                    {
+                        scriptsName.Text = OpenedScript;
+                        SelectScriptInList();
+                    }
+                    IgnoreEvents = false;
+                    return false;
+            }
+            return true;
         }
 
         private void SelectScriptInList()
         {
+            IgnoreEvents = true;
             Console.WriteLine("select begins");
-            //if (!ScriptNameBox.Text.Equals((string)AllScriptsListBox.SelectedItem,
-            //        StringComparison.OrdinalIgnoreCase) ^ SaveScriptButton.Enabled)
-            //{
             int i;
-            //if () i = int.MaxValue;
-            //else
-            if (scriptsSave.Enabled) scriptsList.SelectedIndexChanged -= scriptsList_SelectedIndexChanged;
             for (i = 0; i < scriptsList.Items.Count; i++)
             {
                 if (scriptsName.Text.Equals((string)scriptsList.Items[i],
@@ -774,119 +773,99 @@ namespace Voron_Poster
             }
             if (i >= scriptsList.Items.Count)
             {
-                scriptsList.SelectedIndexChanged -= scriptsList_SelectedIndexChanged;
                 scriptsList.SelectedIndex = -1;
                 if (scriptsEditor.Text != String.Empty)
                 {
                     OpenedScript = (string)scriptsList.SelectedItem;
                     if (scriptsName.Text != String.Empty)
+                    {
                         scriptsSave.Enabled = true;
+                        scriptsAccept.Enabled = true;
+                    }
                 }
+                else scriptsAccept.Enabled = false;
             }
-            scriptsList.SelectedIndexChanged += scriptsList_SelectedIndexChanged;
-            //}
+            else
+                scriptsAccept.Enabled = true;
+            IgnoreEvents = false;
             Console.WriteLine("select ends");
+            //}
         }
 
-        private void ScriptNameBox_TextChanged(object sender, EventArgs e)
+        private void scriptsName_TextChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("namechange begins");
-            if (!scriptsName.Text.Equals((string)scriptsList.SelectedItem,
-                   StringComparison.OrdinalIgnoreCase) && scriptsEditor.Text != String.Empty && scriptsName.Text != String.Empty)
-                scriptsSave.Enabled = true;
-            SelectScriptInList();
-            Console.WriteLine("namechange begins");
-        }
-
-        private bool AskSave()
-        {
-
-            switch (MessageBox.Show("Сохранить изменения?", "Изменения", MessageBoxButtons.YesNoCancel))
+            if (!IgnoreEvents)
             {
-                case System.Windows.Forms.DialogResult.Yes:
-                    SaveScriptButton_Click(scriptsSave, EventArgs.Empty);
-                    break;
-                case System.Windows.Forms.DialogResult.Cancel:
-                    if (OpenedScript == null)
-                    {
-                        scriptsList.SelectedIndexChanged -= scriptsList_SelectedIndexChanged;
-                        scriptsList.SelectedIndex = -1;
-                        scriptsList.SelectedIndexChanged += scriptsList_SelectedIndexChanged;
-                    }
-                    else
-                    {
-                        scriptsName.Text = OpenedScript;
-                        SelectScriptInList();
-                    }
-                    return false;
+                Console.WriteLine("namechange begins");
+                scriptsSave.Enabled = scriptsEditor.Text != String.Empty && scriptsName.Text != String.Empty;
+                SelectScriptInList();
+                Console.WriteLine("namechange ends");
             }
-            return true;
         }
 
         private void scriptsList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("indexchange begins");
-            if (OpenedScript != (string)scriptsList.SelectedItem && scriptsList.SelectedIndex != -1)
+            if (!IgnoreEvents)
             {
-                if (scriptsSave.Enabled && !AskSave()) return;
-                scriptsEditor.Text = String.Empty;
-                try
+                Console.WriteLine("indexchange begins");
+                IgnoreEvents = true;
+                if (OpenedScript != (string)scriptsList.SelectedItem && scriptsList.SelectedIndex != -1)
                 {
-                    scriptsEditor.Text = System.IO.File.ReadAllText(GetScriptPath((string)scriptsList.SelectedItem));
-                    OpenedScript = (string)scriptsList.SelectedItem;
-                    scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+                    if (scriptsSave.Enabled && !AskSave()) return;
+                    scriptsEditor.Text = String.Empty;
+                    try
+                    {
+                        scriptsEditor.Text = System.IO.File.ReadAllText(GetScriptPath((string)scriptsList.SelectedItem));
+                        OpenedScript = (string)scriptsList.SelectedItem;
+                        scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+                    }
+                    catch (Exception Error)
+                    {
+                        MessageBox.Show(Error.Message);
+                    }
+                    scriptsSave.Enabled = false;
                 }
-                catch (Exception Error)
-                {
-                    MessageBox.Show(Error.Message);
-                }
+                scriptsDelete.Enabled = scriptsList.SelectedIndex != -1;
+                scriptsAccept.Enabled = scriptsDelete.Enabled;
+                scriptsName.Text = (string)scriptsList.SelectedItem;
+                IgnoreEvents = false;
+                Console.WriteLine("indexchange ends");
             }
-            scriptsDelete.Enabled = scriptsList.SelectedIndex != -1;
-            scriptsName.TextChanged -= ScriptNameBox_TextChanged;
-            scriptsName.Text = (string)scriptsList.SelectedItem;
-            scriptsName.TextChanged += ScriptNameBox_TextChanged;
-            scriptsEditor.TextChanged -= CodeEditor_TextChanged;
-            scriptsSave.Enabled = false;
-            scriptsEditor.TextChanged += CodeEditor_TextChanged;
-            Console.WriteLine("indexchange ends");
         }
 
-        private void CodeEditor_TextChanged(object sender, EventArgs e)
+        private void scriptsEditor_TextChanged(object sender, EventArgs e)
         {
-            scriptsSave.Enabled = true;
-            scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+            if (!IgnoreEvents)
+            {
+                scriptsSave.Enabled = true;
+                scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+            }
         }
-        private void SaveScriptButton_Click(object sender, EventArgs e)
+
+        private void scriptsSave_Click(object sender, EventArgs e)
         {
             scriptsSave.Enabled = false;
+            IgnoreEvents = true;
             try
             {
-                if (scriptsName.Text == String.Empty) NewScriptButton_Click(sender, e);
+                if (scriptsName.Text == String.Empty) scriptsNew_Click(sender, e);
                 System.IO.File.WriteAllText(GetScriptPath(scriptsName.Text), scriptsEditor.Text);
                 OpenedScript = scriptsName.Text;
-                scriptsList.SelectedIndexChanged -= scriptsList_SelectedIndexChanged;
-                ScriptsPage_Enter(sender, e);
-                SelectScriptInList();
-                scriptsList.SelectedIndexChanged += scriptsList_SelectedIndexChanged;
+                scriptsTab_Enter(sender, e);
             }
             catch (Exception Error)
             {
                 MessageBox.Show(Error.Message);
                 scriptsSave.Enabled = true;
             }
+            IgnoreEvents = false;
         }
 
-        private string GetScriptPath(string Path)
-        {
-            if (!Path.EndsWith(".cs")) Path += ".cs";
-            if (Path.IndexOf('\\') < 0) Path = "Scripts\\" + Path;
-            return Path;
-        }
-
-        private void NewScriptButton_Click(object sender, EventArgs e)
+        private void scriptsNew_Click(object sender, EventArgs e)
         {
             if (scriptsSave.Enabled && !AskSave()) return;
             scriptsEditor.Text = String.Empty;
+            OpenedScript = null;
             int i = 1;
             while (File.Exists(GetScriptPath("Script #" + i.ToString()))) i++;
             scriptsName.Text = "Script #" + i.ToString();
@@ -900,8 +879,10 @@ namespace Voron_Poster
                 try
                 {
                     File.Delete(GetScriptPath(OpenedScript));
-                    ScriptsPage_Enter(sender, e);
-                    propScriptsList.SelectedIndex = propScriptsList.Items.Count - 1;
+                    scriptsTab_Enter(sender, e);
+                    scriptsSave.Enabled = false;
+                    scriptsList.SelectedIndex = scriptsList.Items.Count -1;
+
                 }
                 catch (Exception Error)
                 {
@@ -909,6 +890,8 @@ namespace Voron_Poster
                     MessageBox.Show(Error.Message);
                 }
         }
+
+        #region TestTab
 
         public class ScriptData
         {
@@ -944,7 +927,7 @@ namespace Voron_Poster
         {
             scriptsRun.Enabled = false;
             scriptsListPanel.Enabled = false;
-            bool SaveState = scriptsSave.Enabled, DeleteSate = scriptsDelete.Enabled;
+            bool SaveState = scriptsSave.Enabled, DeleteState = scriptsDelete.Enabled;
             scriptsSave.Enabled = false;
             scriptsDelete.Enabled = false;
             scriptsEditor.IsReadOnly = true;
@@ -996,14 +979,13 @@ namespace Voron_Poster
             WaitScript.Start();
             await WaitScript;
             scriptsTestAbortTimer.Enabled = false;
+            scriptsRun.Click -= scriptsRun_Click; // in case it wasn't removed
             scriptsRun.Click += scriptsRun_Click;
             scriptsRun.Click -= scriptsAbort_Click;
             scriptsRun.Text = "Тест";
             if (Error != null)
             {
                 scriptsStatusLabel.Text = Error.Message;
-                // else
-                //      scriptsStatusLabel.Text = "Скрипт выполнялся слишком долго";
                 scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
                 scriptsStatusLabel.ForeColor = Color.Red;
             }
@@ -1021,10 +1003,9 @@ namespace Voron_Poster
             scriptsRun.Enabled = true;
             scriptsListPanel.Enabled = true;
             scriptsSave.Enabled = SaveState;
-            scriptsDelete.Enabled = DeleteSate;
+            scriptsDelete.Enabled = DeleteState;
             scriptsEditor.IsReadOnly = false;
         }
-
 
         private void scriptsAbort_Click(object sender, EventArgs e)
         {
@@ -1044,15 +1025,56 @@ namespace Voron_Poster
             scriptsRun.Text = "Прервать";
             scriptsRun.Enabled = true;
             ToolTip.SetToolTip(scriptsRun, "Завершить процесс\n"
-                +"Процесс не отвечает, возможно в коде есть бесконечный цикл.\n"
-                +"Не используйте этот скрипт пока не исправите проблему!\n"
-                +"Завершить процесс при выполнении основных задачь будет не возможно!");
+                + "Процесс не отвечает, возможно в коде есть бесконечный цикл.\n"
+                + "Не используйте этот скрипт пока не исправите проблему!\n"
+                + "Завершить процесс при выполнении основных задачь будет не возможно!");
         }
 
         private void scriptsSubject_TextChanged(object sender, EventArgs e)
         {
             scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
         }
+
+        private void scriptsTestBox_Enter(object sender, EventArgs e)
+        {
+            if ((sender as TextBox).ForeColor == SystemColors.GrayText)
+            {
+                (sender as TextBox).Text = String.Empty;
+                (sender as TextBox).ForeColor = SystemColors.WindowText;
+                (sender as TextBox).Font = new Font((sender as TextBox).Font, FontStyle.Regular);
+            }
+        }
+
+        private void scriptsSubject_Leave(object sender, EventArgs e)
+        {
+            if (scriptsSubject.Text == String.Empty)
+            {
+                scriptsSubject.Text = "Тема сообщения";
+                scriptsSubject.ForeColor = SystemColors.GrayText;
+                scriptsSubject.Font = new Font(scriptsSubject.Font, FontStyle.Italic);
+            }
+        }
+
+        private void scriptsMessage_Leave(object sender, EventArgs e)
+        {
+            if (scriptsMessage.Text == String.Empty)
+            {
+                scriptsMessage.Text = "[b]Тестовое сообщение[b]\nСегодня [color=red]" +
+                    "хорошая[/color] погода.\nМы пойдем [color=#12830a]купаться[/color] на речку.";
+                scriptsMessage.ForeColor = SystemColors.GrayText;
+                scriptsMessage.Font = new Font(scriptsMessage.Font, FontStyle.Italic);
+            }
+        }
+
+        #endregion
+
+        private void scriptsCancel_Click(object sender, EventArgs e)
+        {
+            if (scriptsSave.Enabled && !AskSave()) return;
+            Tabs.TabPages.Remove(scriptsTab);
+        }
+
+        #endregion
 
     }
 }

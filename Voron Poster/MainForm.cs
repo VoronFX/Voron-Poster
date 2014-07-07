@@ -944,7 +944,7 @@ namespace Voron_Poster
         private void scriptsAccept_Click(object sender, EventArgs e)
         {
             scriptsCancel_Click(sender, e);
-            propScriptsList.Items.Insert(propScriptsList.SelectedIndex+1, scriptsName.Text);
+            propScriptsList.Items.Insert(propScriptsList.SelectedIndex + 1, scriptsName.Text);
             propScriptsList.SelectedIndex = propScriptsList.SelectedIndex + 1;
         }
 
@@ -1097,25 +1097,76 @@ namespace Voron_Poster
 
         #endregion
 
-        struct TaskList
+        public struct TaskList
         {
             public Forum.TaskBaseProperties[] Properties;
-            public string[] TargetUrl;
+            public string[] TargetUrls;
         }
 
         private void tasksSave_Click(object sender, EventArgs e)
         {
-            Directory.CreateDirectory(@".\TaskLists\");
-            var SaveFileDialog = new SaveFileDialog();
-            SaveFileDialog.DefaultExt = "xml";
-            SaveFileDialog.Filter = "xml";
-            SaveFileDialog.InitialDirectory = @".\TaskLists\";
-            if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            tasksSave.Enabled = false;
+            try
             {
-                TaskList TaskList;
-                TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
+                Directory.CreateDirectory(@".\TaskLists\");
+                var SaveFileDialog = new SaveFileDialog();
+                SaveFileDialog.DefaultExt = "xml";
+                SaveFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
+                SaveFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
+                if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    TaskList TaskList;
+                    TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
+                    TaskList.TargetUrls = new string[Tasks.Count];
+                    for (int i = 0; i < Tasks.Count; i++)
+                    {
+                        TaskList.Properties[i] = Tasks[i].Forum.Properties;
+                        TaskList.TargetUrls[i] = Tasks[i].TargetUrl;
+                    }
+                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                    using (FileStream F = File.Create(SaveFileDialog.FileName))
+                        Xml.Serialize(F, TaskList);
+                }
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            tasksSave.Enabled = true;
+        }
 
-            } 
+        private void tasksLoad_Click(object sender, EventArgs e)
+        {
+            tasksLoad.Enabled = false;
+            try
+            {
+                Directory.CreateDirectory(@".\TaskLists\");
+                var OpenFileDialog = new OpenFileDialog();
+                OpenFileDialog.DefaultExt = ".xml";
+                OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
+                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath,@"TaskLists");
+                if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    TaskList TaskList;
+                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                    using (FileStream F = File.OpenRead(OpenFileDialog.FileName))
+                    TaskList = (TaskList)Xml.Deserialize(F);
+                    for (int i = 0; i < TaskList.Properties.Length; i++)
+                    {
+                        TaskGui NewTask = new TaskGui(this);
+                        NewTask.New = false;
+                        NewTask.TargetUrl = TaskList.TargetUrls[i];
+                        NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
+                        NewTask.Forum.Properties = TaskList.Properties[i];
+                        Tasks.Add(NewTask);
+                    }
+                }
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            tasksLoad.Enabled = true;
         }
 
     }

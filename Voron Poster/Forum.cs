@@ -87,15 +87,17 @@ namespace Voron_Poster
             }
         }
 
-        public Task<bool> Task;
+        public Task Task;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         public TimeSpan RequestTimeout = new TimeSpan(0,0,10);
         public List<string> Log;
         public int Progress;
         public CancellationTokenSource Cancel;
+        public static CaptchaForm CaptchaForm = new CaptchaForm();
         public Forum()
         {
             Log = new List<string>();
+            Log.Add("Ожидание");
             Progress = 0;
         }
 
@@ -116,8 +118,8 @@ namespace Voron_Poster
             if (Client != null) Client.Dispose();
         }
 
-        public abstract Task<bool> Login();
-        public abstract Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText);
+        public abstract Task Login();
+        public abstract Task PostMessage(Uri TargetBoard, string Subject, string Message);
 
         public class ScriptData
         {
@@ -163,40 +165,45 @@ namespace Voron_Poster
             return Session;
         }
 
-        public Task<bool> ExecuteScripts(ScriptData ScriptData)
+        public Task ExecuteScripts(ScriptData ScriptData)
         {
-            Task<bool> Processing = new Task<bool>(() =>
+            Task Processing = new Task(() =>
             {
                 var Session = InitScriptEngine(ScriptData);
                 for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
                 {
                     Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    if (Cancel.IsCancellationRequested) return false;
+                    if (Cancel.IsCancellationRequested) break;
                 }
-                return true;
             });
             Processing.Start();
             return Processing;
         }
 
-
-        public async Task<bool> Run(Uri TargetBoard, string Subject, string Message)
+        public async Task Run(Uri TargetBoard, string Subject, string Message)
         {
+            try
+            {
                 Cancel = new CancellationTokenSource();
-                Task<bool> LoginProcess = Login();
+                Task LoginProcess = Login();
                 var ScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
                 await ExecuteScripts(ScriptData);
-                if (Cancel.IsCancellationRequested) return false;
+                if (Cancel.IsCancellationRequested) return;
                 await LoginProcess;
-                if (Cancel.IsCancellationRequested) return false;
+                if (Cancel.IsCancellationRequested) return;
                 for (int i = 0; i < ScriptData.Output.Count; i++)
                 {
                     await PostMessage(TargetBoard, ScriptData.Output[i].Subject, ScriptData.Output[i].Message);
-                    if (Cancel.IsCancellationRequested) return false;
+                    if (Cancel.IsCancellationRequested) return;
                 }
-                return true;
-   
+            }
+            catch (Exception Error)
+            {
+                Log.Add("Ошибка: " + Error.Message);
+                throw Error;
+            }
         }
+
     }
 
 }

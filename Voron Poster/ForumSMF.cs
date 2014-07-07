@@ -55,24 +55,23 @@ namespace Voron_Poster
             return "";
         }
 
-        public override async Task<bool> Login()
+        public override async Task Login()
         {
             lock (Log) { Log.Add("Cоединение с сервером"); }
             if (Client != null) Client.Dispose();
             Client = new HttpClient();
             Client.Timeout = RequestTimeout;
-            try
-            {
-                Progress++;
-                HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
-                Progress++;
-                string Html = await RespMes.Content.ReadAsStringAsync();
-                lock (Log) { Log.Add("Авторизация"); Progress++; }
-                Html = Html.ToLower();
-                CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
-                string HashPswd = hashLoginPassword(Properties.Username, Properties.Password, CurrSessionID);
-                AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
-                var PostData = new FormUrlEncodedContent(new[]
+
+            Progress++;
+            HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
+            Progress++;
+            string Html = await RespMes.Content.ReadAsStringAsync();
+            lock (Log) { Log.Add("Авторизация"); Progress++; }
+            Html = Html.ToLower();
+            CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
+            string HashPswd = hashLoginPassword(Properties.Username, Properties.Password, CurrSessionID);
+            AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
+            var PostData = new FormUrlEncodedContent(new[]
                     {
                         new KeyValuePair<string, string>("user", Properties.Username.ToLower()),
                         new KeyValuePair<string, string>("cookielength", "-1"),
@@ -80,23 +79,14 @@ namespace Voron_Poster
                         new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
                         new KeyValuePair<string, string>(AnotherID, CurrSessionID)
                      });
-                Progress++;
-                RespMes = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
-                Progress++;
-                Html = await RespMes.Content.ReadAsStringAsync();
-                if (Html.ToLower().IndexOf("index.php?action=logout") >= 0)
-                {
-                    lock (Log) { Log.Add("Успешно авторизирован"); Progress++; }
-                    return true;
-                }
-                lock (Log) { Log.Add("Ошибка при авторизации"); }
-                return false;
-            }
-            catch (Exception e)
-            {
-                lock (Log) { Log.Add("Ошибка: " + e.Message); }
-                return false;
-            }
+            Progress++;
+            RespMes = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
+            Progress++;
+            Html = await RespMes.Content.ReadAsStringAsync();
+            if (Html.ToLower().IndexOf("index.php?action=logout") >= 0)
+                lock (Log) { Log.Add("Успешно авторизирован"); Progress++; }
+            else
+                throw new Exception("Ошибка при авторизации");
         }
 
         //private bool TryGetStartBoard(string BoardUri, out string Start, out string Board)
@@ -144,113 +134,76 @@ namespace Voron_Poster
             else return false;
         }
 
-        private async Task<bool> GetCaptcha(CaptchaForm CaptchaForm)
+        private async Task<Bitmap> GetCaptcha()
         {
-            CaptchaForm.button3.Enabled = false;
-            Bitmap Captcha = new Bitmap(10, 10);
-            try
-            {
-                HttpResponseMessage RespMes = await Client.GetAsync(CaptchaUri, Cancel.Token);
-                lock (Log) { Log.Add("Загружаю каптчу"); };
-                CaptchaForm.pictureBox1.Image = new Bitmap(await RespMes.Content.ReadAsStreamAsync());
-                CaptchaForm.ClientSize = CaptchaForm.ClientSize - CaptchaForm.pictureBox1.Size + CaptchaForm.pictureBox1.Image.Size;
-                //Random r = new Random();
-                //string NewRand = String.Empty;
-                //int n = HttpUtility.ParseQueryString(CaptchaUri.Query).Get("rand").Length;
-                //for (int i = 0; i < n; i++)
-                //{
-                //    int ran = r.Next(15);
-                //    if (ran > 9)
-                //        NewRand += ((char)(ran + 87)).ToString();
-                //    else NewRand += ((char)ran).ToString();
-                //}
-                //HttpUtility.ParseQueryString(CaptchaUri.Query).Set("rand", NewRand);
-                return true;
-            }
-            catch (Exception e)
-            {
-                lock (Log) { Log.Add("Ошибка: " + e.Message); }
-                return false;
-            }
-            finally
-            {
-                CaptchaForm.button3.Enabled = true;
-            }
+            HttpResponseMessage RespMes = await Client.GetAsync(CaptchaUri, Cancel.Token);
+            lock (Log) { Log.Add("Загружаю каптчу"); };
+            return new Bitmap(await RespMes.Content.ReadAsStreamAsync());
+            //Random r = new Random();
+            //string NewRand = String.Empty;
+            //int n = HttpUtility.ParseQueryString(CaptchaUri.Query).Get("rand").Length;
+            //for (int i = 0; i < n; i++)
+            //{
+            //    int ran = r.Next(15);
+            //    if (ran > 9)
+            //        NewRand += ((char)(ran + 87)).ToString();
+            //    else NewRand += ((char)ran).ToString();
+            //}
+            //HttpUtility.ParseQueryString(CaptchaUri.Query).Set("rand", NewRand);
         }
 
-        public override async Task<bool> PostMessage(Uri TargetBoard, string Subject, string BBText)
+        public override async Task PostMessage(Uri TargetBoard, string Subject, string Message)
         {
-            CaptchaForm CaptchaForm = new CaptchaForm();
-            try
+
+            HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage
+                + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
+            Progress++;
+            string Html = await RespMes.Content.ReadAsStringAsync();
+            lock (Log) { Log.Add("Подготовка"); Progress++; }
+            Html = Html.ToLower();
+            string Topic = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get("topic");
+            if (Topic == null) Topic = "0";
+            if (!TryGetPostUrl(Html, out TargetBoard))
+                throw new Exception("Ошибка не удалось извлечь ссылку для публикации");
+
+            string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
+            if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
+                UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
-                HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage
-                    + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
+                CaptchaForm.IsFree.WaitOne();
+                CaptchaForm.RefreshFunction = GetCaptcha;
+                CaptchaForm.CancelFunction = () => Cancel.Cancel();
+                CaptchaForm.ShowDialog();
+            }
+            Progress++;
+            lock (Log) { Log.Add("Публикация"); }
+            using (var FormData = new MultipartFormDataContent())
+            {
+                FormData.Add(new StringContent(Topic), "topic");
+                FormData.Add(new StringContent(Subject), "subject");
+                FormData.Add(new StringContent(Message), "message");
+                if (CaptchaForm != null)
+                    FormData.Add(new StringContent(CaptchaForm.Result.Text), "post_vv[code]");
+                FormData.Add(new StringContent(SeqNum), "seqnum");
+                FormData.Add(new StringContent("0"), "message_mode");
+                FormData.Add(new StringContent(CurrSessionID), AnotherID);
+
+                FormData.Add(new StringContent("0"), "additional_options");
+                FormData.Add(new StringContent("0"), "lock");
+                FormData.Add(new StringContent("0"), "notify");
+                //FormData.Add(new StringContent(""), "sel_color");
+                //FormData.Add(new StringContent(""), "sel_size");
+                //FormData.Add(new StringContent(""), "sel_face");
+                //FormData.Add(new StringContent("xx"), "icon");
+
+                RespMes = await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token);
                 Progress++;
-                string Html = await RespMes.Content.ReadAsStringAsync();
-                lock (Log) { Log.Add("Подготовка"); Progress++; }
+                Html = await RespMes.Content.ReadAsStringAsync();
                 Html = Html.ToLower();
-                string Topic = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get("topic");
-                if (Topic == null) Topic = "0";
-                if (!TryGetPostUrl(Html, out TargetBoard))
-                {
-                    lock (Log) { Log.Add("Ошибка не удалось извлечь ссылку для публикации"); }
-                    return false;
-                }
-                string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
-                if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
-                    UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
-                {
-                    CaptchaForm.func = GetCaptcha;
-                    CaptchaForm.button2.Click += new System.EventHandler((object o, EventArgs e) => { Cancel.Cancel(); });
-                    await GetCaptcha(CaptchaForm);
-                    Progress++;
-                    CaptchaForm.ShowDialog();
-                }
-                else Progress++;
-                lock (Log) { Log.Add("Публикация"); }
-                using (var FormData = new MultipartFormDataContent())
-                {
-                    FormData.Add(new StringContent(Topic), "topic");
-                    FormData.Add(new StringContent(Subject), "subject");
-                    FormData.Add(new StringContent(BBText), "message");
-                    if (CaptchaForm != null)
-                        FormData.Add(new StringContent(CaptchaForm.textBox1.Text), "post_vv[code]");
-                    FormData.Add(new StringContent(SeqNum), "seqnum");
-                    FormData.Add(new StringContent("0"), "message_mode");
-                    FormData.Add(new StringContent(CurrSessionID), AnotherID);
-
-                    FormData.Add(new StringContent("0"), "additional_options");
-                    FormData.Add(new StringContent("0"), "lock");
-                    FormData.Add(new StringContent("0"), "notify");
-                    //FormData.Add(new StringContent(""), "sel_color");
-                    //FormData.Add(new StringContent(""), "sel_size");
-                    //FormData.Add(new StringContent(""), "sel_face");
-                    //FormData.Add(new StringContent("xx"), "icon");
-
-                    RespMes = await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token);
-                    Progress++;
-                    Html = await RespMes.Content.ReadAsStringAsync();
-                    Html = Html.ToLower();
-                    if (Html.IndexOf("errorbox") > 0 || Html.IndexOf(Subject) < 0)
-                    {
-                        lock (Log) { Log.Add("Ошибка"); Progress++; }
-                        return false;
-                    }
-                    else
-                    {
-                        lock (Log) { Log.Add("Тема создана"); Progress++; }
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                lock (Log) { Log.Add("Ошибка: " + e.Message); }
-                return false;
-            }
-            finally
-            {
-                CaptchaForm.Dispose();
+                if (Html.IndexOf("errorbox") > 0 || Html.IndexOf(Subject) < 0)
+                    throw new Exception("Сайт вернул ошибку");
+                
+                lock (Log) { Log.Add("Тема создана"); Progress++; }
             }
         }
     }

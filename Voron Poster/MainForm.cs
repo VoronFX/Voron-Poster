@@ -430,16 +430,19 @@ namespace Voron_Poster
             TempForum.Properties = TempProperties;
             TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
+
+            Task LoginTask = TempForum.Login();
+            PropertiesActivityTask = LoginTask;
             try
             {
-                Task<bool> LoginTask = TempForum.Login();
-                PropertiesActivityTask = LoginTask;
-                if (await LoginTask)
-                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
-                else
-                    propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                await LoginTask;
+                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
             }
-            catch { propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error); }
+            catch (Exception Error)
+            {
+                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error);
+            }
             TempForum = null;
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
@@ -451,6 +454,7 @@ namespace Voron_Poster
             if (!PropertiesActivity)
             {
                 propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Login);
+                ToolTip.SetToolTip(propAuthTryLogin, String.Empty);
                 if (sender == propMainUrl || sender == propEngine)
                     propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Gear);
             }
@@ -516,8 +520,10 @@ namespace Voron_Poster
             TempForum.Properties = TempProperties;
             CurrTask.Forum = TempForum;
             CurrTask.TargetUrl = TempTargetUrl;
+            CurrTask.Ctrls.Name.Text = CurrTask.TargetUrl;
             TempForum = null;
             CurrTask.New = false;
+            TasksUpdater_Tick(sender, e);
             ClosePropertiesPage(sender, e);
             propApply.Enabled = true;
         }
@@ -1144,13 +1150,13 @@ namespace Voron_Poster
                 var OpenFileDialog = new OpenFileDialog();
                 OpenFileDialog.DefaultExt = ".xml";
                 OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
-                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath,@"TaskLists");
+                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     TaskList TaskList;
                     var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
                     using (FileStream F = File.OpenRead(OpenFileDialog.FileName))
-                    TaskList = (TaskList)Xml.Deserialize(F);
+                        TaskList = (TaskList)Xml.Deserialize(F);
                     for (int i = 0; i < TaskList.Properties.Length; i++)
                     {
                         TaskGui NewTask = new TaskGui(this);

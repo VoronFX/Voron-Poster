@@ -96,6 +96,11 @@ namespace Voron_Poster
         public InfoIcons Status = InfoIcons.Stopped, Action = InfoIcons.Run;
         public void SetStatusIcon()
         {
+            if (Forum != null)
+                lock (Forum.Log)
+                {
+                    Ctrls.Status.Text = Forum.Log.Last<string>();
+                }
             if (Forum == null || Forum.Task == null)
             {
                 Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
@@ -109,16 +114,8 @@ namespace Voron_Poster
                         Action = InfoIcons.Cancel;
                         break;
                     case TaskStatus.RanToCompletion:
-                        if (Forum.Task.Result == true)
-                        {
                             Status = InfoIcons.Complete;
                             Action = InfoIcons.Run;
-                        }
-                        else
-                        {
-                            Status = InfoIcons.Error;
-                            Action = InfoIcons.Restart;
-                        }
                         break;
                     case TaskStatus.Created:
                     case TaskStatus.WaitingForActivation:
@@ -358,11 +355,16 @@ namespace Voron_Poster
                 Ctrls.Properties.Enabled = false;
                 Ctrls.StartStop.Click -= Start;
                 Ctrls.StartStop.Click += Cancel;
-                Forum.Task = Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
-         //   Forum.Task.s
-                SetStatusIcon();
-                Ctrls.StartStop.Enabled = true;
-                await Forum.Task;
+                try
+                {
+                    Forum.Task = Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
+                    SetStatusIcon();
+                    Ctrls.StartStop.Enabled = true;
+                    await Forum.Task;
+                }
+                catch (Exception)
+                {   
+                }
                 SetStatusIcon();
                 Ctrls.StartStop.Click += Start;
                 Ctrls.StartStop.Click -= Cancel;

@@ -73,6 +73,26 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap action_add_24xLG {
+            get {
+                object obj = ResourceManager.GetObject("action_add_24xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap action_add_32xLG {
+            get {
+                object obj = ResourceManager.GetObject("action_add_32xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap action_Cancel_16xLG {
             get {
                 object obj = ResourceManager.GetObject("action_Cancel_16xLG", resourceCulture);
@@ -153,6 +173,36 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap folder_Open_32xLG {
+            get {
+                object obj = ResourceManager.GetObject("folder_Open_32xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap folder_Open_32xMD {
+            get {
+                object obj = ResourceManager.GetObject("folder_Open_32xMD", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap folder_Open_32xSM {
+            get {
+                object obj = ResourceManager.GetObject("folder_Open_32xSM", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap gear_16xLG {
             get {
                 object obj = ResourceManager.GetObject("gear_16xLG", resourceCulture);
@@ -206,6 +256,26 @@ namespace Voron_Poster.Properties {
         internal static System.Drawing.Bitmap save_16xLG {
             get {
                 object obj = ResourceManager.GetObject("save_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap save_24xLG {
+            get {
+                object obj = ResourceManager.GetObject("save_24xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap save_32xLG {
+            get {
+                object obj = ResourceManager.GetObject("save_32xLG", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -316,6 +386,26 @@ namespace Voron_Poster.Properties {
         internal static System.Drawing.Bitmap Symbols_Stop_16xLG {
             get {
                 object obj = ResourceManager.GetObject("Symbols_Stop_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap test_32x_SM {
+            get {
+                object obj = ResourceManager.GetObject("test_32x_SM", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap test_32x_SMcuted {
+            get {
+                object obj = ResourceManager.GetObject("test_32x_SMcuted", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -276,6 +276,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libraries\License.txt" />
+    <None Include="Resources\save_32xLG.png" />
+    <None Include="Resources\folder_Open_32xLG.png" />
+    <None Include="Resources\folder_Open_32xSM.png" />
+    <None Include="Resources\folder_Open_32xMD.png" />
+    <None Include="Resources\save_24xLG.png" />
+    <None Include="Resources\action_add_24xLG.png" />
+    <None Include="Resources\action_add_32xLG.png" />
+    <None Include="Resources\test_32x_SM.png" />
+    <None Include="Resources\test_32x_SMcuted.png" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

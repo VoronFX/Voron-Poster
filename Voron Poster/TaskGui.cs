@@ -27,7 +27,7 @@ namespace Voron_Poster
 
         private MainForm MainForm;
         public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, 
-            Gear, Activity, Login, Question, Save, None }
+            Gear, Activity, Login, Question, Save, Test, None }
         public static Bitmap GetIcon(InfoIcons Info)
         {
             switch (Info)
@@ -49,6 +49,7 @@ namespace Voron_Poster
                 case InfoIcons.Login: return global::Voron_Poster.Properties.Resources.user_16xLG;
                 case InfoIcons.Question: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG;
                 case InfoIcons.Save: return global::Voron_Poster.Properties.Resources.save_16xLG;
+                case InfoIcons.Test: return global::Voron_Poster.Properties.Resources.test_32x_SMcuted;
                 default: return null;
             }
         }
@@ -71,6 +72,7 @@ namespace Voron_Poster
             else if (Icon == Voron_Poster.Properties.Resources.user_16xLG) return InfoIcons.Login;
             else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG) return InfoIcons.Question;
             else if (Icon == global::Voron_Poster.Properties.Resources.save_16xLG) return InfoIcons.Save;
+            else if (Icon == global::Voron_Poster.Properties.Resources.test_32x_SMcuted) return InfoIcons.Test;
             else return InfoIcons.None;
         }
         public static string GetTooltip(InfoIcons Info)
@@ -281,13 +283,13 @@ namespace Voron_Poster
 
         private void AddToGuiTable()
         {
-            MainForm.TasksGuiTable.RowCount = MainForm.TasksGuiTable.RowCount + 1;
+            MainForm.tasksTable.RowCount = MainForm.tasksTable.RowCount + 1;
             for (int i = 0; i < Ctrls.AsArray.Length; i++)
             {
-                MainForm.TasksGuiTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.TasksGuiTable.RowCount - 2);
-                MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 2].SizeType = SizeType.Absolute;
-                MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 2].Height = 24F;
-                MainForm.TasksGuiTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                MainForm.tasksTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.tasksTable.RowCount - 2);
+                MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].SizeType = SizeType.Absolute;
+                MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
+                MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             }
         }
 
@@ -320,19 +322,19 @@ namespace Voron_Poster
         {
             for (int c = 0; c < Ctrls.AsArray.Length; c++)
             {
-                int r = MainForm.TasksGuiTable.GetRow(Ctrls.AsArray[c]);
-                MainForm.TasksGuiTable.Controls.Remove(Ctrls.AsArray[c]);
+                int r = MainForm.tasksTable.GetRow(Ctrls.AsArray[c]);
+                MainForm.tasksTable.Controls.Remove(Ctrls.AsArray[c]);
                 Ctrls.AsArray[c].Dispose();
-                for (r = r + 1; r < MainForm.TasksGuiTable.RowCount; r++)
+                for (r = r + 1; r < MainForm.tasksTable.RowCount; r++)
                 {
-                    Control ControlUnder = MainForm.TasksGuiTable.GetControlFromPosition(c, r);
+                    Control ControlUnder = MainForm.tasksTable.GetControlFromPosition(c, r);
                     if (ControlUnder != null)
-                        MainForm.TasksGuiTable.SetRow(ControlUnder, r - 1);
+                        MainForm.tasksTable.SetRow(ControlUnder, r - 1);
                 }
             }
             lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
-            MainForm.TasksGuiTable.RowCount -= 1;
-            MainForm.TasksGuiTable.RowStyles[MainForm.TasksGuiTable.RowCount - 1].SizeType = SizeType.AutoSize;
+            MainForm.tasksTable.RowCount -= 1;
+            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
         }
 
         private async void Cancel(object sender, EventArgs e)

@@ -36,6 +36,9 @@ namespace Voron_Poster
             }
             catch (Exception Error)
             {
+                if (Error is OperationCanceledException) {
+                    this.Close();
+                } else 
                 MessageBox.Show(Error.Message, "Ошибка");
             }
             buttonRefresh.Enabled = true;

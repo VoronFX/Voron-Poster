@@ -47,7 +47,7 @@ namespace Voron_Poster
                 case InfoIcons.Run: return global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
                 case InfoIcons.Restart: return global::Voron_Poster.Properties.Resources.Restart_6322;
                 case InfoIcons.Cancel: return global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-                case InfoIcons.Clear: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                case InfoIcons.Clear: return GetTaggedIcon(InfoIcons.Stopped);
                 //OtherStuff
                 case InfoIcons.Gear: return global::Voron_Poster.Properties.Resources.gear_16xLG;
                 case InfoIcons.Activity: return global::Voron_Poster.Properties.Resources.Activity_16xLG;
@@ -94,16 +94,19 @@ namespace Voron_Poster
                 {
                     Ctrls.Status.Text = Forum.Log.Last<string>();
                 }
-                MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
+            MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
             if (Forum == null || Forum.Task == null)
             {
-                Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                Ctrls.StatusIcon.Image = GetTaggedIcon(InfoIcons.Stopped);
+                Status = InfoIcons.Stopped;
+                Action = InfoIcons.Run;
             }
             else
             {
                 switch (Forum.Task.Status)
                 {
                     case TaskStatus.Running:
+                    case TaskStatus.WaitingForActivation:
                         Status = InfoIcons.Running;
                         Action = InfoIcons.Cancel;
                         break;
@@ -113,6 +116,11 @@ namespace Voron_Poster
                             Status = InfoIcons.Complete;
                             Action = InfoIcons.Run;
                         }
+                        else if (Forum.Error is OperationCanceledException)
+                        {
+                            Status = InfoIcons.Cancelled;
+                            Action = InfoIcons.Run;
+                        }
                         else
                         {
                             Status = InfoIcons.Error;
@@ -120,7 +128,6 @@ namespace Voron_Poster
                         }
                         break;
                     case TaskStatus.Created:
-                    case TaskStatus.WaitingForActivation:
                     case TaskStatus.WaitingToRun:
                         Status = InfoIcons.Waiting;
                         Action = InfoIcons.Cancel;
@@ -135,11 +142,16 @@ namespace Voron_Poster
                         break;
                 }
             }
+            if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
+            else
+                Ctrls.Progress.Value = Math.Min(560, Forum.Progress[0] + Forum.Progress[1] + Forum.Progress[2]);
             Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
+
             if (Status == InfoIcons.Error)
                 ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
             else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
+
             MainForm.ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
             MainForm.ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
         }
@@ -214,7 +226,7 @@ namespace Voron_Poster
                 // GTStatusIcon
                 // 
                 StatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
-                StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+                StatusIcon.Image = GetTaggedIcon(InfoIcons.Stopped);
                 StatusIcon.Location = new System.Drawing.Point(569, 1);
                 StatusIcon.Margin = new System.Windows.Forms.Padding(0);
                 StatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
@@ -233,6 +245,7 @@ namespace Voron_Poster
                 Progress.Size = new System.Drawing.Size(69, 18);
                 Progress.MaximumSize = new System.Drawing.Size(0, 18);
                 Progress.MinimumSize = new System.Drawing.Size(0, 18);
+                Progress.Maximum = 560;
                 Progress.TabIndex = 2;
                 // 
                 // GTStartStop
@@ -302,9 +315,10 @@ namespace Voron_Poster
             Ctrls.InitializeControls();
             MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
             MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
-            Ctrls.StartStop.Click += Start;
+            Ctrls.StartStop.Click += StartStop;
             Ctrls.Delete.Click += Delete;
             Ctrls.Properties.Click += Properties;
+            Ctrls.Name.LinkClicked += linkLabel_LinkClicked;
             AddToGuiTable();
         }
 
@@ -312,12 +326,16 @@ namespace Voron_Poster
 
         public string TargetUrl;
         public Forum Forum;
-        //public Forum.TaskBaseProperties ForumProperties;
 
         public void Properties(object sender, EventArgs e)
         {
             MainForm.CurrTask = this;
             MainForm.ShowPropertiesPage();
+        }
+
+        private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start((sender as LinkLabel).Text);
         }
 
         public void Delete(object sender, EventArgs e)
@@ -339,52 +357,47 @@ namespace Voron_Poster
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
         }
 
-        private async void Cancel(object sender, EventArgs e)
-        {
-            Ctrls.StartStop.Enabled = false;
-            Forum.Cancel.Cancel();
-            Ctrls.StartStop.Click -= Cancel;
-            Ctrls.StartStop.Click += Start;
-            try
-            {
-                await Forum.Task;
-            }
-            catch { };
-            SetStatusIcon();
-            Ctrls.StartStop.Enabled = true;
-            Ctrls.Delete.Enabled = true;
-            Ctrls.Properties.Enabled = true;
-        }
-
-        private async void Start(object sender, EventArgs e)
+        public async void StartStop(object sender, EventArgs e)
         {
             Ctrls.StartStop.Enabled = false;
             Ctrls.Delete.Enabled = false;
             Ctrls.Properties.Enabled = false;
-            Ctrls.StartStop.Click -= Start;
-            Ctrls.StartStop.Click += Cancel;
-            try
+            if (Action == InfoIcons.Cancel)
             {
-                Forum.Cancel = new CancellationTokenSource();
-                Forum.Task = new Task(() =>
-                {
-                    Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
-                });
-                SetStatusIcon();
-                Ctrls.StartStop.Enabled = true;
-                Forum.Task.Start();
-                await Forum.Task;
+                Ctrls.StartStop.Enabled = false;
+                Forum.Cancel.Cancel();
             }
-            catch (Exception Error) { Forum.Error = Error; };
-            SetStatusIcon();
-            Ctrls.StartStop.Click += Start;
-            Ctrls.StartStop.Click -= Cancel;
-            Ctrls.Delete.Enabled = true;
-            Ctrls.Properties.Enabled = true;
-            Ctrls.StartStop.Enabled = true;
-            Console.WriteLine("shit");
-        }
+            else
+            {
+                try
+                {
+                    Forum.Cancel = new CancellationTokenSource();
+                    Forum.Progress = new byte[3] { 0, 0, 0 };
+                    Ctrls.Progress.Value = 0;
+                    Forum.Task =
+                        Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
 
+                    SetStatusIcon();
+                    Ctrls.StartStop.Enabled = true;
+                    Forum.Error = await Forum.Task;
+                }
+                catch (Exception Error)
+                {
+                    Forum.Error = Error;
+                }
+                if (Forum.Error != null)
+                {
+                    if (Forum.Error is OperationCanceledException)
+                        lock (Forum.Log) Forum.Log.Add("Отменено");
+                    else
+                        lock (Forum.Log) Forum.Log.Add("Ошибка\n" + Forum.Error.Message);
+                }
+                SetStatusIcon();
+                Ctrls.Delete.Enabled = true;
+                Ctrls.Properties.Enabled = true;
+                Ctrls.StartStop.Enabled = true;
+            }
+        }
 
     }
 

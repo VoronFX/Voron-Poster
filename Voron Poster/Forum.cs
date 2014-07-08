@@ -88,18 +88,17 @@ namespace Voron_Poster
         }
 
         public Exception Error;
-        public Task Task;
+        public Task<Exception> Task;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
-        public int Progress;
+        public byte[] Progress = new byte[3] { 0, 0, 0 };
         public CancellationTokenSource Cancel;
         public static CaptchaForm CaptchaForm = new CaptchaForm();
         public Forum()
         {
             Log = new List<string>();
-            Log.Add("Ожидание");
-            Progress = 0;
+            Log.Add("Остановлено");
         }
 
         public static Forum New(ForumEngine Engine)
@@ -119,8 +118,8 @@ namespace Voron_Poster
             if (Client != null) Client.Dispose();
         }
 
-        public abstract Task Login();
-        public abstract Task PostMessage(Uri TargetBoard, string Subject, string Message);
+        public abstract Task<Exception> Login();
+        public abstract Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message);
 
         public class ScriptData
         {
@@ -168,64 +167,55 @@ namespace Voron_Poster
 
         private ScriptData CurrentScriptData;
 
-        public Exception ExecuteScripts()
-        {
-            Console.WriteLine("Script start");
-            try
-            {
-                var Session = InitScriptEngine(CurrentScriptData);
-                for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
-                {
-                    Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
-                }
-            }
-            catch (Exception e)
-            {
-                return e;
-            }
-            return null;
-            Console.WriteLine("Script end");
-        }
+        //public Exception ExecuteScripts()
+        //{
+        //    Console.WriteLine("Script start");
+        //    try
+        //    {
+        //        var Session = InitScriptEngine(CurrentScriptData);
+        //        for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+        //        {
+        //            Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+        //            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return e;
+        //    }
+        //    return null;
+        //    Console.WriteLine("Script end");
+        //}
 
-        public void Run(Uri TargetBoard, string Subject, string Message)
+        public async Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
         {
-            Console.WriteLine("Run start");
-            try
-            {
-                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
-                Task LoginProcess = Login();
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                Task<Exception> LoginProcess = Login(); // Run login operation
+
+                // Meanwile process the scripts
                 CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
-              //  Task<Exception> Processing = new Task<Exception>(new Func<Exception>(ExecuteScripts), Cancel.Token);
-                //Processing.Start();
-               // Processing.Wait();
-               // if (Processing.Result != null) throw Processing.Result;
-                //  Processing.e
                 var Session = InitScriptEngine(CurrentScriptData);
+                Progress[2] += 10;
                 for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
                 {
                     Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                    Progress[2] += (byte)(40 / Properties.PreProcessingScripts.Count);
+                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
-                LoginProcess.Wait();
-                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
-               
-                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                Progress[2] = 50;
+                
+                // Waiting for login end
+                if (await LoginProcess != null) return LoginProcess.Result;
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+
+                // Post messages
                 for (int i = 0; i < CurrentScriptData.Output.Count; i++)
                 {
-                    PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message).Wait();
-                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                    Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
+                    if (await PostProcess != null) return PostProcess.Result;
+                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
-            }
-            catch (Exception e)
-            {
-                if (Cancel.IsCancellationRequested || e is OperationCanceledException)
-                    lock (Log) Log.Add("Отменено");
-                else
-                    lock (Log) Log.Add("Ошибка: " + e.Message);
-                Error = e;
-            }
-            Console.WriteLine("Run end");
+                return null;
         }
 
     }

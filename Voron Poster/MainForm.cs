@@ -42,6 +42,10 @@ namespace Voron_Poster
             Tabs.TabPages.Remove(scriptsTab);
             propEngine.Items.AddRange(Enum.GetNames(typeof(Forum.ForumEngine)));
             propEngine.Items.RemoveAt(0);
+
+            GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
+
+
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
             //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
             //null, Tabs, new object[] { true });
@@ -162,6 +166,7 @@ namespace Voron_Poster
         {
             bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
             bool Checked = false, Unchecked = false;
+            int ProgressSum = 0;
             lock (Tasks)
             {
                 for (int i = 0; i < Tasks.Count; i++)
@@ -174,6 +179,7 @@ namespace Voron_Poster
                         Checked = true;
                     }
                     else Unchecked = true;
+                    ProgressSum += Tasks[i].Ctrls.Progress.Value;
                 }
             }
             // Set global status icon
@@ -198,13 +204,22 @@ namespace Voron_Poster
             if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStart = TaskGui.InfoIcons.Restart;
             else GActionStart = TaskGui.InfoIcons.Run;
             // Set global stop icon 
-            GTStop.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Cancel];
-            if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStop = TaskGui.InfoIcons.Clear;
-            else GActionStop = TaskGui.InfoIcons.Cancel;
+            GTStop.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] ||
+                SelInfo[(int)TaskGui.InfoIcons.Cancel] || SelInfo[(int)TaskGui.InfoIcons.Cancelled];
+            if (SelInfo[(int)TaskGui.InfoIcons.Cancel]) GActionStop = TaskGui.InfoIcons.Cancel;
+            else GActionStop = TaskGui.InfoIcons.Clear;
             GTStart.Image = TaskGui.GetTaggedIcon(GActionStart);
             GTStop.Image = TaskGui.GetTaggedIcon(GActionStop);
             ToolTip.SetToolTip(GTStart, TaskGui.GetTooltip(GActionStart));
             ToolTip.SetToolTip(GTStop, TaskGui.GetTooltip(GActionStop));
+
+            if (Tasks.Count == 0 || !Checked) GTProgress.Value = 0;
+            else
+                GTProgress.Value = ProgressSum / Tasks.Count;
+            if ((SelInfo[(int)TaskGui.InfoIcons.Error] || SelInfo[(int)TaskGui.InfoIcons.Cancelled]) &&
+               !(SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting]))
+                ModifyProgressBarColor.SetState(GTProgress, 2);
+            else ModifyProgressBarColor.SetState(GTProgress, 1);
         }
 
         private void GTSelected_Click(object sender, EventArgs e)
@@ -218,14 +233,30 @@ namespace Voron_Poster
 
         private void GTStartStop_Click(object sender, EventArgs e)
         {
-            (sender as Button).Enabled = false;
+            GTStart.Enabled = false;
+            GTStop.Enabled = false;
+            GTDelete.Enabled = false;
             TasksUpdater.Enabled = false;
             TaskGui.InfoIcons Action = TaskGui.GetInfo((Bitmap)((sender as Button).Image));
-            for (int i = 0; i < Tasks.Count; i++)
-            {
-                if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Action == Action)
-                    Tasks[i].Ctrls.StartStop.PerformClick();
-            }
+            if (Action == TaskGui.InfoIcons.Clear)
+                for (int i = 0; i < Tasks.Count; i++)
+                {
+                    if (Tasks[i].Ctrls.Selected.Checked && (
+                    Tasks[i].Status == TaskGui.InfoIcons.Cancelled ||
+                    Tasks[i].Status == TaskGui.InfoIcons.Error))
+                    {
+                        Tasks[i].Forum.Progress = new byte[3] { 0, 0, 0 };
+                        Tasks[i].Forum.Task = null;
+                        Tasks[i].SetStatusIcon();
+                    }
+                }
+            else
+                for (int i = 0; i < Tasks.Count; i++)
+                {
+                    if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Action == Action)
+                        //  Tasks[i].Ctrls.StartStop.PerformClick();
+                        Tasks[i].StartStop(sender, e);
+                }
             TasksUpdater.Enabled = true;
         }
 
@@ -244,7 +275,7 @@ namespace Voron_Poster
                 }
                 foreach (TaskGui Task in Remove)
                 {
-                    Task.Ctrls.Delete.PerformClick();
+                    Task.Delete(sender, e);
                 }
             }
             Remove.Clear();
@@ -1174,6 +1205,8 @@ namespace Voron_Poster
         }
 
         #endregion
+
+
 
     }
 }

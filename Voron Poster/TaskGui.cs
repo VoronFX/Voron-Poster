@@ -193,6 +193,7 @@ namespace Voron_Poster
                 Selected.Size = new System.Drawing.Size(24, 24);
                 Selected.TabIndex = 0;
                 Selected.UseVisualStyleBackColor = true;
+                Selected.BackColor = Color.Transparent;
                 Selected.Checked = true;
                 // 
                 // GTName
@@ -208,6 +209,7 @@ namespace Voron_Poster
                 Name.Text = "Тема/Раздел";
                 Name.Padding = new Padding(3, 6, 3, 0);
                 Name.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+                Name.BackColor = Color.Transparent;
                 // 
                 // GTStatus
                 // 
@@ -222,6 +224,7 @@ namespace Voron_Poster
                 Status.Text = "Состояние";
                 Status.Padding = new Padding(3, 6, 3, 0);
                 Status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+                Status.BackColor = Color.Transparent;
                 // 
                 // GTStatusIcon
                 // 
@@ -236,6 +239,7 @@ namespace Voron_Poster
                 StatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
                 StatusIcon.TabIndex = 9;
                 StatusIcon.TabStop = false;
+                StatusIcon.BackColor = Color.Transparent;
                 // 
                 // GTProgress
                 // 
@@ -261,6 +265,7 @@ namespace Voron_Poster
                 StartStop.Size = new System.Drawing.Size(24, 24);
                 StartStop.TabIndex = 8;
                 StartStop.UseVisualStyleBackColor = true;
+                StartStop.BackColor = Color.Transparent;
                 // 
                 // GTPropeties
                 // 
@@ -275,6 +280,7 @@ namespace Voron_Poster
                 Properties.Size = new System.Drawing.Size(24, 24);
                 Properties.TabIndex = 7;
                 Properties.UseVisualStyleBackColor = true;
+                Properties.BackColor = Color.Transparent;
                 // 
                 // GTDelete
                 // 

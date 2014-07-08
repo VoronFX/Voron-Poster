@@ -131,12 +131,29 @@ namespace Voron_Poster
 
         private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
+            Graphics g = e.Graphics;
+            Rectangle r = e.CellBounds;
             if (e.Row == 0)
-            {
-                Graphics g = e.Graphics;
-                Rectangle r = e.CellBounds;
                 g.FillRectangle(SystemBrushes.Control, r);
-            }
+            //else // Color table rows by status, but I dislike the result
+            //{
+            //    var Status = (PictureBox)tasksTable.GetControlFromPosition(3, e.Row);
+            //    if (Status != null)
+            //    {
+            //        switch (TaskGui.GetInfo((Bitmap)Status.Image))
+            //        {
+            //            case TaskGui.InfoIcons.Running:
+            //            case TaskGui.InfoIcons.Waiting:
+            //                g.FillRectangle(Brushes.LightBlue, r); break;
+            //            case TaskGui.InfoIcons.Complete:
+            //                g.FillRectangle(Brushes.LightGreen, r); break;
+            //            case TaskGui.InfoIcons.Error:
+            //                g.FillRectangle(Brushes.LightPink, r); break;
+            //            default:
+            //                g.FillRectangle(Brushes.White, r); break;
+            //        }
+            //    }
+            //}
         }
 
         private void AddTaskButton_Click(object sender, EventArgs e)
@@ -241,7 +258,8 @@ namespace Voron_Poster
             if (Action == TaskGui.InfoIcons.Clear)
                 for (int i = 0; i < Tasks.Count; i++)
                 {
-                    if (Tasks[i].Ctrls.Selected.Checked && (
+                    if (Tasks[i].Ctrls.Selected.Checked &&
+                         Tasks[i].Ctrls.StartStop.Enabled && (
                     Tasks[i].Status == TaskGui.InfoIcons.Cancelled ||
                     Tasks[i].Status == TaskGui.InfoIcons.Error))
                     {
@@ -253,7 +271,9 @@ namespace Voron_Poster
             else
                 for (int i = 0; i < Tasks.Count; i++)
                 {
-                    if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Action == Action)
+                    if (Tasks[i].Ctrls.Selected.Checked
+                        && Tasks[i].Ctrls.StartStop.Enabled
+                           && Tasks[i].Action == Action)
                         //  Tasks[i].Ctrls.StartStop.PerformClick();
                         Tasks[i].StartStop(sender, e);
                 }

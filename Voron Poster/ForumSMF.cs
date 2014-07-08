@@ -57,7 +57,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> Login()
         {
-            lock (Log) Log.Add("Cоединение с сервером");
+            lock (Log) Log.Add("Cоединение");
 
             // Creating client
             if (Client != null) Client.Dispose();
@@ -96,12 +96,12 @@ namespace Voron_Poster
             Response = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
             if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
             Progress[0] += 60;
-            Html = await Response.Content.ReadAsStringAsync();
+            Html = (await Response.Content.ReadAsStringAsync()).ToLower();
             Progress[0] += 30;
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            if (Html.ToLower().IndexOf("index.php?action=logout") < 0)
+            if (Html.IndexOf("index.php?action=logout") < 0)
                 return new Exception("Ошибка при авторизации");
             else {
                 lock (Log) Log.Add("Успешно авторизирован");
@@ -203,7 +203,9 @@ namespace Voron_Poster
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
                 Progress[1] += 10;
-                CaptchaForm.IsFree.WaitOne();
+                Task Wait = new System.Threading.Tasks.Task(() => CaptchaForm.IsFree.WaitOne());
+                Wait.Start();
+                await Wait;
                 Progress[1] += 20;
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();

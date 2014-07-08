@@ -31,7 +31,6 @@ namespace Voron_Poster
         public MainForm()
         {
             InitializeComponent();
-
             for (int i = 0; i < Tabs.TabPages.Count; i++)
             {
                 typeof(TabPage).InvokeMember("DoubleBuffered",
@@ -179,14 +178,14 @@ namespace Voron_Poster
             }
             // Set global status icon
             if (SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting])
-                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Running);
+                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Running);
             else if (SelInfo[(int)TaskGui.InfoIcons.Error])
-                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
             else if (SelInfo[(int)TaskGui.InfoIcons.Cancelled])
-                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Cancelled);
+                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Cancelled);
             else if (SelInfo[(int)TaskGui.InfoIcons.Complete])
-                GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
-            else GTStatusIcon.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Stopped);
+                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+            else GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
 
             if (Checked && Unchecked) GTSelected.CheckState = CheckState.Indeterminate;
             else if (Checked) GTSelected.CheckState = CheckState.Checked;
@@ -202,8 +201,8 @@ namespace Voron_Poster
             GTStop.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Cancel];
             if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStop = TaskGui.InfoIcons.Clear;
             else GActionStop = TaskGui.InfoIcons.Cancel;
-            GTStart.Image = TaskGui.GetIcon(GActionStart);
-            GTStop.Image = TaskGui.GetIcon(GActionStop);
+            GTStart.Image = TaskGui.GetTaggedIcon(GActionStart);
+            GTStop.Image = TaskGui.GetTaggedIcon(GActionStop);
             ToolTip.SetToolTip(GTStart, TaskGui.GetTooltip(GActionStart));
             ToolTip.SetToolTip(GTStop, TaskGui.GetTooltip(GActionStop));
         }
@@ -249,6 +248,79 @@ namespace Voron_Poster
                 }
             }
             Remove.Clear();
+        }
+
+        public struct TaskList
+        {
+            public Forum.TaskBaseProperties[] Properties;
+            public string[] TargetUrls;
+        }
+
+        private void tasksSave_Click(object sender, EventArgs e)
+        {
+            tasksSave.Enabled = false;
+            try
+            {
+                Directory.CreateDirectory(@".\TaskLists\");
+                var SaveFileDialog = new SaveFileDialog();
+                SaveFileDialog.DefaultExt = "xml";
+                SaveFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
+                SaveFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
+                if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    TaskList TaskList;
+                    TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
+                    TaskList.TargetUrls = new string[Tasks.Count];
+                    for (int i = 0; i < Tasks.Count; i++)
+                    {
+                        TaskList.Properties[i] = Tasks[i].Forum.Properties;
+                        TaskList.TargetUrls[i] = Tasks[i].TargetUrl;
+                    }
+                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                    using (FileStream F = File.Create(SaveFileDialog.FileName))
+                        Xml.Serialize(F, TaskList);
+                }
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            tasksSave.Enabled = true;
+        }
+
+        private void tasksLoad_Click(object sender, EventArgs e)
+        {
+            tasksLoad.Enabled = false;
+            try
+            {
+                Directory.CreateDirectory(@".\TaskLists\");
+                var OpenFileDialog = new OpenFileDialog();
+                OpenFileDialog.DefaultExt = ".xml";
+                OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
+                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
+                if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    TaskList TaskList;
+                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                    using (FileStream F = File.OpenRead(OpenFileDialog.FileName))
+                        TaskList = (TaskList)Xml.Deserialize(F);
+                    for (int i = 0; i < TaskList.Properties.Length; i++)
+                    {
+                        TaskGui NewTask = new TaskGui(this);
+                        NewTask.New = false;
+                        NewTask.TargetUrl = TaskList.TargetUrls[i];
+                        NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
+                        NewTask.Forum.Properties = TaskList.Properties[i];
+                        NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
+                        Tasks.Add(NewTask);
+                    }
+                }
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message);
+            }
+            tasksLoad.Enabled = true;
         }
 
         #endregion
@@ -381,7 +453,7 @@ namespace Voron_Poster
         {
             PropertiesActivity = true;
             ValidateProperties();
-            propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
             Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
             HttpClient Client = new HttpClient();
             StopProperties = new CancellationTokenSource();
@@ -396,7 +468,7 @@ namespace Voron_Poster
             catch
             {
                 Error = true;
-                propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
             }
             finally
             {
@@ -405,16 +477,16 @@ namespace Voron_Poster
             if (!Error)
             {
                 if (Detected == Forum.ForumEngine.Unknown)
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Question);
+                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Question);
                 else
                 {
                     TempProperties.Engine = Detected;
                     propEngine.SelectedIndex =
                         propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.ForumEngine), Detected));
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
                 }
             }
-            else propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+            else propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
             PropertiesActivity = false;
             ValidateProperties();
         }
@@ -424,7 +496,7 @@ namespace Voron_Poster
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
             ValidateProperties();
-            propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
             TempForum = Forum.New(TempProperties.Engine);
             StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
@@ -436,11 +508,11 @@ namespace Voron_Poster
             try
             {
                 await LoginTask;
-                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
             }
             catch (Exception Error)
             {
-                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
                 ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error);
             }
             TempForum = null;
@@ -453,10 +525,10 @@ namespace Voron_Poster
         {
             if (!PropertiesActivity)
             {
-                propAuthTryLogin.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Login);
+                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Login);
                 ToolTip.SetToolTip(propAuthTryLogin, String.Empty);
                 if (sender == propMainUrl || sender == propEngine)
-                    propEngineDetect.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Gear);
+                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Gear);
             }
         }
 
@@ -507,7 +579,7 @@ namespace Voron_Poster
                 propEngine.SelectedIndex >= 0 &&
                 propScriptsList.Items.Count > 0 &&
                 !PropertiesActivity;
-            propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Save);
+            propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Save);
             //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
             //    TryLoginButton.Enabled;
         }
@@ -698,11 +770,11 @@ namespace Voron_Poster
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
                     Xml.Serialize(F, TempProperties);
                 ValidateProperties();
-                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
             }
             catch (Exception Error)
             {
-                propProfileSave.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
                 MessageBox.Show(Error.Message);
             }
             finally
@@ -865,7 +937,7 @@ namespace Voron_Poster
                     {
                         scriptsEditor.Text = System.IO.File.ReadAllText(GetScriptPath((string)scriptsList.SelectedItem));
                         OpenedScript = (string)scriptsList.SelectedItem;
-                        scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+                        scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
                     }
                     catch (Exception Error)
                     {
@@ -886,7 +958,7 @@ namespace Voron_Poster
             if (!IgnoreEvents)
             {
                 scriptsSave.Enabled = true;
-                scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
             }
         }
 
@@ -968,7 +1040,7 @@ namespace Voron_Poster
             scriptsEditor.IsReadOnly = true;
             scriptsSubject.TextChanged -= scriptsSubject_TextChanged;
             scriptsMessage.TextChanged -= scriptsSubject_TextChanged;
-            scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Activity);
+            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
             var Result = new List<string>();
             Exception Error = null;
             ToolTip.SetToolTip(scriptsStatusLabel, String.Empty);
@@ -1011,7 +1083,7 @@ namespace Voron_Poster
             if (Error != null)
             {
                 scriptsStatusLabel.Text = Error.Message;
-                scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Error);
+                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
                 scriptsStatusLabel.ForeColor = Color.Red;
             }
             else
@@ -1019,7 +1091,7 @@ namespace Voron_Poster
                 scriptsResult.Clear();
                 scriptsResult.Lines = Result.ToArray();
                 scriptsResult.Focus();
-                scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Complete);
+                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
                 scriptsStatusLabel.ForeColor = Color.Black;
                 scriptsStatusLabel.Text = "Скрипт выполнен";
             }
@@ -1046,7 +1118,7 @@ namespace Voron_Poster
             scriptsTestAbortTimer.Enabled = false;
             scriptsRun.Click -= scriptsRun_Click;
             scriptsRun.Click += scriptsAbort_Click;
-            scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Cancelled);
+            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Cancelled);
             scriptsRun.Text = "Прервать";
             scriptsRun.Enabled = true;
             ToolTip.SetToolTip(scriptsRun, "Завершить процесс\n"
@@ -1057,7 +1129,7 @@ namespace Voron_Poster
 
         private void scriptsSubject_TextChanged(object sender, EventArgs e)
         {
-            scriptsRun.Image = TaskGui.GetIcon(TaskGui.InfoIcons.Test);
+            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
         }
 
         private void scriptsTestBox_Enter(object sender, EventArgs e)
@@ -1102,78 +1174,6 @@ namespace Voron_Poster
         }
 
         #endregion
-
-        public struct TaskList
-        {
-            public Forum.TaskBaseProperties[] Properties;
-            public string[] TargetUrls;
-        }
-
-        private void tasksSave_Click(object sender, EventArgs e)
-        {
-            tasksSave.Enabled = false;
-            try
-            {
-                Directory.CreateDirectory(@".\TaskLists\");
-                var SaveFileDialog = new SaveFileDialog();
-                SaveFileDialog.DefaultExt = "xml";
-                SaveFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
-                SaveFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
-                if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    TaskList TaskList;
-                    TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
-                    TaskList.TargetUrls = new string[Tasks.Count];
-                    for (int i = 0; i < Tasks.Count; i++)
-                    {
-                        TaskList.Properties[i] = Tasks[i].Forum.Properties;
-                        TaskList.TargetUrls[i] = Tasks[i].TargetUrl;
-                    }
-                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
-                    using (FileStream F = File.Create(SaveFileDialog.FileName))
-                        Xml.Serialize(F, TaskList);
-                }
-            }
-            catch (Exception Error)
-            {
-                MessageBox.Show(Error.Message);
-            }
-            tasksSave.Enabled = true;
-        }
-
-        private void tasksLoad_Click(object sender, EventArgs e)
-        {
-            tasksLoad.Enabled = false;
-            try
-            {
-                Directory.CreateDirectory(@".\TaskLists\");
-                var OpenFileDialog = new OpenFileDialog();
-                OpenFileDialog.DefaultExt = ".xml";
-                OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
-                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
-                if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    TaskList TaskList;
-                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
-                    using (FileStream F = File.OpenRead(OpenFileDialog.FileName))
-                        TaskList = (TaskList)Xml.Deserialize(F);
-                    for (int i = 0; i < TaskList.Properties.Length; i++)
-                    {
-                        TaskGui NewTask = new TaskGui(this);
-                        NewTask.New = false;
-                        NewTask.TargetUrl = TaskList.TargetUrls[i];
-                        NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
-                        NewTask.Forum.Properties = TaskList.Properties[i];
-                        Tasks.Add(NewTask);
-                    }
-                }
-            }
-            catch (Exception Error)
-            {
-                MessageBox.Show(Error.Message);
-            }
-            tasksLoad.Enabled = true;
-        }
 
     }
 }

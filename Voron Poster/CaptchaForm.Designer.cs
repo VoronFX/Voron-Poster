@@ -111,7 +111,7 @@
             this.MaximizeBox = false;
             this.Name = "CaptchaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "CaptchaForm";
+            this.Text = "CAPTCHA";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CaptchaForm_FormClosed);
             this.Shown += new System.EventHandler(this.CaptchaForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.Picture)).EndInit();

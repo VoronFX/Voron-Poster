@@ -4,12 +4,13 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Voron_Poster
 {
-    
+
     public static class ModifyProgressBarColor
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
@@ -26,10 +27,14 @@ namespace Voron_Poster
         #region Gui
 
         private MainForm MainForm;
-        public enum InfoIcons { Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear, 
-            Gear, Activity, Login, Question, Save, Test, None }
-        public static Bitmap GetIcon(InfoIcons Info)
+        public enum InfoIcons
         {
+            Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear,
+            Gear, Activity, Login, Question, Save, Test, None
+        }
+        private static Bitmap GetIcon(InfoIcons Info)
+        {
+
             switch (Info)
             {   //Statuses
                 case InfoIcons.Complete: return global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
@@ -53,27 +58,15 @@ namespace Voron_Poster
                 default: return null;
             }
         }
+        public static Bitmap GetTaggedIcon(InfoIcons Info)
+        {
+            Bitmap Icon = GetIcon(Info);
+            Icon.Tag = Enum.GetName(typeof(InfoIcons), Info);
+            return Icon;
+        }
         public static InfoIcons GetInfo(Bitmap Icon)
-        {   //Statuses
-            if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color) return InfoIcons.Complete;
-            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Play_16xLG) return InfoIcons.Running;
-            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG) return InfoIcons.Stopped;
-            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Pause_16xLG) return InfoIcons.Waiting;
-            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG_color) return InfoIcons.Cancelled;
-            else if (Icon == Voron_Poster.Properties.Resources.StatusAnnotations_Critical_16xLG_color) return InfoIcons.Error;
-            //Actions
-            else if (Icon == Voron_Poster.Properties.Resources.arrow_run_16xLG) return InfoIcons.Run;
-            else if (Icon == Voron_Poster.Properties.Resources.Restart_6322) return InfoIcons.Restart;
-            else if (Icon == Voron_Poster.Properties.Resources.Symbols_Stop_16xLG) return InfoIcons.Cancel;
-            else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG) return InfoIcons.Clear;
-            //OtherStuff
-            else if (Icon == Voron_Poster.Properties.Resources.gear_16xLG) return InfoIcons.Gear;
-            else if (Icon == Voron_Poster.Properties.Resources.Activity_16xLG) return InfoIcons.Activity;
-            else if (Icon == Voron_Poster.Properties.Resources.user_16xLG) return InfoIcons.Login;
-            else if (Icon == global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG) return InfoIcons.Question;
-            else if (Icon == global::Voron_Poster.Properties.Resources.save_16xLG) return InfoIcons.Save;
-            else if (Icon == global::Voron_Poster.Properties.Resources.test_32x_SMcuted) return InfoIcons.Test;
-            else return InfoIcons.None;
+        {
+            return (InfoIcons)(Enum.Parse(typeof(InfoIcons), (string)Icon.Tag));
         }
         public static string GetTooltip(InfoIcons Info)
         {
@@ -101,6 +94,7 @@ namespace Voron_Poster
                 {
                     Ctrls.Status.Text = Forum.Log.Last<string>();
                 }
+                MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
             if (Forum == null || Forum.Task == null)
             {
                 Ctrls.StatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
@@ -114,8 +108,16 @@ namespace Voron_Poster
                         Action = InfoIcons.Cancel;
                         break;
                     case TaskStatus.RanToCompletion:
+                        if (Forum.Error == null)
+                        {
                             Status = InfoIcons.Complete;
                             Action = InfoIcons.Run;
+                        }
+                        else
+                        {
+                            Status = InfoIcons.Error;
+                            Action = InfoIcons.Restart;
+                        }
                         break;
                     case TaskStatus.Created:
                     case TaskStatus.WaitingForActivation:
@@ -133,8 +135,8 @@ namespace Voron_Poster
                         break;
                 }
             }
-            Ctrls.StatusIcon.Image = GetIcon(Status);
-            Ctrls.StartStop.Image = GetIcon(Action);
+            Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
+            Ctrls.StartStop.Image = GetTaggedIcon(Action);
             if (Status == InfoIcons.Error)
                 ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
             else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
@@ -192,7 +194,8 @@ namespace Voron_Poster
                 Name.MinimumSize = new System.Drawing.Size(0, 24);
                 Name.TabIndex = 3;
                 Name.Text = "Тема/Раздел";
-                Name.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+                Name.Padding = new Padding(3, 6, 3, 0);
+                Name.TextAlign = System.Drawing.ContentAlignment.TopLeft;
                 // 
                 // GTStatus
                 // 
@@ -205,7 +208,8 @@ namespace Voron_Poster
                 Status.MinimumSize = new System.Drawing.Size(0, 24);
                 Status.TabIndex = 4;
                 Status.Text = "Состояние";
-                Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+                Status.Padding = new Padding(3, 6, 3, 0);
+                Status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
                 // 
                 // GTStatusIcon
                 // 
@@ -312,8 +316,8 @@ namespace Voron_Poster
 
         public void Properties(object sender, EventArgs e)
         {
-                MainForm.CurrTask = this;
-                MainForm.ShowPropertiesPage();
+            MainForm.CurrTask = this;
+            MainForm.ShowPropertiesPage();
         }
 
         public void Delete(object sender, EventArgs e)
@@ -341,7 +345,11 @@ namespace Voron_Poster
             Forum.Cancel.Cancel();
             Ctrls.StartStop.Click -= Cancel;
             Ctrls.StartStop.Click += Start;
-            await Forum.Task;
+            try
+            {
+                await Forum.Task;
+            }
+            catch { };
             SetStatusIcon();
             Ctrls.StartStop.Enabled = true;
             Ctrls.Delete.Enabled = true;
@@ -350,27 +358,31 @@ namespace Voron_Poster
 
         private async void Start(object sender, EventArgs e)
         {
-                Ctrls.StartStop.Enabled = false;
-                Ctrls.Delete.Enabled = false;
-                Ctrls.Properties.Enabled = false;
-                Ctrls.StartStop.Click -= Start;
-                Ctrls.StartStop.Click += Cancel;
-                try
+            Ctrls.StartStop.Enabled = false;
+            Ctrls.Delete.Enabled = false;
+            Ctrls.Properties.Enabled = false;
+            Ctrls.StartStop.Click -= Start;
+            Ctrls.StartStop.Click += Cancel;
+            try
+            {
+                Forum.Cancel = new CancellationTokenSource();
+                Forum.Task = new Task(() =>
                 {
-                    Forum.Task = Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
-                    SetStatusIcon();
-                    Ctrls.StartStop.Enabled = true;
-                    await Forum.Task;
-                }
-                catch (Exception)
-                {   
-                }
+                    Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
+                });
                 SetStatusIcon();
-                Ctrls.StartStop.Click += Start;
-                Ctrls.StartStop.Click -= Cancel;
-                Ctrls.Delete.Enabled = true;
-                Ctrls.Properties.Enabled = true;
                 Ctrls.StartStop.Enabled = true;
+                Forum.Task.Start();
+                await Forum.Task;
+            }
+            catch (Exception Error) { Forum.Error = Error; };
+            SetStatusIcon();
+            Ctrls.StartStop.Click += Start;
+            Ctrls.StartStop.Click -= Cancel;
+            Ctrls.Delete.Enabled = true;
+            Ctrls.Properties.Enabled = true;
+            Ctrls.StartStop.Enabled = true;
+            Console.WriteLine("shit");
         }
 
 

@@ -11,8 +11,7 @@ using System.Web;
 namespace Voron_Poster
 {
     class ForumSMF : Forum
-    {
-        private Uri CaptchaUri;
+    {        private Uri CaptchaUri;
         private string CurrSessionID;
         private string AnotherID;
         public ForumSMF() : base() { }
@@ -57,6 +56,7 @@ namespace Voron_Poster
 
         public override async Task Login()
         {
+            Console.WriteLine("Login start");
             lock (Log) { Log.Add("Cоединение с сервером"); }
             if (Client != null) Client.Dispose();
             Client = new HttpClient();
@@ -64,6 +64,7 @@ namespace Voron_Poster
 
             Progress++;
             HttpResponseMessage RespMes = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
+            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
             Progress++;
             string Html = await RespMes.Content.ReadAsStringAsync();
             lock (Log) { Log.Add("Авторизация"); Progress++; }
@@ -81,12 +82,15 @@ namespace Voron_Poster
                      });
             Progress++;
             RespMes = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
+            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
             Progress++;
             Html = await RespMes.Content.ReadAsStringAsync();
             if (Html.ToLower().IndexOf("index.php?action=logout") >= 0)
                 lock (Log) { Log.Add("Успешно авторизирован"); Progress++; }
             else
-                throw new Exception("Ошибка при авторизации");
+            { 
+                Console.WriteLine("Login almost exit");
+                throw new Exception("Ошибка при авторизации");}
         }
 
         //private bool TryGetStartBoard(string BoardUri, out string Start, out string Board)
@@ -173,6 +177,7 @@ namespace Voron_Poster
                 CaptchaForm.IsFree.WaitOne();
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
+                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
                 CaptchaForm.ShowDialog();
             }
             Progress++;

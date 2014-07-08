@@ -87,9 +87,10 @@ namespace Voron_Poster
             }
         }
 
+        public Exception Error;
         public Task Task;
         public TaskBaseProperties Properties = new TaskBaseProperties();
-        public TimeSpan RequestTimeout = new TimeSpan(0,0,10);
+        public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
         public int Progress;
         public CancellationTokenSource Cancel;
@@ -165,43 +166,66 @@ namespace Voron_Poster
             return Session;
         }
 
-        public Task ExecuteScripts(ScriptData ScriptData)
+        private ScriptData CurrentScriptData;
+
+        public Exception ExecuteScripts()
         {
-            Task Processing = new Task(() =>
+            Console.WriteLine("Script start");
+            try
             {
-                var Session = InitScriptEngine(ScriptData);
+                var Session = InitScriptEngine(CurrentScriptData);
                 for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
                 {
                     Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    if (Cancel.IsCancellationRequested) break;
+                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
                 }
-            });
-            Processing.Start();
-            return Processing;
+            }
+            catch (Exception e)
+            {
+                return e;
+            }
+            return null;
+            Console.WriteLine("Script end");
         }
 
-        public async Task Run(Uri TargetBoard, string Subject, string Message)
+        public void Run(Uri TargetBoard, string Subject, string Message)
         {
+            Console.WriteLine("Run start");
             try
             {
-                Cancel = new CancellationTokenSource();
+                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
                 Task LoginProcess = Login();
-                var ScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
-                await ExecuteScripts(ScriptData);
-                if (Cancel.IsCancellationRequested) return;
-                await LoginProcess;
-                if (Cancel.IsCancellationRequested) return;
-                for (int i = 0; i < ScriptData.Output.Count; i++)
+                CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
+              //  Task<Exception> Processing = new Task<Exception>(new Func<Exception>(ExecuteScripts), Cancel.Token);
+                //Processing.Start();
+               // Processing.Wait();
+               // if (Processing.Result != null) throw Processing.Result;
+                //  Processing.e
+                var Session = InitScriptEngine(CurrentScriptData);
+                for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
                 {
-                    await PostMessage(TargetBoard, ScriptData.Output[i].Subject, ScriptData.Output[i].Message);
-                    if (Cancel.IsCancellationRequested) return;
+                    Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                }
+                LoginProcess.Wait();
+                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+               
+                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                for (int i = 0; i < CurrentScriptData.Output.Count; i++)
+                {
+                    PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message).Wait();
+                    if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
                 }
             }
-            catch (Exception Error)
+            catch (Exception e)
             {
-                Log.Add("Ошибка: " + Error.Message);
-                throw Error;
+                if (Cancel.IsCancellationRequested || e is OperationCanceledException)
+                    lock (Log) Log.Add("Отменено");
+                else
+                    lock (Log) Log.Add("Ошибка: " + e.Message);
+                Error = e;
             }
+            Console.WriteLine("Run end");
         }
 
     }

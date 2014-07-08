@@ -203,9 +203,7 @@ namespace Voron_Poster
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
                 Progress[1] += 10;
-                Task Wait = new System.Threading.Tasks.Task(() => CaptchaForm.IsFree.WaitOne());
-                Wait.Start();
-                await Wait;
+                await Task.Run(() => CaptchaForm.IsFree.WaitOne());
                 Progress[1] += 20;
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();

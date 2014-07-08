@@ -13,6 +13,10 @@ namespace Voron_Poster
 {
     public abstract class Forum
     {
+        struct DomainQueue
+        {
+
+        }
 
         #region Detect Forum Engine
         public enum ForumEngine { Unknown, SMF }
@@ -88,7 +92,7 @@ namespace Voron_Poster
         }
 
         public Exception Error;
-        public Task<Exception> Task;
+        public Task<Exception> Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
@@ -187,8 +191,10 @@ namespace Voron_Poster
         //    Console.WriteLine("Script end");
         //}
 
-        public async Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
+        public Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
         {
+            return Task.Run(async () =>
+            {
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Task<Exception> LoginProcess = Login(); // Run login operation
 
@@ -203,7 +209,7 @@ namespace Voron_Poster
                     if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
                 Progress[2] = 50;
-                
+
                 // Waiting for login end
                 if (await LoginProcess != null) return LoginProcess.Result;
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -216,6 +222,7 @@ namespace Voron_Poster
                     if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
                 return null;
+            });
         }
 
     }

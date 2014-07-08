@@ -264,7 +264,7 @@ namespace Voron_Poster
                     Tasks[i].Status == TaskGui.InfoIcons.Error))
                     {
                         Tasks[i].Forum.Progress = new byte[3] { 0, 0, 0 };
-                        Tasks[i].Forum.Task = null;
+                        Tasks[i].Forum.Activity = null;
                         Tasks[i].SetStatusIcon();
                     }
                 }

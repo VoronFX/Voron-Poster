@@ -95,7 +95,7 @@ namespace Voron_Poster
                     Ctrls.Status.Text = Forum.Log.Last<string>();
                 }
             MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
-            if (Forum == null || Forum.Task == null)
+            if (Forum == null || Forum.Activity == null)
             {
                 Ctrls.StatusIcon.Image = GetTaggedIcon(InfoIcons.Stopped);
                 Status = InfoIcons.Stopped;
@@ -103,7 +103,7 @@ namespace Voron_Poster
             }
             else
             {
-                switch (Forum.Task.Status)
+                switch (Forum.Activity.Status)
                 {
                     case TaskStatus.Running:
                     case TaskStatus.WaitingForActivation:
@@ -380,12 +380,11 @@ namespace Voron_Poster
                     Forum.Cancel = new CancellationTokenSource();
                     Forum.Progress = new byte[3] { 0, 0, 0 };
                     Ctrls.Progress.Value = 0;
-                    Forum.Task =
+                    Forum.Activity = 
                         Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
-
                     SetStatusIcon();
                     Ctrls.StartStop.Enabled = true;
-                    Forum.Error = await Forum.Task;
+                    Forum.Error = await Forum.Activity;
                 }
                 catch (Exception Error)
                 {

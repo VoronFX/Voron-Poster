@@ -263,7 +263,7 @@ namespace Voron_Poster
                     Tasks[i].Status == TaskGui.InfoIcons.Cancelled ||
                     Tasks[i].Status == TaskGui.InfoIcons.Error))
                     {
-                        Tasks[i].Forum.Progress = new byte[3] { 0, 0, 0 };
+                        Tasks[i].Forum.Progress = new int[4] { 0, 0, 0, 1 };
                         Tasks[i].Forum.Activity = null;
                         Tasks[i].SetStatusIcon();
                     }
@@ -554,14 +554,19 @@ namespace Voron_Poster
             TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
 
-            Task LoginTask = TempForum.Login();
+            Task<Exception> LoginTask = TempForum.Login();
             PropertiesActivityTask = LoginTask;
+            Exception Error;
             try
             {
-                await LoginTask;
-                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+                Error = await LoginTask;
             }
-            catch (Exception Error)
+            catch (Exception CatchedError)
+            {
+                Error = CatchedError;
+            }
+            if (Error == null) propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+            else
             {
                 propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
                 ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error);

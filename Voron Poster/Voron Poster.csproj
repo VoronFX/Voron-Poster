@@ -126,6 +126,7 @@
     <Compile Include="DBTableLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ForumvBulletin.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

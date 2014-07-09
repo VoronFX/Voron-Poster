@@ -20,22 +20,11 @@ namespace Voron_Poster
         private static string SHA1HashStringForUTF8String(string s)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(s);
-
+            
             var sha1 = SHA1.Create();
             byte[] hashBytes = sha1.ComputeHash(bytes);
 
             return HexStringFromBytes(hashBytes);
-        }
-
-        private static string HexStringFromBytes(byte[] bytes)
-        {
-            var sb = new StringBuilder();
-            foreach (byte b in bytes)
-            {
-                var hex = b.ToString("x2");
-                sb.Append(hex);
-            }
-            return sb.ToString();
         }
 
         private static string hashLoginPassword(string Username, string Password, string cur_session_id)
@@ -43,26 +32,12 @@ namespace Voron_Poster
             return SHA1HashStringForUTF8String(SHA1HashStringForUTF8String(Username.ToLower() + Password) + cur_session_id);
         }
 
-        private string GetBetweenStrAfterStr(string Html, string After, string Beg, string End)
-        {
-            int b = Html.IndexOf(After);
-            if (b < 0 || b + After.Length >= Html.Length) return "";
-            b = Html.IndexOf(Beg, b + After.Length);
-            if (b < 0 || b + Beg.Length >= Html.Length) return "";
-            int e = Html.IndexOf(End, b + Beg.Length);
-            if (e > 0)
-                return Html.Substring(b + Beg.Length, e - b - Beg.Length);
-            return "";
-        }
-
+    
         public override async Task<Exception> Login()
         {
             lock (Log) Log.Add("Cоединение");
 
-            // Creating client
-            if (Client != null) Client.Dispose();
-            Client = new HttpClient();
-            Client.Timeout = RequestTimeout;
+            CreateClient(); // Creating client
             Progress[0] += 12;
 
             // Getting loging page
@@ -94,7 +69,7 @@ namespace Voron_Poster
 
             // Send data to login and wait response
             Response = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
-            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
             Progress[0] += 30;
@@ -177,45 +152,45 @@ namespace Voron_Poster
         {
 
             // Get the post page
-            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             var Response = await Client.GetAsync(Properties.ForumMainPage
                 + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
-            Progress[1] += 50;
+            Progress[2] += 50 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[1] += 20;
-            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+            Progress[2] += 20 / Progress[3];
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
           
             // Get post url
             lock (Log) Log.Add("Подготовка");
             Html = Html.ToLower();
-            Progress[1] += 11;
+            Progress[2] += 11 / Progress[3];
             string Topic = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get("topic");
             if (Topic == null) Topic = "0";
             if (!TryGetPostUrl(Html, out TargetBoard))
                 return new Exception("Не удалось извлечь ссылку для публикации");
-            Progress[1] += 11;
+            Progress[2] += 11 / Progress[3];
             string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
-            Progress[1] += 11;
+            Progress[2] += 11 / Progress[3];
 
             // Check and ask if captcha
-            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
-                Progress[1] += 10;
+                Progress[2] += 10 / Progress[3];
                 await Task.Run(() => CaptchaForm.IsFree.WaitOne());
-                Progress[1] += 20;
+                Progress[2] += 20 / Progress[3];
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 CaptchaForm.ShowDialog();
-                Progress[1] += 20;
+                Progress[2] += 20 / Progress[3];
             }
-            else Progress[1] += 50;
+            else Progress[2] += 50 / Progress[3];
 
             // Form data and post
             lock (Log) Log.Add("Публикация");
-            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             using (var FormData = new MultipartFormDataContent())
             {
                 FormData.Add(new StringContent(Topic), "topic");
@@ -234,25 +209,25 @@ namespace Voron_Poster
                 //FormData.Add(new StringContent(""), "sel_size");
                 //FormData.Add(new StringContent(""), "sel_face");
                 //FormData.Add(new StringContent("xx"), "icon");            
-                Progress[1] += 11;
+                Progress[2] += 11 / Progress[3];
 
                 // Send post
-                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Response = await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token);
-                Progress[1] += 50;
+                Progress[2] += 50 / Progress[3];
                 Html = await Response.Content.ReadAsStringAsync();
-                Progress[1] += 20;
+                Progress[2] += 20 / Progress[3];
                 Html = Html.ToLower();
-                Progress[1] += 11;
+                Progress[2] += 11 / Progress[3];
 
                 // Check if success
-                if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 if (Html.IndexOf("errorbox") > 0 || Html.IndexOf(Subject.ToLower()) < 0)
                     return new Exception("Сайт вернул ошибку");
                 else
                 {
                     lock (Log) Log.Add("Опубликовано");
-                    Progress[1] += 10;
+                    Progress[2] += 10 / Progress[3];
                     return null;
                 }
             }

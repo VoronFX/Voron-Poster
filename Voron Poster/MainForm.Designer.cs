@@ -288,7 +288,7 @@
             this.panel1.MaximumSize = new System.Drawing.Size(0, 10);
             this.panel1.MinimumSize = new System.Drawing.Size(0, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(0, 10);
+            this.panel1.Size = new System.Drawing.Size(551, 10);
             this.panel1.TabIndex = 43;
             // 
             // messageSubject
@@ -1245,7 +1245,7 @@
             // 
             this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTProgress.Location = new System.Drawing.Point(402, 4);
-            this.GTProgress.Maximum = 560;
+            this.GTProgress.Maximum = 765;
             this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.Name = "GTProgress";

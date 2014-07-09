@@ -144,7 +144,7 @@ namespace Voron_Poster
             }
             if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
             else
-                Ctrls.Progress.Value = Math.Min(560, Forum.Progress[0] + Forum.Progress[1] + Forum.Progress[2]);
+                Ctrls.Progress.Value = Math.Min(765, Forum.Progress[0] + Forum.Progress[1] + Forum.Progress[2]);
             Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
 
@@ -249,7 +249,7 @@ namespace Voron_Poster
                 Progress.Size = new System.Drawing.Size(69, 18);
                 Progress.MaximumSize = new System.Drawing.Size(0, 18);
                 Progress.MinimumSize = new System.Drawing.Size(0, 18);
-                Progress.Maximum = 560;
+                Progress.Maximum = 765;
                 Progress.TabIndex = 2;
                 // 
                 // GTStartStop
@@ -378,7 +378,7 @@ namespace Voron_Poster
                 try
                 {
                     Forum.Cancel = new CancellationTokenSource();
-                    Forum.Progress = new byte[3] { 0, 0, 0 };
+                    Forum.Progress = new int[4] { 0, 0, 0, 1 };
                     Ctrls.Progress.Value = 0;
                     Forum.Activity = 
                         Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);

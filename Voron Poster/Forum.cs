@@ -13,13 +13,13 @@ namespace Voron_Poster
 {
     public abstract class Forum
     {
-        struct DomainQueue
-        {
+        //struct DomainQueue
+        //{
 
-        }
+        //}
 
         #region Detect Forum Engine
-        public enum ForumEngine { Unknown, SMF }
+        public enum ForumEngine { Unknown, SMF, vBulletin }
 
         struct FESearchExpression
         {
@@ -57,6 +57,9 @@ namespace Voron_Poster
             new FESearchExpression("http://www.simplemachines.org/about/copyright.php", 10),
             new FESearchExpression("http://www.simplemachines.org/", 10),
             new FESearchExpression("Simple Machines", 10)});
+
+            Match[(int)ForumEngine.vBulletin] += SearchForExpressions(Html, new FESearchExpression[] {
+            new FESearchExpression("vBulletin", 20)});
 
             ForumEngine PossibleEngine = ForumEngine.Unknown;
             for (int i = 0; i < Match.Length; i++)
@@ -96,7 +99,7 @@ namespace Voron_Poster
         public TaskBaseProperties Properties = new TaskBaseProperties();
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
-        public byte[] Progress = new byte[3] { 0, 0, 0 };
+        public int[] Progress = new int[4] { 0, 0, 0, 1 };
         public CancellationTokenSource Cancel;
         public static CaptchaForm CaptchaForm = new CaptchaForm();
         public Forum()
@@ -110,11 +113,41 @@ namespace Voron_Poster
             switch (Engine)
             {
                 case ForumEngine.SMF: return new ForumSMF();
+                case ForumEngine.vBulletin: return new ForumvBulletin();
                 default: return null;
             }
         }
 
         protected HttpClient Client;
+
+        protected void CreateClient(){
+            if (Client != null) Client.Dispose();
+            Client = new HttpClient();
+            Client.Timeout = RequestTimeout;
+        }
+
+        protected static string HexStringFromBytes(byte[] bytes)
+        {
+            var sb = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                var hex = b.ToString("x2");
+                sb.Append(hex);
+            }
+            return sb.ToString();
+        }
+
+        protected string GetBetweenStrAfterStr(string Html, string After, string Beg, string End)
+        {
+            int b = Html.IndexOf(After);
+            if (b < 0 || b + After.Length >= Html.Length) return "";
+            b = Html.IndexOf(Beg, b + After.Length);
+            if (b < 0 || b + Beg.Length >= Html.Length) return "";
+            int e = Html.IndexOf(End, b + Beg.Length);
+            if (e > 0)
+                return Html.Substring(b + Beg.Length, e - b - Beg.Length);
+            return "";
+        }
 
 
         ~Forum()
@@ -201,26 +234,28 @@ namespace Voron_Poster
                 // Meanwile process the scripts
                 CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
                 var Session = InitScriptEngine(CurrentScriptData);
-                Progress[2] += 10;
+                Progress[1] += 50;
                 for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
                 {
                     Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    Progress[2] += (byte)(40 / Properties.PreProcessingScripts.Count);
+                    Progress[1] += (byte)(205 / Properties.PreProcessingScripts.Count);
                     if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
-                Progress[2] = 50;
+                Progress[1] = 255;
 
                 // Waiting for login end
                 if (await LoginProcess != null) return LoginProcess.Result;
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
                 // Post messages
+                Progress[3] = CurrentScriptData.Output.Count;
                 for (int i = 0; i < CurrentScriptData.Output.Count; i++)
                 {
                     Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
                     if (await PostProcess != null) return PostProcess.Result;
                     if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
+                Progress[2] = 255;
                 return null;
             });
         }

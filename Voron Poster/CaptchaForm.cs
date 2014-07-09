@@ -46,7 +46,6 @@ namespace Voron_Poster
 
         private void CaptchaForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            IsFree.Set();
             Picture.Image = null;
             Resize = true;
         }
@@ -58,7 +57,13 @@ namespace Voron_Poster
 
         private void CaptchaForm_Shown(object sender, EventArgs e)
         {
+            Result.Text = "";
             buttonRefresh_Click(sender, e);
+        }
+
+        private void CaptchaForm_Load(object sender, EventArgs e)
+        {
+
         }
 
 

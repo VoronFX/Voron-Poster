@@ -31,6 +31,7 @@ namespace Voron_Poster
         public MainForm()
         {
             InitializeComponent();
+            Forum.CaptchaForm.Owner = this;
             for (int i = 0; i < Tabs.TabPages.Count; i++)
             {
                 typeof(TabPage).InvokeMember("DoubleBuffered",
@@ -387,15 +388,6 @@ namespace Voron_Poster
         Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
         CancellationTokenSource StopProperties;
 
-        private string GetDomain(string Url)
-        {
-            string Domain = new String(Url.Replace("http://", String.Empty)
-                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
-            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
-                return Domain;
-            return String.Empty;
-        }
-
         private void propAuthGlobal_CheckedChanged(object sender, EventArgs e)
         {
             TempProperties.UseLocalAccount = propAuthLocal.Checked;
@@ -441,7 +433,7 @@ namespace Voron_Poster
                     TempTargetUrl = (sender as TextBox).Text;
                     if (DetectMainPage)
                     {
-                        string Domain = GetDomain(propTargetUrl.Text).ToLower();
+                        string Domain = Forum.GetDomain(propTargetUrl.Text).ToLower();
                         if (propTargetUrl.Text.LastIndexOf("/") > 7)
                             propMainUrl.Text = new String(propTargetUrl.Text.Take(propTargetUrl.Text.LastIndexOf("/")+1).ToArray());
                         else
@@ -858,8 +850,8 @@ namespace Voron_Poster
 
         private void NewProfileButton_Click(object sender, EventArgs e)
         {
-            string NameBase = GetDomain(propMainUrl.Text);
-            if (NameBase == String.Empty) NameBase = GetDomain(propTargetUrl.Text);
+            string NameBase = Forum.GetDomain(propMainUrl.Text);
+            if (NameBase == String.Empty) NameBase = Forum.GetDomain(propTargetUrl.Text);
             if (NameBase == String.Empty) NameBase = "Профиль";
             int i = 2;
             if (File.Exists(GetProfilePath(NameBase)))

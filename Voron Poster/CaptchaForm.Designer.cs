@@ -113,6 +113,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "CAPTCHA";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CaptchaForm_FormClosed);
+            this.Load += new System.EventHandler(this.CaptchaForm_Load);
             this.Shown += new System.EventHandler(this.CaptchaForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.Picture)).EndInit();
             this.ResumeLayout(false);

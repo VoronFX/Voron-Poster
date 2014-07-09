@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows.Forms;
 
 namespace Voron_Poster
 {
@@ -175,18 +176,25 @@ namespace Voron_Poster
             string SeqNum = GetBetweenStrAfterStr(Html, "name=\"seqnum\"", "value=\"", "\"");
             Progress[2] += 11 / Progress[3];
 
+            string Captcha = null;
             // Check and ask if captcha
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
                 Progress[2] += 10 / Progress[3];
-                await Task.Run(() => CaptchaForm.IsFree.WaitOne());
+                //await Task.Run(() => CaptchaForm.IsFree.WaitOne());
+                WaitingForQueue = true;
+                lock (Log) Log.Add("В очереди");
+                await WaitFor(CaptchaForm.IsFree);
                 Progress[2] += 20 / Progress[3];
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                CaptchaForm.ShowDialog();
+
+                Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
+                Captcha = CaptchaForm.Result.Text;
+                CaptchaForm.IsFree.Set();
                 Progress[2] += 20 / Progress[3];
             }
             else Progress[2] += 50 / Progress[3];
@@ -199,8 +207,8 @@ namespace Voron_Poster
                 FormData.Add(new StringContent(Topic), "topic");
                 FormData.Add(new StringContent(Subject), "subject");
                 FormData.Add(new StringContent(Message), "message");
-                if (CaptchaForm != null)
-                    FormData.Add(new StringContent(CaptchaForm.Result.Text), "post_vv[code]");
+                if (Captcha != null)
+                    FormData.Add(new StringContent(Captcha), "post_vv[code]");
                 FormData.Add(new StringContent(SeqNum), "seqnum");
                 FormData.Add(new StringContent("0"), "message_mode");
                 FormData.Add(new StringContent(CurrSessionID), AnotherID);

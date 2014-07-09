@@ -15,10 +15,36 @@ namespace Voron_Poster
 {
     public abstract class Forum
     {
-        //struct DomainQueue
-        //{
 
-        //}
+        static Dictionary<string, AutoResetEvent> DomainQueue = new Dictionary<string, AutoResetEvent>();
+        public bool WaitingForQueue;
+        private Task WaitOrAdd(string Domain)
+        {
+            AutoResetEvent WaitHandle;
+            lock (DomainQueue)
+            {
+                if (!DomainQueue.TryGetValue(Domain, out WaitHandle))
+                {
+                    WaitHandle = new AutoResetEvent(true);
+                    DomainQueue.Add(Domain, WaitHandle);
+                }
+            }
+            if (WaitHandle.WaitOne(0))
+            {
+                WaitHandle.Reset();
+                Activity.ContinueWith((uselessvar) => WaitHandle.Set());
+                return Task.FromResult(true);
+            }
+            else
+                return WaitFor(WaitHandle).ContinueWith((uselessvar) =>
+                {
+                    try
+                    {
+                        Task.Delay(3000, Cancel.Token).Wait();
+                    }
+                    catch { }
+                });
+        }
 
         #region Detect Engine
         public enum Engine { Unknown, SMF, vBulletin }
@@ -122,6 +148,35 @@ namespace Voron_Poster
             }
         }
 
+        protected Task WaitFor(AutoResetEvent waitHandle)
+        {
+            var tcs = new TaskCompletionSource<object>();
+
+            Cancel.Token.Register(() => tcs.TrySetResult(null));
+            var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
+
+            // Registering callback to wait till WaitHandle changes its state
+            ThreadPool.RegisterWaitForSingleObject(
+                waitObject: waitHandle,
+                callBack: (o, timeout) =>
+                {
+                    if (CancelCopy.IsCancellationRequested)
+                        // If main task is cancelled give signal to next in queue immediatly
+                        waitHandle.Set();
+                    else
+                    {
+                        // Give signal to to next in queue when main task ends
+                        Activity.ContinueWith((uselessvar) => waitHandle.Set());
+                        WaitingForQueue = false;
+                    }
+                    tcs.TrySetResult(null);
+                },
+                state: null,
+                timeout: Timeout.InfiniteTimeSpan,
+                executeOnlyOnce: true);
+            return tcs.Task;
+        }
+
         protected async Task<HttpResponseMessage> PostAndLog(string requestUri, HttpContent content)
         {
             string StringContent = await content.ReadAsStringAsync();
@@ -137,9 +192,10 @@ namespace Voron_Poster
             return Response;
         }
 
-        public void ShowData()
+        public void ShowData(string Title)
         {
             var LogOutput = new LogOutput(HttpLog);
+            LogOutput.Text = Title;
             var Xml = new System.Xml.Serialization.XmlSerializer(this.GetType());
             try
             {
@@ -159,7 +215,8 @@ namespace Voron_Poster
         [NonSerialized]
         protected HttpClient Client;
 
-        public void Reset(){
+        public void Reset()
+        {
 
             Log = new List<string>();
             Log.Add("Остановлено");
@@ -168,6 +225,7 @@ namespace Voron_Poster
             Activity = null;
             Progress = new int[4] { 0, 0, 0, 1 };
             Cancel = new CancellationTokenSource();
+            WaitingForQueue = false;
 
             // Recreating client
             if (Client != null) Client.Dispose();
@@ -202,6 +260,15 @@ namespace Voron_Poster
         ~Forum()
         {
             if (Client != null) Client.Dispose();
+        }
+
+        public static string GetDomain(string Url)
+        {
+            string Domain = new String(Url.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
+                return Domain;
+            return String.Empty;
         }
 
         public abstract Task<Exception> Login();
@@ -278,9 +345,14 @@ namespace Voron_Poster
             return Task.Run(async () =>
             {
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                Task<Exception> LoginProcess = Login(); // Run login operation
+
+                // Async Magic. Wait for domain free and then run login operation 
+                Task<Exception> LoginProcess = null;
+                Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
+                    ContinueWith((uselessvar) => { LoginProcess = Login(); });
 
                 // Meanwile process the scripts
+                lock (Log) Log.Add("Обработка скриптов");
                 CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
                 var Session = InitScriptEngine(CurrentScriptData);
                 Progress[1] += 50;
@@ -293,6 +365,13 @@ namespace Voron_Poster
                 Progress[1] = 255;
 
                 // Waiting for login end
+                if (LoginProcess == null)
+                {
+                    WaitingForQueue = true;
+                    lock (Log) Log.Add("В очереди");
+                }
+                await WaitingDomain;
+                WaitingForQueue = false;
                 if (await LoginProcess != null) return LoginProcess.Result;
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 

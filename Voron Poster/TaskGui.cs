@@ -107,8 +107,16 @@ namespace Voron_Poster
                 {
                     case TaskStatus.Running:
                     case TaskStatus.WaitingForActivation:
-                        Status = InfoIcons.Running;
-                        Action = InfoIcons.Cancel;
+                        if (Forum.WaitingForQueue)
+                        {
+                            Status = InfoIcons.Waiting;
+                            Action = InfoIcons.Cancel;
+                        }
+                        else
+                        {
+                            Status = InfoIcons.Running;
+                            Action = InfoIcons.Cancel;
+                        }
                         break;
                     case TaskStatus.RanToCompletion:
                         if (Forum.Error == null)
@@ -369,7 +377,7 @@ namespace Voron_Poster
         private void Status_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (Ctrls.Status.LinkColor != Color.Black && Forum != null)
-                Forum.ShowData();
+                Forum.ShowData(TargetUrl);
         }
 
         public void Delete(object sender, EventArgs e)
@@ -414,6 +422,8 @@ namespace Voron_Poster
                 }
                 catch (Exception Error)
                 {
+                    if (!(Error is OperationCanceledException))
+                        throw;
                     Forum.Error = Error;
                 }
                 if (Forum.Error != null)

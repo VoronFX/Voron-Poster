@@ -12,20 +12,20 @@ using System.Net.Http;
 
 namespace Voron_Poster
 {
-    public partial class HtmlOutput : Form
+    public partial class LogOutput : Form
     {
-        public List<HttpResponseMessage> ResponseLog;
+        public List<KeyValuePair<HttpResponseMessage, string>> HttpLog;
         public Scintilla HtmlBox = new Scintilla();
-        public Scintilla ResponseBox = new Scintilla();
+        public Scintilla HttpBox = new Scintilla();
         public Scintilla VariablesBox = new Scintilla();
-        public HtmlOutput(List<HttpResponseMessage> NewResponseLog)
+        public LogOutput(List<KeyValuePair<HttpResponseMessage, string>> NewHttpLog)
         {
             InitializeComponent();
             Browser.Navigate("about:blank");
-            ResponseLog = NewResponseLog;
-            for (int i = 0; i < ResponseLog.Count; i++)
+            HttpLog = NewHttpLog;
+            for (int i = 0; i < HttpLog.Count; i++)
             {
-                ResponseList.Items.Add(ResponseLog[i].RequestMessage.RequestUri);
+                ResponseList.Items.Add(HttpLog[i].Key.RequestMessage.RequestUri);
             }
             ResponseList.SelectedIndex = ResponseList.Items.Count - 1;
             HtmlBox.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -40,17 +40,17 @@ namespace Voron_Poster
             HtmlBox.Indentation.SmartIndentType = SmartIndent.Simple;
             HtmlTab.Controls.Add(HtmlBox);
 
-            ResponseBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            ResponseBox.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
-            ResponseBox.Location = new System.Drawing.Point(0, 0);
-            ResponseBox.Margins.Margin1.Type = MarginType.Number;
-            ResponseBox.Margins.Margin1.Width = 27;
-            ResponseBox.Margins.Margin2.Width = 16;
-            ResponseBox.Name = "ResponseBox";
-            ResponseBox.TabIndex = 0;
-            ResponseBox.ConfigurationManager.Language = "js";
-            ResponseBox.Indentation.SmartIndentType = SmartIndent.Simple;
-            ResponseTab.Controls.Add(ResponseBox);
+            HttpBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            HttpBox.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
+            HttpBox.Location = new System.Drawing.Point(0, 0);
+            HttpBox.Margins.Margin1.Type = MarginType.Number;
+            HttpBox.Margins.Margin1.Width = 27;
+            HttpBox.Margins.Margin2.Width = 16;
+            HttpBox.Name = "ResponseBox";
+            HttpBox.TabIndex = 0;
+            HttpBox.ConfigurationManager.Language = "js";
+            HttpBox.Indentation.SmartIndentType = SmartIndent.Simple;
+            ResponseTab.Controls.Add(HttpBox);
 
             VariablesBox.Dock = System.Windows.Forms.DockStyle.Fill;
             VariablesBox.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
@@ -77,15 +77,16 @@ namespace Voron_Poster
             {
                 try
                 {
-                    string Html = await ResponseLog[ResponseList.SelectedIndex].Content.ReadAsStringAsync();
+                    string Html = await HttpLog[ResponseList.SelectedIndex].Key.Content.ReadAsStringAsync();
                     Browser.Document.Write(Html);
                     Browser.Refresh();
 
-                    ResponseBox.IsReadOnly = false;
-                    ResponseBox.Text = ResponseLog[ResponseList.SelectedIndex].RequestMessage.ToString()+"\n\n";
-                    ResponseBox.Text += ResponseLog[ResponseList.SelectedIndex].ToString();
+                    HttpBox.IsReadOnly = false;
+                    HttpBox.Text = HttpLog[ResponseList.SelectedIndex].Key.RequestMessage.ToString()+"\n\n";
+                    HttpBox.Text += "Request POST content: \n{\n"+HttpLog[ResponseList.SelectedIndex].Value + "\n}\n\n";
+                    HttpBox.Text += HttpLog[ResponseList.SelectedIndex].Key.ToString();
      
-                    ResponseBox.IsReadOnly = true;
+                    HttpBox.IsReadOnly = true;
 
                     HtmlBox.IsReadOnly = false;
                     HtmlBox.Text = Html;

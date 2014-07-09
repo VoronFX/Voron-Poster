@@ -128,11 +128,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ForumvBulletin.cs" />
-    <Compile Include="HtmlOutput.cs">
+    <Compile Include="LogOutput.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="HtmlOutput.Designer.cs">
-      <DependentUpon>HtmlOutput.cs</DependentUpon>
+    <Compile Include="LogOutput.Designer.cs">
+      <DependentUpon>LogOutput.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -153,8 +153,8 @@
     <EmbeddedResource Include="CaptchaForm.resx">
       <DependentUpon>CaptchaForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HtmlOutput.resx">
-      <DependentUpon>HtmlOutput.cs</DependentUpon>
+    <EmbeddedResource Include="LogOutput.resx">
+      <DependentUpon>LogOutput.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

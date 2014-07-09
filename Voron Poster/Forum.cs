@@ -20,54 +20,54 @@ namespace Voron_Poster
 
         //}
 
-        #region Detect Forum Engine
-        public enum ForumEngine { Unknown, SMF, vBulletin }
+        #region Detect Engine
+        public enum Engine { Unknown, SMF, vBulletin }
 
-        struct FESearchExpression
+        struct SearchExpression
         {
-            public string SearchExpression;
+            public string Expression;
             public int Value;
 
-            public FESearchExpression(string newSearchExpression, int newValue)
+            public SearchExpression(string newSearchExpression, int newValue)
             {
-                SearchExpression = newSearchExpression;
+                Expression = newSearchExpression;
                 Value = newValue;
             }
         }
 
-        private static int SearchForExpressions(string Html, FESearchExpression[] Expressions)
+        private static int SearchForExpressions(string Html, SearchExpression[] Expressions)
         {
             int ResultMatch = 0;
-            foreach (FESearchExpression CurrExpression in Expressions)
+            foreach (SearchExpression CurrExpression in Expressions)
             {
-                if (Html.IndexOf(CurrExpression.SearchExpression.ToLower()) >= 0)
+                if (Html.IndexOf(CurrExpression.Expression.ToLower()) >= 0)
                     ResultMatch += CurrExpression.Value;
             }
             return ResultMatch;
         }
 
-        public static async Task<ForumEngine> DetectForumEngine(string Url, HttpClient Client, CancellationToken Cancel)
+        public static async Task<Engine> DetectEngine(string Url, HttpClient Client, CancellationToken Cancel)
         {
-            int[] Match = new int[Enum.GetNames(typeof(ForumEngine))
+            int[] Match = new int[Enum.GetNames(typeof(Engine))
                      .Length];
             string Html = await (await Client.GetAsync(Url, Cancel)).Content.ReadAsStringAsync();
-            Match[(int)ForumEngine.Unknown] = 9;
+            Match[(int)Engine.Unknown] = 9;
 
-            Match[(int)ForumEngine.SMF] += SearchForExpressions(Html, new FESearchExpression[] {
-            new FESearchExpression("Powered by SMF", 20),
-            new FESearchExpression("Simple Machines Forum", 20),
-            new FESearchExpression("http://www.simplemachines.org/about/copyright.php", 10),
-            new FESearchExpression("http://www.simplemachines.org/", 10),
-            new FESearchExpression("Simple Machines", 10)});
+            Match[(int)Engine.SMF] += SearchForExpressions(Html, new SearchExpression[] {
+            new SearchExpression("Powered by SMF", 20),
+            new SearchExpression("Simple Machines Forum", 20),
+            new SearchExpression("http://www.simplemachines.org/about/copyright.php", 10),
+            new SearchExpression("http://www.simplemachines.org/", 10),
+            new SearchExpression("Simple Machines", 10)});
 
-            Match[(int)ForumEngine.vBulletin] += SearchForExpressions(Html, new FESearchExpression[] {
-            new FESearchExpression("vBulletin", 20)});
+            Match[(int)Engine.vBulletin] += SearchForExpressions(Html, new SearchExpression[] {
+            new SearchExpression("vBulletin", 20)});
 
-            ForumEngine PossibleEngine = ForumEngine.Unknown;
+            Engine PossibleEngine = Engine.Unknown;
             for (int i = 0; i < Match.Length; i++)
             {
                 if (Match[i] > Match[(int)PossibleEngine])
-                    PossibleEngine = (ForumEngine)i;
+                    PossibleEngine = (Engine)i;
             }
             return PossibleEngine;
         }
@@ -75,7 +75,7 @@ namespace Voron_Poster
         #endregion
         public class TaskBaseProperties
         {
-            public ForumEngine Engine;
+            public Engine Engine;
             public string ForumMainPage;
             public bool UseLocalAccount;
             public string Username;
@@ -96,7 +96,7 @@ namespace Voron_Poster
             }
         }
         [XmlIgnore]
-        protected List<HttpResponseMessage> ResponseLog;
+        protected List<KeyValuePair<HttpResponseMessage, string>> HttpLog;
         [XmlIgnore]
         public Exception Error;
         [XmlIgnore]
@@ -112,39 +112,48 @@ namespace Voron_Poster
             Reset();
         }
 
-        public static Forum New(ForumEngine Engine)
+        public static Forum New(Engine Engine)
         {
             switch (Engine)
             {
-                case ForumEngine.SMF: return new ForumSMF();
-                case ForumEngine.vBulletin: return new ForumvBulletin();
+                case Engine.SMF: return new ForumSMF();
+                case Engine.vBulletin: return new ForumvBulletin();
                 default: return null;
             }
         }
 
-        protected HttpResponseMessage LogResponse(HttpResponseMessage Response)
+        protected async Task<HttpResponseMessage> PostAndLog(string requestUri, HttpContent content)
         {
-            ResponseLog.Add(Response);
+            string StringContent = await content.ReadAsStringAsync();
+            var Response = await Client.PostAsync(requestUri, content, Cancel.Token);
+            HttpLog.Add(new KeyValuePair<HttpResponseMessage, string>(Response, StringContent));
+            return Response;
+        }
+
+        protected async Task<HttpResponseMessage> GetAndLog(string requestUri)
+        {
+            var Response = await Client.GetAsync(requestUri, Cancel.Token);
+            HttpLog.Add(new KeyValuePair<HttpResponseMessage, string>(Response, String.Empty));
             return Response;
         }
 
         public void ShowData()
         {
-            var HtmlOutput = new HtmlOutput(ResponseLog);
+            var LogOutput = new LogOutput(HttpLog);
             var Xml = new System.Xml.Serialization.XmlSerializer(this.GetType());
             try
             {
                 using (var Text = new System.IO.StringWriter())
                 {
                     Xml.Serialize(Text, this);
-                    HtmlOutput.VariablesBox.Text = Text.ToString();
+                    LogOutput.VariablesBox.Text = Text.ToString();
                 }
             }
             catch (Exception)
             {
             }
-            HtmlOutput.VariablesBox.IsReadOnly = true;
-            HtmlOutput.Show();
+            LogOutput.VariablesBox.IsReadOnly = true;
+            LogOutput.Show();
         }
 
         [NonSerialized]
@@ -154,7 +163,7 @@ namespace Voron_Poster
 
             Log = new List<string>();
             Log.Add("Остановлено");
-            ResponseLog = new List<HttpResponseMessage>();
+            HttpLog = new List<KeyValuePair<HttpResponseMessage, string>>();
             Error = null;
             Activity = null;
             Progress = new int[4] { 0, 0, 0, 1 };

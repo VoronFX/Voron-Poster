@@ -41,7 +41,7 @@ namespace Voron_Poster
             Progress[0] += 12;
 
             // Getting loging page
-            var Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token));
+            var Response = await GetAndLog(Properties.ForumMainPage + "index.php?action=login");
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 50;
             string Html = await Response.Content.ReadAsStringAsync();
@@ -68,11 +68,11 @@ namespace Voron_Poster
             Progress[0] += 8;
 
             // Send data to login and wait response
-            Response =  LogResponse(await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token));
+            Response = await PostAndLog(Properties.ForumMainPage + "index.php?action=login2", PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
 
-            Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage, Cancel.Token));
+            Response = await GetAndLog(Properties.ForumMainPage);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 40;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
@@ -157,8 +157,7 @@ namespace Voron_Poster
 
             // Get the post page
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            var Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage
-                + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token));
+            var Response = await GetAndLog(Properties.ForumMainPage + "index.php" + TargetBoard.Query + "&action=post");
             Progress[2] += 50 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[2] += 20 / Progress[3];
@@ -217,7 +216,7 @@ namespace Voron_Poster
 
                 // Send post
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                Response = LogResponse(await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token));
+                Response =  await PostAndLog(TargetBoard.AbsoluteUri, FormData);
                 Progress[2] += 50 / Progress[3];
                 Html = await Response.Content.ReadAsStringAsync();
                 Progress[2] += 20 / Progress[3];

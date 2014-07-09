@@ -37,7 +37,7 @@ namespace Voron_Poster
             Progress[0] += 12;
 
             // Getting loging page
-            var Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage, Cancel.Token));
+            var Response =  await GetAndLog(Properties.ForumMainPage);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
             string Html = await Response.Content.ReadAsStringAsync();
@@ -63,7 +63,7 @@ namespace Voron_Poster
             Progress[0] += 12;
 
             // Send data to login and wait response
-            Response = LogResponse(await Client.PostAsync(Properties.ForumMainPage + "login.php?do=login", PostData, Cancel.Token));
+            Response = await PostAndLog(Properties.ForumMainPage + "login.php?do=login", PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
@@ -135,8 +135,7 @@ namespace Voron_Poster
 
             // Get the post page
             lock (Log) Log.Add("Подготовка");
-            var Response = LogResponse(await Client.GetAsync(PostUrl + "?do=new"
-                    + Target + "&" + TargetParameter + "=" + TargetValue, Cancel.Token));
+            var Response = await GetAndLog(PostUrl + "?do=new" + Target + "&" + TargetParameter + "=" + TargetValue);
             Progress[2] += 60 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[2] += 30 / Progress[3];
@@ -177,7 +176,7 @@ namespace Voron_Poster
             Progress[2] += 7 / Progress[3];
 
             // Send data
-            Response = LogResponse(await Client.PostAsync(PostUrl, PostData, Cancel.Token));
+            Response = await PostAndLog(PostUrl, PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();

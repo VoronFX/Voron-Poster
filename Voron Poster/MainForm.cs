@@ -40,7 +40,7 @@ namespace Voron_Poster
             }
             Tabs.TabPages.Remove(propTab);
             Tabs.TabPages.Remove(scriptsTab);
-            propEngine.Items.AddRange(Enum.GetNames(typeof(Forum.ForumEngine)));
+            propEngine.Items.AddRange(Enum.GetNames(typeof(Forum.Engine)));
             propEngine.Items.RemoveAt(0);
 
             GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
@@ -483,7 +483,7 @@ namespace Voron_Poster
         private void propEngine_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (propEngine.SelectedIndex >= 0)
-                TempProperties.Engine = (Forum.ForumEngine)Enum.Parse(typeof(Forum.ForumEngine),
+                TempProperties.Engine = (Forum.Engine)Enum.Parse(typeof(Forum.Engine),
             (string)propEngine.SelectedItem);
             ValidateProperties();
             ResetIcon(sender, e);
@@ -499,14 +499,14 @@ namespace Voron_Poster
             PropertiesActivity = true;
             ValidateProperties();
             propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
-            Forum.ForumEngine Detected = Forum.ForumEngine.Unknown;
+            Forum.Engine Detected = Forum.Engine.Unknown;
             HttpClient Client = new HttpClient();
             StopProperties = new CancellationTokenSource();
             Client.Timeout = new TimeSpan(0, 0, 10);
             bool Error = false;
             try
             {
-                Task<Forum.ForumEngine> DetectTask = Forum.DetectForumEngine(TempProperties.ForumMainPage, Client, StopProperties.Token);
+                Task<Forum.Engine> DetectTask = Forum.DetectEngine(TempProperties.ForumMainPage, Client, StopProperties.Token);
                 PropertiesActivityTask = DetectTask;
                 Detected = await DetectTask;
             }
@@ -521,13 +521,13 @@ namespace Voron_Poster
             }
             if (!Error)
             {
-                if (Detected == Forum.ForumEngine.Unknown)
+                if (Detected == Forum.Engine.Unknown)
                     propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Question);
                 else
                 {
                     TempProperties.Engine = Detected;
                     propEngine.SelectedIndex =
-                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.ForumEngine), Detected));
+                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.Engine), Detected));
                     propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
                 }
             }
@@ -685,7 +685,7 @@ namespace Voron_Poster
                 || TempProperties.ForumMainPage == "http://"
                 || TempProperties.ForumMainPage == String.Empty;
             propEngine.SelectedIndex = propEngine.Items.IndexOf(
-                Enum.GetName(typeof(Forum.ForumEngine), TempProperties.Engine));
+                Enum.GetName(typeof(Forum.Engine), TempProperties.Engine));
             propUsername.Text = TempProperties.Username;
             propPassword.Text = TempProperties.Password;
             propScriptsList.Items.Clear();

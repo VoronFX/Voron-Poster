@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
@@ -10,7 +11,8 @@ using System.Web;
 
 namespace Voron_Poster
 {
-    class ForumSMF : Forum
+
+    public class ForumSMF : Forum
     {
         private Uri CaptchaUri;
         private string CurrSessionID;
@@ -31,32 +33,30 @@ namespace Voron_Poster
         {
             return SHA1HashStringForUTF8String(SHA1HashStringForUTF8String(Username.ToLower() + Password) + cur_session_id);
         }
-
     
         public override async Task<Exception> Login()
         {
             lock (Log) Log.Add("Cоединение");
 
-            CreateClient(); // Creating client
             Progress[0] += 12;
 
             // Getting loging page
-            var Response = await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token);
+            var Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage + "index.php?action=login", Cancel.Token));
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 60;
+            Progress[0] += 50;
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[0] += 30;
+            Progress[0] += 25;
 
             // Search for Id's and calculate hash
             lock (Log) Log.Add("Авторизация");
             Html = Html.ToLower();
-            Progress[0] += 10;
+            Progress[0] += 8;
             CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
-            Progress[0] += 10;
+            Progress[0] += 8;
             string HashPswd = hashLoginPassword(Properties.Username, Properties.Password, CurrSessionID);
-            Progress[0] += 10;
+            Progress[0] += 8;
             AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
-            Progress[0] += 10;
+            Progress[0] += 8;
             var PostData = new FormUrlEncodedContent(new[]
                     {
                         new KeyValuePair<string, string>("user", Properties.Username.ToLower()),
@@ -65,14 +65,18 @@ namespace Voron_Poster
                         new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
                         new KeyValuePair<string, string>(AnotherID, CurrSessionID)
                      });
-            Progress[0] += 10;
+            Progress[0] += 8;
 
             // Send data to login and wait response
-            Response = await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token);
+            Response =  LogResponse(await Client.PostAsync(Properties.ForumMainPage + "index.php?action=login2", PostData, Cancel.Token));
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;
+
+            Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage, Cancel.Token));
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Progress[0] += 40;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            Progress[0] += 30;
+            Progress[0] += 15;
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -153,8 +157,8 @@ namespace Voron_Poster
 
             // Get the post page
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            var Response = await Client.GetAsync(Properties.ForumMainPage
-                + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token);
+            var Response = LogResponse(await Client.GetAsync(Properties.ForumMainPage
+                + "index.php" + TargetBoard.Query + "&action=post", Cancel.Token));
             Progress[2] += 50 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[2] += 20 / Progress[3];
@@ -213,7 +217,7 @@ namespace Voron_Poster
 
                 // Send post
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                Response = await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token);
+                Response = LogResponse(await Client.PostAsync(TargetBoard.AbsoluteUri, FormData, Cancel.Token));
                 Progress[2] += 50 / Progress[3];
                 Html = await Response.Content.ReadAsStringAsync();
                 Progress[2] += 20 / Progress[3];

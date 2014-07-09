@@ -263,8 +263,7 @@ namespace Voron_Poster
                     Tasks[i].Status == TaskGui.InfoIcons.Cancelled ||
                     Tasks[i].Status == TaskGui.InfoIcons.Error))
                     {
-                        Tasks[i].Forum.Progress = new int[4] { 0, 0, 0, 1 };
-                        Tasks[i].Forum.Activity = null;
+                        Tasks[i].Forum.Reset();
                         Tasks[i].SetStatusIcon();
                     }
                 }
@@ -432,12 +431,6 @@ namespace Voron_Poster
                 CaretPos += 7 + https;
                 RecheckBlock = false;
             }
-            //if (!(sender as TextBox).Text.StartsWith("http://".Substring(0,Math.Min(, StringComparison.OrdinalIgnoreCase)
-            //    && !(sender as TextBox).Text.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    CaretPos += 7;
-            //    (sender as TextBox).Text = "http://" + (sender as TextBox).Text;
-            //}
             Uri Url;
             if (Uri.TryCreate((sender as TextBox).Text, UriKind.Absolute, out Url)
                 && (Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps))
@@ -449,9 +442,10 @@ namespace Voron_Poster
                     if (DetectMainPage)
                     {
                         string Domain = GetDomain(propTargetUrl.Text).ToLower();
-                        if (propMainUrl.Text.IndexOf("https://") >= 0)
-                            propMainUrl.Text = "https://" + Domain;
-                        else propMainUrl.Text = "http://" + Domain;
+                        if (propTargetUrl.Text.LastIndexOf("/") > 7)
+                            propMainUrl.Text = new String(propTargetUrl.Text.Take(propTargetUrl.Text.LastIndexOf("/")+1).ToArray());
+                        else
+                            propMainUrl.Text = propTargetUrl.Text + "/";
                         if (Domain != String.Empty) //suggest profile
                             foreach (Object s in propProfiles.Items)
                             {
@@ -1230,6 +1224,11 @@ namespace Voron_Poster
         }
 
         #endregion
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
 
 
 

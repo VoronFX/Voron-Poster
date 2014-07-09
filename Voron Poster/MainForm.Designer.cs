@@ -111,6 +111,7 @@
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -156,6 +157,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.linkLabel1);
             this.tabPage1.Controls.Add(this.button3);
             this.tabPage1.Controls.Add(this.button2);
             this.tabPage1.Controls.Add(this.label1);
@@ -288,7 +290,7 @@
             this.panel1.MaximumSize = new System.Drawing.Size(0, 10);
             this.panel1.MinimumSize = new System.Drawing.Size(0, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(551, 10);
+            this.panel1.Size = new System.Drawing.Size(0, 10);
             this.panel1.TabIndex = 43;
             // 
             // messageSubject
@@ -1142,6 +1144,20 @@
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.ActiveLinkColor = System.Drawing.Color.Black;
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.linkLabel1.LinkColor = System.Drawing.Color.Red;
+            this.linkLabel1.Location = new System.Drawing.Point(289, 154);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(55, 13);
+            this.linkLabel1.TabIndex = 16;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "linkLabel1";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
             // tasksTable
             // 
             this.tasksTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1432,6 +1448,7 @@
         private System.Windows.Forms.Panel panel1;
         public System.Windows.Forms.TextBox messageText;
         public System.Windows.Forms.TextBox messageSubject;
+        private System.Windows.Forms.LinkLabel linkLabel1;
 
 
     }

@@ -8,6 +8,8 @@ using System.Threading;
 using System.Net;
 using Roslyn.Scripting.CSharp;
 using System.Runtime.Remoting.Messaging;
+using System.Xml.Serialization;
+using System.Windows.Forms;
 
 namespace Voron_Poster
 {
@@ -93,19 +95,21 @@ namespace Voron_Poster
                 PreProcessingScripts = new List<string>(Data.PreProcessingScripts);
             }
         }
-
+        [XmlIgnore]
+        protected List<HttpResponseMessage> ResponseLog;
+        [XmlIgnore]
         public Exception Error;
+        [XmlIgnore]
         public Task<Exception> Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
-        public int[] Progress = new int[4] { 0, 0, 0, 1 };
+        public int[] Progress;
         public CancellationTokenSource Cancel;
         public static CaptchaForm CaptchaForm = new CaptchaForm();
         public Forum()
         {
-            Log = new List<string>();
-            Log.Add("Остановлено");
+            Reset();
         }
 
         public static Forum New(ForumEngine Engine)
@@ -118,9 +122,45 @@ namespace Voron_Poster
             }
         }
 
+        protected HttpResponseMessage LogResponse(HttpResponseMessage Response)
+        {
+            ResponseLog.Add(Response);
+            return Response;
+        }
+
+        public void ShowData()
+        {
+            var HtmlOutput = new HtmlOutput(ResponseLog);
+            var Xml = new System.Xml.Serialization.XmlSerializer(this.GetType());
+            try
+            {
+                using (var Text = new System.IO.StringWriter())
+                {
+                    Xml.Serialize(Text, this);
+                    HtmlOutput.VariablesBox.Text = Text.ToString();
+                }
+            }
+            catch (Exception)
+            {
+            }
+            HtmlOutput.VariablesBox.IsReadOnly = true;
+            HtmlOutput.Show();
+        }
+
+        [NonSerialized]
         protected HttpClient Client;
 
-        protected void CreateClient(){
+        public void Reset(){
+
+            Log = new List<string>();
+            Log.Add("Остановлено");
+            ResponseLog = new List<HttpResponseMessage>();
+            Error = null;
+            Activity = null;
+            Progress = new int[4] { 0, 0, 0, 1 };
+            Cancel = new CancellationTokenSource();
+
+            // Recreating client
             if (Client != null) Client.Dispose();
             Client = new HttpClient();
             Client.Timeout = RequestTimeout;

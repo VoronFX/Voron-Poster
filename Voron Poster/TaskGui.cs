@@ -149,8 +149,26 @@ namespace Voron_Poster
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
 
             if (Status == InfoIcons.Error)
+            {
                 ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
+            }
             else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
+
+            if (Status == InfoIcons.Error)
+            {
+                Ctrls.Status.LinkColor = Color.Red;
+                Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
+            }
+            else if (Status == InfoIcons.Complete)
+            {
+                Ctrls.Status.LinkColor = Color.Green;
+                Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
+            }
+            else
+            {
+                Ctrls.Status.LinkColor = Color.Black;
+                Ctrls.Status.LinkBehavior = LinkBehavior.NeverUnderline;
+            }
 
             MainForm.ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
             MainForm.ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
@@ -160,7 +178,7 @@ namespace Voron_Poster
         {
             public CheckBox Selected;
             public LinkLabel Name;
-            public Label Status;
+            public LinkLabel Status;
             public PictureBox StatusIcon;
             public ProgressBar Progress;
             public Button StartStop;
@@ -171,7 +189,7 @@ namespace Voron_Poster
             {
                 this.Selected = new System.Windows.Forms.CheckBox();
                 this.Name = new System.Windows.Forms.LinkLabel();
-                this.Status = new System.Windows.Forms.Label();
+                this.Status = new System.Windows.Forms.LinkLabel();
                 this.StatusIcon = new System.Windows.Forms.PictureBox();
                 this.Progress = new System.Windows.Forms.ProgressBar();
                 this.StartStop = new System.Windows.Forms.Button();
@@ -224,6 +242,9 @@ namespace Voron_Poster
                 Status.Text = "Состояние";
                 Status.Padding = new Padding(3, 6, 3, 0);
                 Status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+                Status.LinkColor = Color.Black;
+                Status.LinkBehavior = LinkBehavior.NeverUnderline;
+                Status.ActiveLinkColor = Color.Black;
                 Status.BackColor = Color.Transparent;
                 // 
                 // GTStatusIcon
@@ -324,7 +345,8 @@ namespace Voron_Poster
             Ctrls.StartStop.Click += StartStop;
             Ctrls.Delete.Click += Delete;
             Ctrls.Properties.Click += Properties;
-            Ctrls.Name.LinkClicked += linkLabel_LinkClicked;
+            Ctrls.Name.LinkClicked += Name_LinkClicked;
+            Ctrls.Status.LinkClicked += Status_LinkClicked;
             AddToGuiTable();
         }
 
@@ -339,9 +361,15 @@ namespace Voron_Poster
             MainForm.ShowPropertiesPage();
         }
 
-        private void linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void Name_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start((sender as LinkLabel).Text);
+        }
+
+        private void Status_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (Ctrls.Status.LinkColor != Color.Black && Forum != null)
+                Forum.ShowData();
         }
 
         public void Delete(object sender, EventArgs e)
@@ -377,10 +405,8 @@ namespace Voron_Poster
             {
                 try
                 {
-                    Forum.Cancel = new CancellationTokenSource();
-                    Forum.Progress = new int[4] { 0, 0, 0, 1 };
-                    Ctrls.Progress.Value = 0;
-                    Forum.Activity = 
+                    Forum.Reset();
+                    Forum.Activity =
                         Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
                     SetStatusIcon();
                     Ctrls.StartStop.Enabled = true;

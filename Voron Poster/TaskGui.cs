@@ -92,7 +92,8 @@ namespace Voron_Poster
             if (Forum != null)
                 lock (Forum.Log)
                 {
-                    Ctrls.Status.Text = Forum.Log.Last<string>();
+                     string StatusText = Forum.Log.Last<string>();
+                     Ctrls.Status.Text = new string(StatusText.Skip(Math.Max(0, StatusText.IndexOf(":"))).ToArray());
                 }
             MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
             if (Forum == null || Forum.Activity == null)

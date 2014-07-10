@@ -92,7 +92,8 @@ namespace Voron_Poster
                     HtmlBox.Text = Html;
                     HtmlBox.IsReadOnly = true;
                 }
-                catch (Exception Error) { MessageBox.Show(Error.Message); }
+                catch (Exception Error) { 
+                    MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error); }
             }
         }
     }

@@ -80,54 +80,6 @@ namespace Voron_Poster
             b.Show();
         }
 
-        ForumSMF f;
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            //WebRequest Request = WebRequest.Create(textBox1.Text);
-            //WebResponse Response = Request.GetResponse();
-            //Stream dataStream = Response.GetResponseStream();
-            //// Open the stream using a StreamReader for easy access.
-            //StreamReader Reader = new StreamReader(dataStream);
-            //// Read the content.
-            //string responseFromServer = Reader.ReadToEnd();
-            //// Display the content.
-            //// Clean up the streams and the response.
-            //Reader.Close();
-            //Response.Close();
-            //textBox1.Text = responseFromServer;
-            progressBar1.Parent = this;
-            progressBar1.Text = "test";
-            progressBar1.Maximum = 15;
-
-
-            //f = new ForumSMF();
-            //f.RequestTimeout = 3000;
-            //f.MainPage = new Uri("http://www.simplemachines.org/community/");
-            //System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
-            //t.Interval = 100;
-            //t.Tick += new EventHandler((a, b) => { progressBar1.Value = f.Progress; });
-            //t.Start();
-            //await f.Login("Voron", "LEVEL2index");
-            //textBox1.Lines = f.Log.ToArray();
-            //textBox2.Text = f.h;
-            //  RenderHtml(f.h);
-            // this.Text = hashLoginPassword(textBox1.Lines[0], textBox1.Lines[1], textBox1.Lines[2]);
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            f.Cancel.Cancel();
-        }
-
-        private async void button3_Click(object sender, EventArgs e)
-        {
-            //await f.PostMessage(new Uri("http://www.simplemachines.org/community/index.php?topic=524612.0"), "test3", textBox2.Text);
-            //textBox1.Lines = f.Log.ToArray();
-            //textBox2.Text += f.h;
-            //RenderHtml(f.h);
-        }
-
         #region Tasks Page
 
         private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
@@ -173,10 +125,29 @@ namespace Voron_Poster
             //  Tabs.TabPages.Remove(TaskPropertiesPage);
         }
 
+        TabPage PreviousTab = null;
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            //if (Tabs.SelectedIndex == Tabs.TabPages.IndexOf(TaskPropertiesPage))
-            e.Cancel = !e.TabPage.Enabled;
+            if (PreviousTab == propTab && e.TabPage != scriptsTab)
+            {
+                DialogResult Ask = System.Windows.Forms.DialogResult.No;
+                if (propApply.Enabled)
+                    Ask = MessageBox.Show("Сохранить изменнения?",
+                        this.Text, MessageBoxButtons.YesNoCancel);
+                switch (Ask)
+                {
+                    case System.Windows.Forms.DialogResult.Yes: propApply.PerformClick(); break;
+                    case System.Windows.Forms.DialogResult.No: propCancel.PerformClick(); break;
+                }
+            }
+            if (e.TabPage.Enabled)
+            {
+                PreviousTab = e.TabPage;
+                e.Cancel = false;
+            }
+            else
+                e.Cancel = true;
+            
             TasksUpdater.Enabled = e.TabPage == tasksTab;
         }
 
@@ -334,7 +305,7 @@ namespace Voron_Poster
             }
             catch (Exception Error)
             {
-                MessageBox.Show(Error.Message);
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             tasksSave.Enabled = true;
         }
@@ -369,7 +340,7 @@ namespace Voron_Poster
             }
             catch (Exception Error)
             {
-                MessageBox.Show(Error.Message);
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             tasksLoad.Enabled = true;
         }
@@ -435,7 +406,7 @@ namespace Voron_Poster
                     {
                         string Domain = Forum.GetDomain(propTargetUrl.Text).ToLower();
                         if (propTargetUrl.Text.LastIndexOf("/") > 7)
-                            propMainUrl.Text = new String(propTargetUrl.Text.Take(propTargetUrl.Text.LastIndexOf("/")+1).ToArray());
+                            propMainUrl.Text = new String(propTargetUrl.Text.Take(propTargetUrl.Text.LastIndexOf("/") + 1).ToArray());
                         else
                             propMainUrl.Text = propTargetUrl.Text + "/";
                         if (Domain != String.Empty) //suggest profile
@@ -537,9 +508,9 @@ namespace Voron_Poster
             TempForum = Forum.New(TempProperties.Engine);
             StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
+            TempForum.Reset();
             TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
-
             Task<Exception> LoginTask = TempForum.Login();
             PropertiesActivityTask = LoginTask;
             Exception Error;
@@ -555,12 +526,19 @@ namespace Voron_Poster
             else
             {
                 propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
-                ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error);
+                ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
             }
-            TempForum = null;
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
             ValidateProperties();
+        }
+
+        private void propAuthLog_Click(object sender, EventArgs e)
+        {
+            if (TempForum != null)
+            {
+                TempForum.ShowData(TempForum.Properties.ForumMainPage);
+            }
         }
 
         private void ResetIcon(object sender, EventArgs e)
@@ -702,6 +680,7 @@ namespace Voron_Poster
             }
 
             tasksTab.Enabled = true;
+            PreviousTab = null;
             Tabs.SelectTab(tasksTab);
             for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
             Tabs.TabPages.Remove(propTab);
@@ -709,6 +688,7 @@ namespace Voron_Poster
             {
                 CurrTask.Delete(sender, e);
             }
+            TempForum = null;
             propCancel.Enabled = true;
         }
 
@@ -792,7 +772,7 @@ namespace Voron_Poster
                 }
                 catch (Exception Error)
                 {
-                    MessageBox.Show(Error.Message);
+                    MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 finally
                 {
@@ -817,7 +797,7 @@ namespace Voron_Poster
             catch (Exception Error)
             {
                 propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
-                MessageBox.Show(Error.Message);
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -839,7 +819,7 @@ namespace Voron_Poster
             }
             catch (Exception Error)
             {
-                MessageBox.Show(Error.Message);
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -983,7 +963,7 @@ namespace Voron_Poster
                     }
                     catch (Exception Error)
                     {
-                        MessageBox.Show(Error.Message);
+                        MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     scriptsSave.Enabled = false;
                 }
@@ -1017,7 +997,7 @@ namespace Voron_Poster
             }
             catch (Exception Error)
             {
-                MessageBox.Show(Error.Message);
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 scriptsSave.Enabled = true;
             }
             IgnoreEvents = false;
@@ -1049,7 +1029,7 @@ namespace Voron_Poster
                 catch (Exception Error)
                 {
                     scriptsDelete.Enabled = true;
-                    MessageBox.Show(Error.Message);
+                    MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
         }
 
@@ -1221,6 +1201,8 @@ namespace Voron_Poster
         {
 
         }
+
+
 
 
 

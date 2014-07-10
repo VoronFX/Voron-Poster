@@ -32,23 +32,21 @@ namespace Voron_Poster
 
         public override async Task<Exception> Login()
         {
-            lock (Log) Log.Add("Cоединение");
-
-            Progress[0] += 12;
-
             // Getting loging page
+            lock (Log) Log.Add("Авторизация: Загрузка страницы");
             var Response =  await GetAndLog(Properties.ForumMainPage);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 60;
+            Progress[0] += 66;
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[0] += 30;
 
             // Search for Id's and calculate hash
-            lock (Log) Log.Add("Авторизация");
+            lock (Log) Log.Add("Авторизация: Поиск переменных");
             Html = Html.ToLower();
             Progress[0] += 13;
-            SecurityToken = GetBetweenStrAfterStr(Html, "securitytoken", "value=\"", "\"");
+            SecurityToken = GetFieldValue(Html, "securitytoken");
             Progress[0] += 12;
+            lock (Log) Log.Add("Авторизация: Подготовка данных");
             string HashPswd = MD5HashStringForUTF8String(str_to_ent(Properties.Password.Trim()));
             string HashPswdUtf = MD5HashStringForUTF8String(Properties.Password.Trim());
             Progress[0] += 13;
@@ -63,9 +61,10 @@ namespace Voron_Poster
             Progress[0] += 12;
 
             // Send data to login and wait response
+            lock (Log) Log.Add("Авторизация: Запрос авторизации");
             Response = await PostAndLog(Properties.ForumMainPage + "login.php?do=login", PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 60;
+            Progress[0] += 66;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
             Progress[0] += 30;
 
@@ -120,6 +119,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
         {
+            lock (Log) Log.Add("Публикация: Подготовка данных");
             string PostUrl;
             string TargetParameter = "t";
             string Target = "reply";
@@ -134,20 +134,21 @@ namespace Voron_Poster
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
             // Get the post page
-            lock (Log) Log.Add("Подготовка");
+            lock (Log) Log.Add("Публикация: Загрузка страницы");
             var Response = await GetAndLog(PostUrl + "?do=new" + Target + "&" + TargetParameter + "=" + TargetValue);
             Progress[2] += 60 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[2] += 30 / Progress[3];
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
-            string posthash = GetBetweenStrAfterStr(Html, "name=\"posthash\"", "value=\"", "\"");
+            lock (Log) Log.Add("Публикация: Поиск переменных");
+            string posthash = GetFieldValue(Html, "posthash");
             Progress[2] += 10 / Progress[3];
-            string poststarttime = GetBetweenStrAfterStr(Html, "name=\"poststarttime\"", "value=\"", "\"");
+            string poststarttime = GetFieldValue(Html, "poststarttime");
             Progress[2] += 10 / Progress[3];
-            string loggedinuser = GetBetweenStrAfterStr(Html, "name=\"loggedinuser\"", "value=\"", "\"");
+            string loggedinuser = GetFieldValue(Html, "loggedinuser");
             Progress[2] += 10 / Progress[3];
-            SecurityToken = GetBetweenStrAfterStr(Html, "name=\"securitytoken\"", "value=\"", "\"");
+            SecurityToken = GetFieldValue(Html, "securitytoken");
             Progress[2] += 10 / Progress[3];
 
             // Not working by unkknown encoding problem 
@@ -162,7 +163,7 @@ namespace Voron_Poster
             //        new KeyValuePair<string, string>(TargetParameter, TargetValue),  
             //        new KeyValuePair<string, string>("do", "post"+Target)
             //    });
-            lock (Log) Log.Add("Публикация");
+            lock (Log) Log.Add("Публикация: Подготовка данных");
             StringContent PostData = new StringContent("subject="+Subject
                         + "&message="+Message
                         + "&securitytoken=" + SecurityToken
@@ -176,6 +177,7 @@ namespace Voron_Poster
             Progress[2] += 7 / Progress[3];
 
             // Send data
+            lock (Log) Log.Add("Публикация: Отправка запроса");
             Response = await PostAndLog(PostUrl, PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 60;

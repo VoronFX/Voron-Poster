@@ -38,8 +38,8 @@ namespace Voron_Poster
             {
                 if (Error is OperationCanceledException) {
                     this.Close();
-                } else 
-                MessageBox.Show(Error.Message, "Ошибка");
+                } else
+                    MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             buttonRefresh.Enabled = true;
         }

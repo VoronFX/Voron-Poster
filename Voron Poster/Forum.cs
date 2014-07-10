@@ -47,7 +47,7 @@ namespace Voron_Poster
         }
 
         #region Detect Engine
-        public enum Engine { Unknown, SMF, vBulletin }
+        public enum Engine { Unknown, SMF, vBulletin, IPB }
 
         struct SearchExpression
         {
@@ -64,10 +64,10 @@ namespace Voron_Poster
         private static int SearchForExpressions(string Html, SearchExpression[] Expressions)
         {
             int ResultMatch = 0;
-            foreach (SearchExpression CurrExpression in Expressions)
+            for (int i = 0; i < Expressions.Length; i++)
             {
-                if (Html.IndexOf(CurrExpression.Expression.ToLower()) >= 0)
-                    ResultMatch += CurrExpression.Value;
+                if (Html.IndexOf(Expressions[i].Expression.ToLower()) >= 0)
+                    ResultMatch += Expressions[i].Value;
             }
             return ResultMatch;
         }
@@ -89,6 +89,16 @@ namespace Voron_Poster
             Match[(int)Engine.vBulletin] += SearchForExpressions(Html, new SearchExpression[] {
             new SearchExpression("vBulletin", 20)});
 
+            Match[(int)Engine.IPB] += SearchForExpressions(Html, new SearchExpression[] {
+            new SearchExpression("Powered By IP.Board", 20),
+            new SearchExpression("Powered By IP Board", 20),
+            new SearchExpression("Powered By IPB", 20),
+            new SearchExpression("IP.Board", 10),
+            new SearchExpression("IPBoard", 10),
+            new SearchExpression("IPB", 10),
+            new SearchExpression("http://www.invisionboard.com", 10)});
+
+
             Engine PossibleEngine = Engine.Unknown;
             for (int i = 0; i < Match.Length; i++)
             {
@@ -99,6 +109,7 @@ namespace Voron_Poster
         }
 
         #endregion
+
         public class TaskBaseProperties
         {
             public Engine Engine;
@@ -144,6 +155,7 @@ namespace Voron_Poster
             {
                 case Engine.SMF: return new ForumSMF();
                 case Engine.vBulletin: return new ForumvBulletin();
+                case Engine.IPB: return new ForumIPB();
                 default: return null;
             }
         }
@@ -225,7 +237,7 @@ namespace Voron_Poster
             Activity = null;
             Progress = new int[4] { 0, 0, 0, 1 };
             Cancel = new CancellationTokenSource();
-            WaitingForQueue = false;
+            WaitingForQueue = true;
 
             // Recreating client
             if (Client != null) Client.Dispose();
@@ -261,6 +273,34 @@ namespace Voron_Poster
         {
             if (Client != null) Client.Dispose();
         }
+
+        protected string GetFieldValue(string Html, string Name)
+        {
+            return GetFieldValue(Html, Name, "value");
+        }
+
+        protected string GetFieldValue(string Html, string Name, string Attribute)
+        {
+            return GetFieldValue(Html, "name", Name, "value");
+        }
+
+        protected string GetFieldValue(string Html, string SearchAttr, string SearchValue, string GetAttr)
+        {
+            Html = Html.Replace('\'', '"');
+            int b = Html.IndexOf(SearchAttr + "=\"" + SearchValue + "\"", StringComparison.OrdinalIgnoreCase);
+            if (b < 0) return String.Empty;
+            int TagBeg = Html.LastIndexOf("<", b, StringComparison.OrdinalIgnoreCase);
+            int TagEnd = Html.IndexOf(">", b + SearchAttr.Length + SearchValue.Length + 2, StringComparison.OrdinalIgnoreCase);
+            if (TagBeg < 0) TagBeg = 0;
+            if (TagEnd < 0) TagEnd = Html.Length;
+            string Tag = Html.Substring(TagBeg, TagEnd - TagBeg + 1);
+            TagBeg = Tag.IndexOf(GetAttr + "=\"", StringComparison.OrdinalIgnoreCase);
+            if (TagBeg < 0) return String.Empty;
+            TagEnd = Tag.IndexOf("\"", TagBeg + GetAttr.Length + 2, StringComparison.OrdinalIgnoreCase);
+            if (TagEnd < 0) return String.Empty;
+            return Tag.Substring(TagBeg + GetAttr.Length + 2, TagEnd - (TagBeg + GetAttr.Length + 2));
+        }
+
 
         public static string GetDomain(string Url)
         {
@@ -346,6 +386,7 @@ namespace Voron_Poster
             {
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
+                WaitingForQueue = false;
                 // Async Magic. Wait for domain free and then run login operation 
                 Task<Exception> LoginProcess = null;
                 Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
@@ -368,7 +409,7 @@ namespace Voron_Poster
                 if (LoginProcess == null)
                 {
                     WaitingForQueue = true;
-                    lock (Log) Log.Add("В очереди");
+                    lock (Log) Log.Add("Авторизация: В очереди");
                 }
                 await WaitingDomain;
                 WaitingForQueue = false;

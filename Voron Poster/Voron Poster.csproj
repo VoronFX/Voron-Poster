@@ -128,6 +128,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ForumIPB.cs" />
+    <Compile Include="ForumUniversal.cs" />
     <Compile Include="ForumvBulletin.cs" />
     <Compile Include="LogOutput.cs">
       <SubType>Form</SubType>

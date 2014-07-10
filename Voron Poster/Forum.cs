@@ -20,36 +20,47 @@ namespace Voron_Poster
         public bool WaitingForQueue;
         private Task WaitOrAdd(string Domain)
         {
-            AutoResetEvent WaitHandle;
-            lock (DomainQueue)
+            try
             {
-                if (!DomainQueue.TryGetValue(Domain, out WaitHandle))
+
+                AutoResetEvent WaitHandle;
+                lock (DomainQueue)
                 {
-                    WaitHandle = new AutoResetEvent(true);
-                    DomainQueue.Add(Domain, WaitHandle);
-                }
-            }
-            if (WaitHandle.WaitOne(0))
-            {
-                WaitHandle.Reset();
-                Activity.ContinueWith((uselessvar) => WaitHandle.Set());
-                return Task.FromResult(true);
-            }
-            else
-                return WaitFor(WaitHandle).ContinueWith((uselessvar) =>
-                {
-                    try
+                    if (!DomainQueue.TryGetValue(Domain, out WaitHandle))
                     {
-                        Task.Delay(3000, Cancel.Token).Wait();
+                        WaitHandle = new AutoResetEvent(true);
+                        DomainQueue.Add(Domain, WaitHandle);
                     }
-                    catch { }
-                });
+                }
+                if (WaitHandle.WaitOne(0))
+                {
+                    WaitHandle.Reset();
+                    Activity.ContinueWith((uselessvar) => WaitHandle.Set());
+                    return Task.FromResult(true);
+                }
+                else
+                    return WaitFor(WaitHandle).ContinueWith((uselessvar) =>
+                    {
+                        try
+                        {
+                            Task.Delay(3000, Cancel.Token).Wait();
+                        }
+                        catch { }
+                    });
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("It here. Don't lose this exception");
+                int f = 4;
+                string fff = "fd";
+            }
+            return Task.FromResult(true);
         }
 
         #region Detect Engine
-        public enum Engine { Unknown, SMF, vBulletin, IPB }
+        public enum Engine { Unknown, SMF, vBulletin, IPB, Universal }
 
-        struct SearchExpression
+        protected struct SearchExpression
         {
             public string Expression;
             public int Value;
@@ -61,12 +72,12 @@ namespace Voron_Poster
             }
         }
 
-        private static int SearchForExpressions(string Html, SearchExpression[] Expressions)
+        protected static int SearchForExpressions(string Html, SearchExpression[] Expressions)
         {
             int ResultMatch = 0;
             for (int i = 0; i < Expressions.Length; i++)
             {
-                if (Html.IndexOf(Expressions[i].Expression.ToLower()) >= 0)
+                if (Html.IndexOf(Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
                     ResultMatch += Expressions[i].Value;
             }
             return ResultMatch;
@@ -156,6 +167,7 @@ namespace Voron_Poster
                 case Engine.SMF: return new ForumSMF();
                 case Engine.vBulletin: return new ForumvBulletin();
                 case Engine.IPB: return new ForumIPB();
+                case Forum.Engine.Universal: return new ForumUniversal();
                 default: return null;
             }
         }
@@ -163,29 +175,37 @@ namespace Voron_Poster
         protected Task WaitFor(AutoResetEvent waitHandle)
         {
             var tcs = new TaskCompletionSource<object>();
+            try
+            {
+                Cancel.Token.Register(() => tcs.TrySetResult(null));
+                var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
 
-            Cancel.Token.Register(() => tcs.TrySetResult(null));
-            var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
-
-            // Registering callback to wait till WaitHandle changes its state
-            ThreadPool.RegisterWaitForSingleObject(
-                waitObject: waitHandle,
-                callBack: (o, timeout) =>
-                {
-                    if (CancelCopy.IsCancellationRequested)
-                        // If main task is cancelled give signal to next in queue immediatly
-                        waitHandle.Set();
-                    else
+                // Registering callback to wait till WaitHandle changes its state
+                ThreadPool.RegisterWaitForSingleObject(
+                    waitObject: waitHandle,
+                    callBack: (o, timeout) =>
                     {
-                        // Give signal to to next in queue when main task ends
-                        Activity.ContinueWith((uselessvar) => waitHandle.Set());
-                        WaitingForQueue = false;
-                    }
-                    tcs.TrySetResult(null);
-                },
-                state: null,
-                timeout: Timeout.InfiniteTimeSpan,
-                executeOnlyOnce: true);
+                        if (CancelCopy.IsCancellationRequested)
+                            // If main task is cancelled give signal to next in queue immediatly
+                            waitHandle.Set();
+                        else
+                        {
+                            // Give signal to to next in queue when main task ends
+                            Activity.ContinueWith((uselessvar) => waitHandle.Set());
+                            WaitingForQueue = false;
+                        }
+                        tcs.TrySetResult(null);
+                    },
+                    state: null,
+                    timeout: Timeout.InfiniteTimeSpan,
+                    executeOnlyOnce: true);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("It here. Don't lose this exception");
+                int f = 4;
+                string fff = "fd";
+            }
             return tcs.Task;
         }
 
@@ -227,7 +247,7 @@ namespace Voron_Poster
         [NonSerialized]
         protected HttpClient Client;
 
-        public void Reset()
+        public virtual void Reset()
         {
 
             Log = new List<string>();
@@ -422,6 +442,7 @@ namespace Voron_Poster
                 {
                     Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
                     if (await PostProcess != null) return PostProcess.Result;
+                    await Task.Delay(1000);
                     if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 }
                 Progress[2] = 255;

@@ -399,7 +399,7 @@ namespace Voron_Poster
             MainForm.tasksTable.RowCount -= 1;
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
         }
-
+        
         public async void StartStop(object sender, EventArgs e)
         {
             Ctrls.StartStop.Enabled = false;

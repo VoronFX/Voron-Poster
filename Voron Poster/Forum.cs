@@ -10,51 +10,48 @@ using Roslyn.Scripting.CSharp;
 using System.Runtime.Remoting.Messaging;
 using System.Xml.Serialization;
 using System.Windows.Forms;
+using System.Collections.Concurrent;
 
 namespace Voron_Poster
 {
     public abstract class Forum
     {
 
-        static Dictionary<string, AutoResetEvent> DomainQueue = new Dictionary<string, AutoResetEvent>();
+        static ConcurrentDictionary<string, AutoResetEvent> DomainQueue = new ConcurrentDictionary<string, AutoResetEvent>();
         public bool WaitingForQueue;
         private Task WaitOrAdd(string Domain)
         {
-            try
+            AutoResetEvent WaitHandle = null;
+            if (!DomainQueue.TryGetValue(Domain, out WaitHandle))
+            {
+                WaitHandle = new AutoResetEvent(true);
+                DomainQueue.TryAdd(Domain, WaitHandle);
+            }
+            if (WaitHandle.WaitOne(0))
             {
 
-                AutoResetEvent WaitHandle;
-                lock (DomainQueue)
-                {
-                    if (!DomainQueue.TryGetValue(Domain, out WaitHandle))
-                    {
-                        WaitHandle = new AutoResetEvent(true);
-                        DomainQueue.Add(Domain, WaitHandle);
-                    }
-                }
-                if (WaitHandle.WaitOne(0))
+                if (WaitHandle == null) MessageBox.Show("WaitHandler null");
+                if (Activity == null) MessageBox.Show("Activity null");
+                try
                 {
                     WaitHandle.Reset();
                     Activity.ContinueWith((uselessvar) => WaitHandle.Set());
-                    return Task.FromResult(true);
+
                 }
-                else
-                    return WaitFor(WaitHandle).ContinueWith((uselessvar) =>
-                    {
-                        try
-                        {
-                            Task.Delay(3000, Cancel.Token).Wait();
-                        }
-                        catch { }
-                    });
+                catch (Exception err)
+                {
+                    MessageBox.Show("It here. Don't lose this exception");
+                    int f = 4;
+                    string fff = "fd";
+                } 
+                return Task.FromResult(true);
             }
-            catch (Exception err)
-            {
-                MessageBox.Show("It here. Don't lose this exception");
-                int f = 4;
-                string fff = "fd";
-            }
-            return Task.FromResult(true);
+            else
+                return WaitFor(WaitHandle).ContinueWith((uselessvar) =>
+                {
+                    try { Task.Delay(3000).Wait(Cancel.Token); }
+                    catch { }
+                });
         }
 
         #region Detect Engine
@@ -175,37 +172,28 @@ namespace Voron_Poster
         protected Task WaitFor(AutoResetEvent waitHandle)
         {
             var tcs = new TaskCompletionSource<object>();
-            try
-            {
-                Cancel.Token.Register(() => tcs.TrySetResult(null));
-                var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
+            Cancel.Token.Register(() => tcs.TrySetResult(null));
+            var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
 
-                // Registering callback to wait till WaitHandle changes its state
-                ThreadPool.RegisterWaitForSingleObject(
-                    waitObject: waitHandle,
-                    callBack: (o, timeout) =>
+            // Registering callback to wait till WaitHandle changes its state
+            ThreadPool.RegisterWaitForSingleObject(
+                waitObject: waitHandle,
+                callBack: (o, timeout) =>
+                {
+                    if (CancelCopy.IsCancellationRequested)
+                        // If main task is cancelled give signal to next in queue immediatly
+                        waitHandle.Set();
+                    else
                     {
-                        if (CancelCopy.IsCancellationRequested)
-                            // If main task is cancelled give signal to next in queue immediatly
-                            waitHandle.Set();
-                        else
-                        {
-                            // Give signal to to next in queue when main task ends
-                            Activity.ContinueWith((uselessvar) => waitHandle.Set());
-                            WaitingForQueue = false;
-                        }
-                        tcs.TrySetResult(null);
-                    },
-                    state: null,
-                    timeout: Timeout.InfiniteTimeSpan,
-                    executeOnlyOnce: true);
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("It here. Don't lose this exception");
-                int f = 4;
-                string fff = "fd";
-            }
+                        // Give signal to to next in queue when main task ends
+                        Activity.ContinueWith((uselessvar) => waitHandle.Set());
+                        WaitingForQueue = false;
+                    }
+                    tcs.TrySetResult(null);
+                },
+                state: null,
+                timeout: Timeout.InfiniteTimeSpan,
+                executeOnlyOnce: true);
             return tcs.Task;
         }
 
@@ -400,54 +388,60 @@ namespace Voron_Poster
         //    Console.WriteLine("Script end");
         //}
 
+
+
+
         public Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
         {
-            return Task.Run(async () =>
-            {
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            return Task.Run<Exception>(async () =>
+               {
+                   // Wait untill "Activity" will be assigned with this task,
+                   // sometimes it happens later then this task begins executing
+                   while (Activity == null) Task.Delay(100).Wait();
 
-                WaitingForQueue = false;
-                // Async Magic. Wait for domain free and then run login operation 
-                Task<Exception> LoginProcess = null;
-                Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
-                    ContinueWith((uselessvar) => { LoginProcess = Login(); });
+                   if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                   WaitingForQueue = false;
+                   // Async Magic. Wait for domain free and then run login operation 
+                   Task<Exception> LoginProcess = null;
+                   Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
+                       ContinueWith((uselessvar) => { LoginProcess = Login(); });
 
-                // Meanwile process the scripts
-                lock (Log) Log.Add("Обработка скриптов");
-                CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
-                var Session = InitScriptEngine(CurrentScriptData);
-                Progress[1] += 50;
-                for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
-                {
-                    Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    Progress[1] += (byte)(205 / Properties.PreProcessingScripts.Count);
-                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                }
-                Progress[1] = 255;
+                   // Meanwile process the scripts
+                   lock (Log) Log.Add("Обработка скриптов");
+                   CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
+                   var Session = InitScriptEngine(CurrentScriptData);
+                   Progress[1] += 50;
+                   for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+                   {
+                       Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+                       Progress[1] += (byte)(205 / Properties.PreProcessingScripts.Count);
+                       if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                   }
+                   Progress[1] = 255;
 
-                // Waiting for login end
-                if (LoginProcess == null)
-                {
-                    WaitingForQueue = true;
-                    lock (Log) Log.Add("Авторизация: В очереди");
-                }
-                await WaitingDomain;
-                WaitingForQueue = false;
-                if (await LoginProcess != null) return LoginProcess.Result;
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                   // Waiting for login end
+                   if (LoginProcess == null)
+                   {
+                       WaitingForQueue = true;
+                       lock (Log) Log.Add("Авторизация: В очереди");
+                   }
+                   await WaitingDomain;
+                   WaitingForQueue = false;
+                   if (await LoginProcess != null) return LoginProcess.Result;
+                   if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
-                // Post messages
-                Progress[3] = CurrentScriptData.Output.Count;
-                for (int i = 0; i < CurrentScriptData.Output.Count; i++)
-                {
-                    Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
-                    if (await PostProcess != null) return PostProcess.Result;
-                    await Task.Delay(1000);
-                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                }
-                Progress[2] = 255;
-                return null;
-            });
+                   // Post messages
+                   Progress[3] = CurrentScriptData.Output.Count;
+                   for (int i = 0; i < CurrentScriptData.Output.Count; i++)
+                   {
+                       Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
+                       if (await PostProcess != null) return PostProcess.Result;
+                       await Task.Delay(1000);
+                       if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                   }
+                   Progress[2] = 255;
+                   return null;
+               });
         }
 
     }

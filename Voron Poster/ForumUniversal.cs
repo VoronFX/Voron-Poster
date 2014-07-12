@@ -22,35 +22,75 @@ namespace Voron_Poster
         {
             InitExpression();
         }
-
+        Form a;
         private WebBrowser WB;
         private AutoResetEvent WaitLoad = new AutoResetEvent(true);
         public override void Reset()
         {
             base.Reset();
+            if (a != null) a.Dispose();
+             a = new Form();
             if (WB != null)
 
                 WB.Dispose();
             WB = new WebBrowser();
-            WB.Visible = false;
+            WB.Visible = true;
             WB.ScriptErrorsSuppressed = true;
-            WB.Parent = Application.OpenForms[0];
-            WB.DocumentCompleted += (o, e) =>
+            WB.Parent = a;
+            a.WindowState = FormWindowState.Maximized;
+            a.Controls.Add(WB);
+            a.Show();
+            var b = new Button();
+            b.Parent = a;
+            b.Click += async (o, e) =>
             {
-                WaitLoad.Set();
+                await Task.Delay(1000);
+                await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/");
             };
+            b.Dock = DockStyle.Top;
+            a.Controls.Add(b);
+            WB.Dock = DockStyle.Fill;
+            WB.DocumentCompleted += WB_DocumentComplete;
 
         }
 
-
-        struct LoginForm
+        class LoginForm
         {
-            public HtmlElement Form;
-            public HtmlElement Login;
-            public HtmlElement Password;
-            public int FormMatch;
+            public HtmlElement Form = null;
+            public HtmlElement Login = null;
+            public HtmlElement Password = null;
+            public HtmlElement Submit = null;
+            public int FormMatch = -500;
         }
 
+        #region Browser
+
+        private void InitBrowser()
+        {
+
+        }
+
+        private void WB_DocumentComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            string url = e.Url.ToString();
+            var browser = (WebBrowser)sender;
+
+            if (!(url.StartsWith("http://") || url.StartsWith("https://")))
+            {
+                // in AJAX     
+            }
+            if (e.Url.AbsolutePath != browser.Url.AbsolutePath)
+            {
+                // IFRAME           
+            }
+            else
+            {
+                // REAL DOCUMENT COMPLETE
+                WaitLoad.Set();
+            }
+        }
+
+        #endregion
 
         #region Expressions
 
@@ -76,6 +116,12 @@ namespace Voron_Poster
                     ResultMatch += Expressions[i].Value * 2;
                 if (Html.IndexOf("value=\"" + Expressions[i].Expression + "\"", StringComparison.OrdinalIgnoreCase) >= 0)
                     ResultMatch += Expressions[i].Value;
+                if (Html.IndexOf("form_" + Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
+                    ResultMatch += Expressions[i].Value;
+                if (Html.IndexOf("form/" + Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
+                    ResultMatch += Expressions[i].Value;
+                if (Html.IndexOf("login_" + Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
+                    ResultMatch += Expressions[i].Value;
                 if (Html.IndexOf(Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
                     ResultMatch += Expressions[i].Value;
             }
@@ -86,7 +132,7 @@ namespace Voron_Poster
         {
 
             public static SearchExpression[] LoginInput = new SearchExpression[]{
-                new SearchExpression("type=text", 150),
+               // new SearchExpression("type=text", 150), // IE don't show type=text it thinks it's default
                 new SearchExpression("login", 30),
                 new SearchExpression("user", 30),
                 new SearchExpression("username", 30),
@@ -102,7 +148,7 @@ namespace Voron_Poster
                 new SearchExpression("ник", 10)
             };
             public static SearchExpression[] PassInput = new SearchExpression[]{
-                new SearchExpression("type=password", 150),    
+                new SearchExpression("type=password", 300),    
                 new SearchExpression("password", 20),
                 new SearchExpression("passwrd", 20),
                 new SearchExpression("passwd", 20),
@@ -115,6 +161,7 @@ namespace Voron_Poster
                 new SearchExpression("type=checkbox", 50), 
                 new SearchExpression("type=submit", 50),
                 new SearchExpression("type=button", 50),
+                new SearchExpression("type=", 150),
                 new SearchExpression("display: none", 20)
             };
 
@@ -125,6 +172,7 @@ namespace Voron_Poster
                 new SearchExpression("register", 20),
                 new SearchExpression("reset", 20),
                 new SearchExpression("new", 20),    
+                new SearchExpression("search", 20),  
             };
             public static SearchExpression[] LoginFormStuffInput = new SearchExpression[]{
                 new SearchExpression("remember", 50),    
@@ -137,99 +185,61 @@ namespace Voron_Poster
                 new SearchExpression("signin", 20),
                 new SearchExpression("sign_in", 20),
             };
+            public static SearchExpression[] LoginFormSubmitInput = new SearchExpression[]{
+                new SearchExpression("type=submit", 100),
+                new SearchExpression("type=button", 50),
+                new SearchExpression("type=hidden", -100),    
+                new SearchExpression("type=checkbox", -100),
+                new SearchExpression("type=text", -100),
+                new SearchExpression("type=password", -50),
+                new SearchExpression("submit", 100),
+                new SearchExpression("display: none", -200)
+            };
         }
 
         #endregion
 
-        //private static int IsLoginForm(string FormHtml)
-        //{
-        //    SearchExpression[] LoginFormExpression = new SearchExpression[]{
-        //        new SearchExpression("name=\"login\"", 30),
-        //        new SearchExpression("name=\"user\"", 30),
-        //        new SearchExpression("name=\"username\"", 30),
-        //        new SearchExpression("name=\"password\"", 30),
-        //        new SearchExpression("name=\"passwrd\"", 30),
-        //        new SearchExpression("type=\"password\"", 30),
-        //        new SearchExpression("type=\"pass\"", 30),
-        //        new SearchExpression("login", 10),
-        //        new SearchExpression("user", 10),
-        //        new SearchExpression("username", 10),
-        //        new SearchExpression("password", 20),
-        //        new SearchExpression("passwrd", 20),
-        //        new SearchExpression("pass", 10),
-        //        new SearchExpression("signin", 20),
-        //        new SearchExpression("sign_in", 20),
-        //        new SearchExpression("rememberme", 10),
-        //        new SearchExpression("email", 10),
-        //        new SearchExpression("e-mail", 10),
-        //        new SearchExpression("логин", 10),
-        //        new SearchExpression("пароль", 10),
-        //        new SearchExpression("войти", 10),
-        //        new SearchExpression("вход", 10),
-        //        new SearchExpression("имя", 10),
-        //        new SearchExpression("cookie", 5),
-        //        new SearchExpression("login.php", 20),
-        //        new SearchExpression("method=\"post\"", 5),
-        //        new SearchExpression("hash", 5),
-        //    };
-        //    return SearchForExpressions(FormHtml, LoginFormExpression);
-        //}
-
-
-
-        //private static int IsLoginInput(string InputHtml)
-        //{
-        //    return 0;
-
-
-        //    //return SearchForExpressions(Input, LoginInputExpression);
-        //}
-
-        //private HtmlElement ChooseLoginForm(HtmlElementCollection Forms)
-        //{
-        //    int BestLoginFormIndex = -1, BestLoginFormMatch = 0;
-        //    for (int i = 0; i < Forms.Count; i++)
-        //    {
-        //        int CurrMatch = IsLoginForm(Forms[i].OuterHtml.Replace("'", "").Replace("\"", ""));
-        //        if (CurrMatch > BestLoginFormMatch)
-        //        {
-        //            BestLoginFormMatch = CurrMatch;
-        //            BestLoginFormIndex = i;
-        //        }
-        //    }
-        //    if (BestLoginFormMatch < 30 || BestLoginFormIndex < 0) return null;
-        //    else return Forms[BestLoginFormIndex];
-        //}
-
-        private int GetLoginForm(HtmlElementCollection Forms, out LoginForm BestForm)
+        private LoginForm GetLoginForm(HtmlElementCollection Forms)
         {
-            BestForm = new LoginForm();
+            LoginForm BestForm = new LoginForm();
             int BestFormRate = int.MinValue;
             for (int i = 0; i < Forms.Count; i++)
             {
-                HtmlElementCollection Inputs = Forms[i].GetElementsByTagName("input");
                 int BestLogin = -500; int BestLoginIndex = -1;
                 int BestPass = -500; int BestPassIndex = -1;
-                for (int i2 = 0; i2 < Inputs.Count; i2++)
+                int BestSubmit = -500; int BestSubmitIndex = -1;
+                for (int i2 = 0; i2 < Forms[i].All.Count; i2++)
                 {
-                    string OuterHtml = Inputs[i2].OuterHtml.Replace("'", "").Replace("\"", "");
-                    int RateLogin = MatchRate(OuterHtml, Expr.LoginInput);
-                    int RatePass = MatchRate(OuterHtml, Expr.PassInput);
-                    int RateBad1 = MatchRate(OuterHtml, Expr.LoginFormBad1Input);
-                    int RateBad2 = MatchRate(OuterHtml, Expr.LoginFormBad2Input);
-                    int RateStuff = MatchRate(OuterHtml, Expr.LoginFormStuffInput);
-                    int RateBadAll = RateBad1 + RateBad2 + RateStuff;
-                    int CurrLoginRate = RateLogin*3 - RatePass - RateBadAll;
-                    int CurrPassRate = RatePass*3 - RateLogin - RateBadAll;
-                    if (CurrLoginRate > BestLogin)
+                    string OuterHtml = Forms[i].All[i2].OuterHtml.Replace("'", "").Replace("\"", "");
+                    if (Forms[i].All[i2].TagName == "INPUT")
                     {
-                        BestLogin = CurrLoginRate;
-                        BestLoginIndex = i2;
+                        int RateLogin = MatchRate(OuterHtml, Expr.LoginInput) + 150;
+                        int RatePass = MatchRate(OuterHtml, Expr.PassInput);
+                        int RateBad1 = MatchRate(OuterHtml, Expr.LoginFormBad1Input);
+                        int RateBad2 = MatchRate(OuterHtml, Expr.LoginFormBad2Input);
+                        int RateStuff = MatchRate(OuterHtml, Expr.LoginFormStuffInput);
+                        int RateBadAll = RateBad1 + RateBad2 + RateStuff;
+                        int CurrLoginRate = RateLogin * 3 - RatePass - RateBadAll;
+                        int CurrPassRate = RatePass * 3 - RateLogin - RateBadAll;
+                        if (CurrLoginRate > BestLogin)
+                        {
+                            BestLogin = CurrLoginRate;
+                            BestLoginIndex = i2;
+                        }
+                        if (CurrPassRate > BestPass)
+                        {
+                            BestPass = CurrPassRate;
+                            BestPassIndex = i2;
+                        }
                     }
-                    if (CurrPassRate > BestPass)
+                    if (Forms[i].All[i2].GetAttribute("type") == "submit")
                     {
-                        BestPass = CurrPassRate;
-                        BestPassIndex = i2;
+                        int RateSubmit = MatchRate(OuterHtml, Expr.LoginFormSubmitInput);
+                        if (RateSubmit > BestSubmit)
+                        {
+                            BestSubmit = RateSubmit;
+                            BestSubmitIndex = i2;
+                        }
                     }
                 }
                 string FormOuterHtml = Forms[i].OuterHtml.Replace("'", "").Replace("\"", "");
@@ -238,41 +248,131 @@ namespace Voron_Poster
                              + MatchRate(FormOuterHtml, Expr.LoginFormStuffInput)
                              - MatchRate(FormOuterHtml, Expr.LoginFormBad2Input);
                 int SummRate = FormRate + BestLogin + BestPass;
-                if (BestLogin > 100 && BestPass > 100 && SummRate > BestFormRate)
+                if (BestLogin > 100 && BestPass > 100 && BestSubmit > 90 && SummRate > BestFormRate)
                 {
                     BestForm.Form = Forms[i];
-                    BestForm.Login = Inputs[BestLoginIndex];
-                    BestForm.Password = Inputs[BestPassIndex];
+                    BestForm.Login = Forms[i].All[BestLoginIndex];
+                    BestForm.Password = Forms[i].All[BestPassIndex];
+                    BestForm.Submit = Forms[i].All[BestSubmitIndex];
                     BestFormRate = SummRate;
                 }
             }
-            return BestFormRate;
+            if (BestFormRate >= 100)
+                return BestForm;
+            else return null;
+        }
+
+        private List<Uri> GetPossibleLoginPageLinks(HtmlElementCollection Links)
+        {
+            List<Uri> LoginLinks = new List<Uri>();
+            string CurrentHost = new Uri(Properties.ForumMainPage).Host;
+            for (int i = 0; i < Links.Count; i++)
+            {
+                string Href = Links[i].GetAttribute("href");
+                Uri Url;
+                if (Uri.TryCreate(Href, UriKind.RelativeOrAbsolute, out Url) &&
+                    !Url.IsAbsoluteUri || Url.Host.EndsWith(CurrentHost, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (Url.OriginalString.IndexOf("login", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        Url.OriginalString.IndexOf("sign", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        Url.OriginalString.IndexOf("auth", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        if (Url.OriginalString.IndexOf("/login", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            Url.OriginalString.IndexOf("=login", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            Url.OriginalString.IndexOf("index.php", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            Url.OriginalString.IndexOf("/sign", StringComparison.OrdinalIgnoreCase) >= 0)
+                            LoginLinks.Insert(0, Url);
+                        else
+                            LoginLinks.Add(Url);
+                    }
+                }
+            }
+            return LoginLinks;
+        }
+
+
+        private async Task<bool> WaitNavigate(string Url)
+        {
+            return await WaitNavigate(new Uri(Url));
+        }
+
+        private async Task<bool> WaitNavigate(Uri Url)
+        {
+            int i = 0;
+            for (i = 0; i < 3; i++)
+            {
+                WaitLoad.Reset();
+                var AbortTimeout = new CancellationTokenSource();
+                Task.Delay(RequestTimeout, AbortTimeout.Token).ContinueWith((uselessvar) =>
+                {
+                    WB.BeginInvoke((Action)(() => { WB.Stop(); }));
+                }, TaskContinuationOptions.NotOnCanceled);
+                WB.BeginInvoke((Action)(() => WB.Navigate(Url.AbsoluteUri)));
+                await WaitFor(WaitLoad);
+                AbortTimeout.Cancel();
+                bool DocNotNull = true;
+                WB.Invoke((Action)(() => { DocNotNull = WB.Document != null; }));
+                if (DocNotNull) break;
+            }
+            return i < 3;
         }
 
         public override async Task<Exception> Login()
         {
 
-            Activity.ContinueWith((uselessvar) =>
+            //Activity = Activity.ContinueWith<Exception>((PrevTask) =>
+            //{
+            //    WB.BeginInvoke((Action)(() => WB.Dispose()));
+            //    return PrevTask.Result;
+            //});
+
+            if (!await WaitNavigate(Properties.ForumMainPage)) return new Exception("Сервер не отвечает");
+            HtmlElementCollection Links = null;
+            WB.Invoke((Action)(() =>
             {
-                Application.OpenForms[0].BeginInvoke((Action)(() => WB.Dispose()));
-            });
-            WaitLoad.Set();
+                //  if (WB.Document != null) 
+                Links = WB.Document.Links;
+            }));
+            List<Uri> LoginLinks = GetPossibleLoginPageLinks(Links);
+            LoginForm LoginForm = null;
+            int LinkIndex = -1;
+            while (LoginForm == null && LinkIndex < LoginLinks.Count)
+            {
+                if (LinkIndex >= 0)
+                    if (!await WaitNavigate(LoginLinks[LinkIndex])) return new Exception("Сервер не отвечает");
+
+                HtmlElementCollection Forms = null;
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+
+                WB.Invoke((Action)(() =>
+                {
+                    //if (WB.Document != null) 
+                    Forms = WB.Document.Forms;
+                }));
+                LoginForm = GetLoginForm(Forms);
+                if (LoginForm == null) LinkIndex++;
+            }
+            if (LoginForm == null) return new Exception("Форма авторизации не найдена");
             WaitLoad.Reset();
-            WB.BeginInvoke((Action)(() => WB.Navigate(Properties.ForumMainPage)));
-            // WB.BeginInvoke((Action)(() => WB.Navigate(@"http://www.anti-malware.ru/forum/index.php?")));
+            LoginForm.Login.SetAttribute("value", Properties.Username);
+            LoginForm.Password.SetAttribute("value", Properties.Password);
+            LoginForm.Submit.InvokeMember("click");
+            //WB.Document.
             await WaitFor(WaitLoad);
+            Console.WriteLine(LinkIndex);
+            if (LinkIndex == -1)
+                Console.WriteLine(Properties.ForumMainPage);
+            else Console.WriteLine(LoginLinks[LinkIndex].OriginalString);
 
 
-            HtmlElementCollection Forms = null;
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            
-            
-                WB.Invoke((Action)(() => { if (WB.Document != null) Forms = WB.Document.Forms; }));
-                LoginForm LoginForm;
-                GetLoginForm(Forms, out LoginForm);
-            
 
 
+
+
+            for (int i = -1; i < LinkIndex; i++)
+            {
+
+            }
             //form.InvokeMember("submit");
 
             int ff = 4;
@@ -303,13 +403,14 @@ namespace Voron_Poster
             //{
             //    lock (Log) Log.Add("Успешно авторизирован");
             //    Progress[0] += 35;
-            return null;
+            return new Exception("full shit");
             //}
         }
 
+
         public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
         {
-
+            return null;
             // Get post url
             lock (Log) Log.Add("Публикация: Подготовка данных");
             string TargetTopic;

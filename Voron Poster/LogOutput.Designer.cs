@@ -75,7 +75,6 @@
             // 
             // Browser
             // 
-            this.Browser.AllowNavigation = false;
             this.Browser.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Browser.Location = new System.Drawing.Point(3, 3);
             this.Browser.MinimumSize = new System.Drawing.Size(20, 20);

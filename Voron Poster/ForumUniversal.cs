@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -33,6 +36,9 @@ namespace Voron_Poster
             if (WB != null)
 
                 WB.Dispose();
+
+          
+
             WB = new WebBrowser();
             WB.Visible = true;
             WB.ScriptErrorsSuppressed = true;
@@ -51,7 +57,6 @@ namespace Voron_Poster
             a.Controls.Add(b);
             WB.Dock = DockStyle.Fill;
             WB.DocumentCompleted += WB_DocumentComplete;
-
         }
 
         protected class LoginForm
@@ -67,8 +72,7 @@ namespace Voron_Poster
 
         private void InitBrowser()
         {
-
-        }
+         }
 
         private void WB_DocumentComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
@@ -89,6 +93,11 @@ namespace Voron_Poster
                 WaitLoad.Set();
             }
         }
+
+        private const int INTERNET_OPTION_END_BROWSER_SESSION = 81;
+
+        [DllImport("wininet.dll", SetLastError = true)]
+        private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
 
         #endregion
 
@@ -314,10 +323,10 @@ namespace Voron_Poster
                 WB.BeginInvoke((Action)(() => WB.Navigate(Url.AbsoluteUri)));
                 await WaitAndStop();
                 bool DocNotNull = true;
-                WB.Invoke((Action)(() => { 
+                WB.Invoke((Action)(() =>
+                {
                     DocNotNull = WB.Document != null;
-                    if (DocNotNull)
-                        HttpLog.Add(new KeyValuePair<object, string>(WB.DocumentText, Url.AbsoluteUri));
+                    LogPage();
                 }));
                 if (DocNotNull) break;
             }
@@ -333,21 +342,52 @@ namespace Voron_Poster
             }
         }
 
+        protected void LogPage(){
+            WB.Invoke((Action)(() => {
+                if (WB.Document != null)
+                {
+                    Stream documentStream = WB.DocumentStream;
+                    using (StreamReader streamReader = new StreamReader(documentStream, Encoding.GetEncoding(WB.Document.Encoding)))
+                    {
+                        documentStream.Position = 0L;
+                        HttpLog.Add(new KeyValuePair<object, string>(streamReader.ReadToEnd(), WB.Url.AbsoluteUri));
+                    }
+                }
+            }));
+        }
+
         public override async Task<Exception> Login()
         {
             // Dispose browser after task done
-            //Activity = Activity.ContinueWith<Exception>((PrevTask) =>
-            //{
-            //    WB.BeginInvoke((Action)(() => WB.Dispose()));
-            //    return PrevTask.Result;
-            //});
+            Activity = Activity.ContinueWith<Exception>((PrevTask) =>
+            {
+                WB.BeginInvoke((Action)(() => WB.Dispose()));
+                return PrevTask.Result;
+            });
+
+            // Loading main page
+            lock (Log) Log.Add("Очистка данных");
+            if (!await WaitNavigate(Properties.ForumMainPage, 2)) return new Exception("Сервер не отвечает");
+           WB.Invoke((Action)(() => {
+               InternetSetOption(IntPtr.Zero, INTERNET_OPTION_END_BROWSER_SESSION, new IntPtr(3), 0);
+               WaitLoad.Reset();
+               WB.Navigate("javascript:void((function(){var a,b,c,e,f;f=0;a=document.cookie.split('; ');"
+                   +"for(e=0;e<a.length&&a[e];e++){f++;for(b='.'+location.host;b;b=b.replace(/^(?:%5C.|"
+                   +"[^%5C.]+)/,'')){for(c=location.pathname;c;c=c.replace(/.$/,'')){document.cookie=(a[e]+';"
+                   +" domain='+b+';Z path='+c+'; expires='+new Date((new Date()).getTime()-1e11).toGMTString());}}}})())");
+
+           }));
+           await WaitAndStop();
+            Progress[0] += 38;
+
+
 
             // Loading main page
             lock (Log) Log.Add("Авторизация: Загрузка страницы");
             Uri LoginPage = new Uri(Properties.ForumMainPage);
             if (!await WaitNavigate(LoginPage, 2)) return new Exception("Сервер не отвечает");
             Progress[0] += 38;
-            
+
             // Extracting possible login links
             lock (Log) Log.Add("Авторизация: Поиск страницы входа");
             HtmlElementCollection Links = null;
@@ -355,14 +395,15 @@ namespace Voron_Poster
             List<Uri> LoginLinks = GetPossibleLoginPageLinks(Links);
             LoginForm LoginForm = null;
             HtmlElementCollection Forms = null;
-             Progress[0] += 18;
+            Progress[0] += 18;
             int LinkIndex = -1;
 
             while (LoginForm == null && LinkIndex < LoginLinks.Count)
             {
                 // Loading next possible page with login form
-                if (LinkIndex >= 0){
-                lock (Log) Log.Add("Авторизация: Загрузка страницы");
+                if (LinkIndex >= 0)
+                {
+                    lock (Log) Log.Add("Авторизация: Загрузка страницы");
                     if (!await WaitNavigate(LoginLinks[LinkIndex], 2)) return new Exception("Сервер не отвечает");
                     Progress[0] += 87 / LoginLinks.Count;
                 }
@@ -387,9 +428,7 @@ namespace Voron_Poster
             WaitLoad.Reset();
             LoginForm.Submit.InvokeMember("click");
             await WaitAndStop();
-            WB.Invoke((Action)(() => {
-                HttpLog.Add(new KeyValuePair<object, string>(WB.DocumentText, WB.Url.AbsoluteUri));
-            }));
+            LogPage();
             Progress[0] += 38;
 
             // Load page with login form again and check if login successful
@@ -399,13 +438,15 @@ namespace Voron_Poster
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             Progress[0] += 38;
             string Html = String.Empty;
-            WB.Invoke((Action)(() => {
-                Forms = WB.Document.Forms; 
+            WB.Invoke((Action)(() =>
+            {
+                Forms = WB.Document.Forms;
                 Html = WB.Document.Body.OuterHtml;
             }));
             if (GetLoginForm(Forms) != null && MatchRate(Html, Expr.LoginSuccess) < 100)
                 return new Exception("Авторизация не удалась");
-            else {
+            else
+            {
                 lock (Log) Log.Add("Успешно авторизирован");
                 Progress[0] += 18;
             }

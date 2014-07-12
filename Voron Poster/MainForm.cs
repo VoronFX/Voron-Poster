@@ -19,6 +19,7 @@ using Roslyn.Scripting;
 
 using System.Reflection;
 using ScintillaNET;
+using Microsoft.Win32;
 
 namespace Voron_Poster
 {
@@ -46,6 +47,15 @@ namespace Voron_Poster
 
             GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
 
+            // Use latest installed IE
+            //try
+            //{
+            //    using (RegistryKey RegKey = Registry.CurrentUser.OpenSubKey(
+            // @"Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION\", true))
+            //        RegKey.SetValue(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".exe",
+            //            9000, RegistryValueKind.DWord);
+            //}
+            //catch { }
 
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
             //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
@@ -147,7 +157,7 @@ namespace Voron_Poster
             }
             else
                 e.Cancel = true;
-            
+
             TasksUpdater.Enabled = e.TabPage == tasksTab;
         }
 

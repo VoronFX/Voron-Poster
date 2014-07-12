@@ -14,18 +14,20 @@ namespace Voron_Poster
 {
     public partial class LogOutput : Form
     {
-        public List<KeyValuePair<HttpResponseMessage, string>> HttpLog;
+        public List<KeyValuePair<object, string>> HttpLog;
         public Scintilla HtmlBox = new Scintilla();
         public Scintilla HttpBox = new Scintilla();
         public Scintilla VariablesBox = new Scintilla();
-        public LogOutput(List<KeyValuePair<HttpResponseMessage, string>> NewHttpLog)
+        public LogOutput(List<KeyValuePair<object, string>> NewHttpLog)
         {
             InitializeComponent();
             Browser.Navigate("about:blank");
             HttpLog = NewHttpLog;
             for (int i = 0; i < HttpLog.Count; i++)
             {
-                ResponseList.Items.Add(HttpLog[i].Key.RequestMessage.RequestUri);
+                if (HttpLog[i].Key is HttpResponseMessage)
+                    ResponseList.Items.Add((HttpLog[i].Key as HttpResponseMessage).RequestMessage.RequestUri);
+                else ResponseList.Items.Add(HttpLog[i].Value);
             }
             ResponseList.SelectedIndex = ResponseList.Items.Count - 1;
             HtmlBox.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -77,14 +79,25 @@ namespace Voron_Poster
             {
                 try
                 {
-                    string Html = await HttpLog[ResponseList.SelectedIndex].Key.Content.ReadAsStringAsync();
+                    string Html;
+                    if (HttpLog[ResponseList.SelectedIndex].Key is HttpResponseMessage)
+                        Html = await (HttpLog[ResponseList.SelectedIndex].Key as HttpResponseMessage).Content.ReadAsStringAsync();
+                    else Html = HttpLog[ResponseList.SelectedIndex].Key as string;
                     Browser.Document.Write(Html);
                     Browser.Refresh();
 
                     HttpBox.IsReadOnly = false;
-                    HttpBox.Text = HttpLog[ResponseList.SelectedIndex].Key.RequestMessage.ToString()+"\n\n";
-                    HttpBox.Text += "Request POST content: \n{\n"+HttpLog[ResponseList.SelectedIndex].Value + "\n}\n\n";
-                    HttpBox.Text += HttpLog[ResponseList.SelectedIndex].Key.ToString();
+                    if (HttpLog[ResponseList.SelectedIndex].Key is HttpResponseMessage)
+                    {
+                        var Response = (HttpLog[ResponseList.SelectedIndex].Key as HttpResponseMessage);
+                        HttpBox.Text = Response.RequestMessage.ToString() + "\n\n";
+                        HttpBox.Text += "Request POST content: \n{\n" + HttpLog[ResponseList.SelectedIndex].Value + "\n}\n\n";
+                        HttpBox.Text += Response.ToString();
+                    }
+                    else
+                    {
+                        HttpBox.Text = "RequestUrl: " + HttpLog[ResponseList.SelectedIndex].Value + "\n\n";
+                    }
      
                     HttpBox.IsReadOnly = true;
 

@@ -17,7 +17,8 @@ namespace Voron_Poster
     public abstract class Forum
     {
 
-        static ConcurrentDictionary<string, AutoResetEvent> DomainQueue = new ConcurrentDictionary<string, AutoResetEvent>();
+        static ConcurrentDictionary<string, AutoResetEvent> DomainQueue 
+            = new ConcurrentDictionary<string, AutoResetEvent>();
         public bool WaitingForQueue;
         private Task WaitOrAdd(string Domain)
         {
@@ -43,7 +44,7 @@ namespace Voron_Poster
                     MessageBox.Show("It here. Don't lose this exception");
                     int f = 4;
                     string fff = "fd";
-                } 
+                }
                 return Task.FromResult(true);
             }
             else
@@ -141,7 +142,7 @@ namespace Voron_Poster
             }
         }
         [XmlIgnore]
-        protected List<KeyValuePair<HttpResponseMessage, string>> HttpLog;
+        protected List<KeyValuePair<object, string>> HttpLog;
         [XmlIgnore]
         public Exception Error;
         [XmlIgnore]
@@ -169,10 +170,15 @@ namespace Voron_Poster
             }
         }
 
-        protected Task WaitFor(AutoResetEvent waitHandle)
+        protected Task<bool> WaitFor(AutoResetEvent waitHandle)
+        { 
+            return WaitFor(waitHandle, Timeout.InfiniteTimeSpan);
+        }
+
+        protected Task<bool> WaitFor(AutoResetEvent waitHandle, TimeSpan Timeout)
         {
-            var tcs = new TaskCompletionSource<object>();
-            Cancel.Token.Register(() => tcs.TrySetResult(null));
+            var tcs = new TaskCompletionSource<bool>();
+            Cancel.Token.Register(() => tcs.TrySetResult(false));
             var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
 
             // Registering callback to wait till WaitHandle changes its state
@@ -180,7 +186,7 @@ namespace Voron_Poster
                 waitObject: waitHandle,
                 callBack: (o, timeout) =>
                 {
-                    
+
                     if (CancelCopy.IsCancellationRequested)
                         // If main task is cancelled give signal to next in queue immediatly
                         waitHandle.Set();
@@ -190,10 +196,12 @@ namespace Voron_Poster
                         Activity.ContinueWith((uselessvar) => waitHandle.Set());
                         WaitingForQueue = false;
                     }
-                    tcs.TrySetResult(null);
+                    if (timeout)
+                        tcs.TrySetResult(false);
+                    else tcs.TrySetResult(true);
                 },
                 state: null,
-                timeout: Timeout.InfiniteTimeSpan,
+                timeout: Timeout,
                 executeOnlyOnce: true);
             return tcs.Task;
         }
@@ -202,14 +210,14 @@ namespace Voron_Poster
         {
             string StringContent = await content.ReadAsStringAsync();
             var Response = await Client.PostAsync(requestUri, content, Cancel.Token);
-            HttpLog.Add(new KeyValuePair<HttpResponseMessage, string>(Response, StringContent));
+            HttpLog.Add(new KeyValuePair<object, string>(Response, StringContent));
             return Response;
         }
 
         protected async Task<HttpResponseMessage> GetAndLog(string requestUri)
         {
             var Response = await Client.GetAsync(requestUri, Cancel.Token);
-            HttpLog.Add(new KeyValuePair<HttpResponseMessage, string>(Response, String.Empty));
+            HttpLog.Add(new KeyValuePair<object, string>(Response, String.Empty));
             return Response;
         }
 
@@ -241,7 +249,7 @@ namespace Voron_Poster
 
             Log = new List<string>();
             Log.Add("Остановлено");
-            HttpLog = new List<KeyValuePair<HttpResponseMessage, string>>();
+            HttpLog = new List<KeyValuePair<object, string>>();
             Error = null;
             Activity = null;
             Progress = new int[4] { 0, 0, 0, 1 };

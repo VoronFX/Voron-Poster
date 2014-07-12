@@ -20,7 +20,7 @@ namespace Voron_Poster
         public ForumUniversal()
             : base()
         {
-            InitExpression();
+            //InitExpression();
         }
         Form a;
         private WebBrowser WB;
@@ -29,7 +29,7 @@ namespace Voron_Poster
         {
             base.Reset();
             if (a != null) a.Dispose();
-             a = new Form();
+            a = new Form();
             if (WB != null)
 
                 WB.Dispose();
@@ -39,13 +39,13 @@ namespace Voron_Poster
             WB.Parent = a;
             a.WindowState = FormWindowState.Maximized;
             a.Controls.Add(WB);
-            a.Show();
+            //       a.Show();
             var b = new Button();
             b.Parent = a;
             b.Click += async (o, e) =>
             {
                 await Task.Delay(1000);
-                await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/");
+                await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/", 2);
             };
             b.Dock = DockStyle.Top;
             a.Controls.Add(b);
@@ -54,7 +54,7 @@ namespace Voron_Poster
 
         }
 
-        class LoginForm
+        protected class LoginForm
         {
             public HtmlElement Form = null;
             public HtmlElement Login = null;
@@ -94,14 +94,14 @@ namespace Voron_Poster
 
         #region Expressions
 
-        private static bool ExpressionInited = false;
-        private static void InitExpression()
-        {
-            if (ExpressionInited) return;
+        //private static bool ExpressionInited = false;
+        //private static void InitExpression()
+        //{
+        //    if (ExpressionInited) return;
 
 
-            ExpressionInited = true;
-        }
+        //    ExpressionInited = true;
+        //}
 
         protected static int MatchRate(string Html, SearchExpression[] Expressions)
         {
@@ -195,11 +195,20 @@ namespace Voron_Poster
                 new SearchExpression("submit", 100),
                 new SearchExpression("display: none", -200)
             };
+            public static SearchExpression[] LoginSuccess = new SearchExpression[]{
+                new SearchExpression("/logout", 100),
+                new SearchExpression("logout.php", 100),
+                new SearchExpression("logout", 100),
+                new SearchExpression("signout", 100),
+                new SearchExpression("выход", 100),    
+                new SearchExpression("выйти", 100),
+                new SearchExpression("вы зашли как", 100),
+            };
         }
 
         #endregion
 
-        private LoginForm GetLoginForm(HtmlElementCollection Forms)
+        protected LoginForm GetLoginForm(HtmlElementCollection Forms)
         {
             LoginForm BestForm = new LoginForm();
             int BestFormRate = int.MinValue;
@@ -262,7 +271,7 @@ namespace Voron_Poster
             else return null;
         }
 
-        private List<Uri> GetPossibleLoginPageLinks(HtmlElementCollection Links)
+        protected List<Uri> GetPossibleLoginPageLinks(HtmlElementCollection Links)
         {
             List<Uri> LoginLinks = new List<Uri>();
             string CurrentHost = new Uri(Properties.ForumMainPage).Host;
@@ -291,120 +300,116 @@ namespace Voron_Poster
         }
 
 
-        private async Task<bool> WaitNavigate(string Url, int Retry)
+        protected async Task<bool> WaitNavigate(string Url, int Retry)
         {
             return await WaitNavigate(new Uri(Url), Retry);
         }
 
-        private async Task<bool> WaitNavigate(Uri Url, int Retry)
+        protected async Task<bool> WaitNavigate(Uri Url, int Retry)
         {
             int i = -1;
             for (i = -1; i < Retry; i++)
             {
                 WaitLoad.Reset();
-                var AbortTimeout = new CancellationTokenSource();
-                Task.Delay(RequestTimeout, AbortTimeout.Token).ContinueWith((uselessvar) =>
-                {
-                    WB.BeginInvoke((Action)(() => { WB.Stop(); }));
-                }, TaskContinuationOptions.NotOnCanceled);
                 WB.BeginInvoke((Action)(() => WB.Navigate(Url.AbsoluteUri)));
-                await WaitFor(WaitLoad);
-                AbortTimeout.Cancel();
+                await WaitAndStop();
                 bool DocNotNull = true;
-                WB.Invoke((Action)(() => { DocNotNull = WB.Document != null; }));
+                WB.Invoke((Action)(() => { 
+                    DocNotNull = WB.Document != null;
+                    if (DocNotNull)
+                        HttpLog.Add(new KeyValuePair<object, string>(WB.DocumentText, Url.AbsoluteUri));
+                }));
                 if (DocNotNull) break;
             }
             return i < Retry;
         }
 
+        protected async Task WaitAndStop()
+        {
+            if (!await WaitFor(WaitLoad, RequestTimeout))
+            {
+                WB.BeginInvoke((Action)(() => WB.Stop()));
+                await WaitFor(WaitLoad, RequestTimeout);
+            }
+        }
+
         public override async Task<Exception> Login()
         {
-
+            // Dispose browser after task done
             //Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             //{
             //    WB.BeginInvoke((Action)(() => WB.Dispose()));
             //    return PrevTask.Result;
             //});
 
-            if (!await WaitNavigate(Properties.ForumMainPage, 2)) return new Exception("Сервер не отвечает");
+            // Loading main page
+            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+            Uri LoginPage = new Uri(Properties.ForumMainPage);
+            if (!await WaitNavigate(LoginPage, 2)) return new Exception("Сервер не отвечает");
+            Progress[0] += 38;
+            
+            // Extracting possible login links
+            lock (Log) Log.Add("Авторизация: Поиск страницы входа");
             HtmlElementCollection Links = null;
-            WB.Invoke((Action)(() =>
-            {
-                //  if (WB.Document != null) 
-                Links = WB.Document.Links;
-            }));
+            WB.Invoke((Action)(() => { Links = WB.Document.Links; }));
             List<Uri> LoginLinks = GetPossibleLoginPageLinks(Links);
             LoginForm LoginForm = null;
+            HtmlElementCollection Forms = null;
+             Progress[0] += 18;
             int LinkIndex = -1;
+
             while (LoginForm == null && LinkIndex < LoginLinks.Count)
             {
-                if (LinkIndex >= 0)
+                // Loading next possible page with login form
+                if (LinkIndex >= 0){
+                lock (Log) Log.Add("Авторизация: Загрузка страницы");
                     if (!await WaitNavigate(LoginLinks[LinkIndex], 2)) return new Exception("Сервер не отвечает");
-
-                HtmlElementCollection Forms = null;
+                    Progress[0] += 87 / LoginLinks.Count;
+                }
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
-                WB.Invoke((Action)(() =>
-                {
-                    //if (WB.Document != null) 
-                    Forms = WB.Document.Forms;
-                }));
+                // Checking if any of forms is a login form
+                lock (Log) Log.Add("Авторизация: Поиск формы входа");
+                WB.Invoke((Action)(() => { Forms = WB.Document.Forms; }));
                 LoginForm = GetLoginForm(Forms);
                 if (LoginForm == null) LinkIndex++;
             }
             if (LoginForm == null) return new Exception("Форма авторизации не найдена");
-            
+            Progress[0] = 143;
+
+            // Fill the form and submit
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            lock (Log) Log.Add("Авторизация: Запрос авторизации");
+            if (LinkIndex != -1) LoginPage = LoginLinks[LinkIndex];
             LoginForm.Login.SetAttribute("value", Properties.Username);
             LoginForm.Password.SetAttribute("value", Properties.Password);
-            LoginForm.Submit.InvokeMember("click");
+            Progress[0] += 18;
             WaitLoad.Reset();
-            await WaitFor(WaitLoad);
-            Console.WriteLine(LinkIndex);
-            if (LinkIndex == -1)
-                Console.WriteLine(Properties.ForumMainPage);
-            else Console.WriteLine(LoginLinks[LinkIndex].OriginalString);
+            LoginForm.Submit.InvokeMember("click");
+            await WaitAndStop();
+            WB.Invoke((Action)(() => {
+                HttpLog.Add(new KeyValuePair<object, string>(WB.DocumentText, WB.Url.AbsoluteUri));
+            }));
+            Progress[0] += 38;
 
-
-
-
-
-
-            for (int i = -1; i < LinkIndex; i++)
-            {
-
+            // Load page with login form again and check if login successful
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+            if (!await WaitNavigate(LoginPage, 2)) return new Exception("Сервер не отвечает");
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Progress[0] += 38;
+            string Html = String.Empty;
+            WB.Invoke((Action)(() => {
+                Forms = WB.Document.Forms; 
+                Html = WB.Document.Body.OuterHtml;
+            }));
+            if (GetLoginForm(Forms) != null && MatchRate(Html, Expr.LoginSuccess) < 100)
+                return new Exception("Авторизация не удалась");
+            else {
+                lock (Log) Log.Add("Успешно авторизирован");
+                Progress[0] += 18;
             }
-            //form.InvokeMember("submit");
-
-            int ff = 4;
-            //            string s = WB.Document.Url.AbsoluteUri;
-
-            //lock (Log) Log.Add("Авторизация: Подготовка данных");
-
-            //var PostData = new FormUrlEncodedContent(new[]
-            //    {
-            //        new KeyValuePair<string, string>("UserName", Properties.Username.ToLower()),
-            //        new KeyValuePair<string, string>("PassWord", Properties.Password)
-            //     });
-            //Progress[0] += 40;
-
-            //// Send data to login and wait response
-            //lock (Log) Log.Add("Авторизация: Запрос авторизации");
-            //var Response = await PostAndLog(Properties.ForumMainPage + "index.php?act=Login&CODE=01", PostData);
-            //if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            //Progress[0] += 120;
-            //string Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            //Progress[0] += 60;
-
-            //// Check if login successfull
-            //if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            //if (Html.IndexOf("act=login&amp;code=03") < 0)
-            //    return new Exception("Ошибка при авторизации");
-            //else
-            //{
-            //    lock (Log) Log.Add("Успешно авторизирован");
-            //    Progress[0] += 35;
-            return new Exception("full shit");
-            //}
+            return null;
         }
 
 

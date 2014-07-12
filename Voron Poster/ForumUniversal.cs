@@ -291,15 +291,15 @@ namespace Voron_Poster
         }
 
 
-        private async Task<bool> WaitNavigate(string Url)
+        private async Task<bool> WaitNavigate(string Url, int Retry)
         {
-            return await WaitNavigate(new Uri(Url));
+            return await WaitNavigate(new Uri(Url), Retry);
         }
 
-        private async Task<bool> WaitNavigate(Uri Url)
+        private async Task<bool> WaitNavigate(Uri Url, int Retry)
         {
-            int i = 0;
-            for (i = 0; i < 3; i++)
+            int i = -1;
+            for (i = -1; i < Retry; i++)
             {
                 WaitLoad.Reset();
                 var AbortTimeout = new CancellationTokenSource();
@@ -314,7 +314,7 @@ namespace Voron_Poster
                 WB.Invoke((Action)(() => { DocNotNull = WB.Document != null; }));
                 if (DocNotNull) break;
             }
-            return i < 3;
+            return i < Retry;
         }
 
         public override async Task<Exception> Login()
@@ -326,7 +326,7 @@ namespace Voron_Poster
             //    return PrevTask.Result;
             //});
 
-            if (!await WaitNavigate(Properties.ForumMainPage)) return new Exception("Сервер не отвечает");
+            if (!await WaitNavigate(Properties.ForumMainPage, 2)) return new Exception("Сервер не отвечает");
             HtmlElementCollection Links = null;
             WB.Invoke((Action)(() =>
             {
@@ -339,7 +339,7 @@ namespace Voron_Poster
             while (LoginForm == null && LinkIndex < LoginLinks.Count)
             {
                 if (LinkIndex >= 0)
-                    if (!await WaitNavigate(LoginLinks[LinkIndex])) return new Exception("Сервер не отвечает");
+                    if (!await WaitNavigate(LoginLinks[LinkIndex], 2)) return new Exception("Сервер не отвечает");
 
                 HtmlElementCollection Forms = null;
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -353,11 +353,11 @@ namespace Voron_Poster
                 if (LoginForm == null) LinkIndex++;
             }
             if (LoginForm == null) return new Exception("Форма авторизации не найдена");
-            WaitLoad.Reset();
+            
             LoginForm.Login.SetAttribute("value", Properties.Username);
             LoginForm.Password.SetAttribute("value", Properties.Password);
             LoginForm.Submit.InvokeMember("click");
-            //WB.Document.
+            WaitLoad.Reset();
             await WaitFor(WaitLoad);
             Console.WriteLine(LinkIndex);
             if (LinkIndex == -1)

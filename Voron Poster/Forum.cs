@@ -180,6 +180,7 @@ namespace Voron_Poster
                 waitObject: waitHandle,
                 callBack: (o, timeout) =>
                 {
+                    
                     if (CancelCopy.IsCancellationRequested)
                         // If main task is cancelled give signal to next in queue immediatly
                         waitHandle.Set();

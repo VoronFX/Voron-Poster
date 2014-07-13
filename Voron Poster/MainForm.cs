@@ -60,7 +60,6 @@ namespace Voron_Poster
             //        typeof(TabControl).InvokeMember("DoubleBuffered",
             //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
             //null, Tabs, new object[] { true });
-
             scriptsEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             scriptsEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
             scriptsEditor.Location = new System.Drawing.Point(0, 0);
@@ -1210,6 +1209,19 @@ namespace Voron_Poster
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
 
+        }
+
+
+       
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //CefSharp.BrowserSettings b = new CefSharp.BrowserSettings();
+            //WebView w = new WebView("http://google.com", b);
+            //w.Width = 200;
+            //w.Height = 200;
+            //w.Visible = true;
+            //w.Enabled = true;
+            //this.Controls.Add(w);
         }
 
 

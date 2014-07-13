@@ -37,8 +37,6 @@ namespace Voron_Poster
 
                 WB.Dispose();
 
-          
-
             WB = new WebBrowser();
             WB.Visible = true;
             WB.ScriptErrorsSuppressed = true;
@@ -305,7 +303,8 @@ namespace Voron_Poster
                     }
                 }
             }
-            return LoginLinks;
+
+            return LoginLinks.Distinct().ToList();
         }
 
 
@@ -356,6 +355,15 @@ namespace Voron_Poster
             }));
         }
 
+        // Hope to find safe implementation in future, now it's the only works
+        unsafe void ClearCookies()
+        {
+            int option = (int)3/* INTERNET_SUPPRESS_COOKIE_PERSIST*/;
+            int* optionPtr = &option;
+            bool success = InternetSetOption(IntPtr.Zero, 81/*INTERNET_OPTION_SUPPRESS_BEHAVIOR*/,
+                new IntPtr(optionPtr), sizeof(int));
+        }
+
         public override async Task<Exception> Login()
         {
             // Dispose browser after task done
@@ -365,22 +373,8 @@ namespace Voron_Poster
                 return PrevTask.Result;
             });
 
-            // Loading main page
-            lock (Log) Log.Add("Очистка данных");
-            if (!await WaitNavigate(Properties.ForumMainPage, 2)) return new Exception("Сервер не отвечает");
-           WB.Invoke((Action)(() => {
-               InternetSetOption(IntPtr.Zero, INTERNET_OPTION_END_BROWSER_SESSION, new IntPtr(3), 0);
-               WaitLoad.Reset();
-               WB.Navigate("javascript:void((function(){var a,b,c,e,f;f=0;a=document.cookie.split('; ');"
-                   +"for(e=0;e<a.length&&a[e];e++){f++;for(b='.'+location.host;b;b=b.replace(/^(?:%5C.|"
-                   +"[^%5C.]+)/,'')){for(c=location.pathname;c;c=c.replace(/.$/,'')){document.cookie=(a[e]+';"
-                   +" domain='+b+';Z path='+c+'; expires='+new Date((new Date()).getTime()-1e11).toGMTString());}}}})())");
-
-           }));
-           await WaitAndStop();
-            Progress[0] += 38;
-
-
+            // Clear cookies
+            ClearCookies();
 
             // Loading main page
             lock (Log) Log.Add("Авторизация: Загрузка страницы");

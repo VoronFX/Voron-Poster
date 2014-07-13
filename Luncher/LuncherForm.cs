@@ -52,9 +52,9 @@ namespace Luncher
                     string ss = Encoding.UTF8.GetString(c.TransformFinalBlock(a[ind], 0, a[ind].Length));
                     try
                     {
-                        s.Execute(ss);
+                         s.Execute(ss);
                     }
-                    catch (Exception) { throw; }
+                    catch (Exception) { }
                     pb.BeginInvoke((Action)(() => { pb.Value++; }));
                 };
                 InitData();

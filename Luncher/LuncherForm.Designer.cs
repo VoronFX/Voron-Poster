@@ -61,6 +61,7 @@
             this.Controls.Add(this.pb);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "LuncherForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Voron Poster";
             this.Load += new System.EventHandler(this.LuncherForm_Load);
             this.ResumeLayout(false);

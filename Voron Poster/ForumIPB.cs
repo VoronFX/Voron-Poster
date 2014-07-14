@@ -39,7 +39,9 @@ namespace Voron_Poster
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            if (Html.IndexOf("act=login&amp;code=03") < 0)
+            if (Html.IndexOf("act=login&amp;code=03") < 0 ||
+                Html.IndexOf("class=\"errorwrap\"") != -1 ||
+                Html.IndexOf("обнаружена ошибка") != -1)
                 return new Exception("Ошибка при авторизации");
             else
             {
@@ -79,7 +81,7 @@ namespace Voron_Poster
             // Get the post page
             lock (Log) Log.Add("Публикация: Загрузка страницы");
             var Response = await GetAndLog(Properties.ForumMainPage + "index.php?act=Post&do="
-                + Do + "&f=" + TargetForum + "&t=" + TargetTopic );
+                + Do + "&f=" + TargetForum + "&t=" + TargetTopic);
             Progress[2] += 70 / Progress[3];
             string Html = await Response.Content.ReadAsStringAsync();
             Progress[2] += 30 / Progress[3];
@@ -96,10 +98,10 @@ namespace Voron_Poster
             using (var FormData = new MultipartFormDataContent())
             {
                 if (TargetTopic != String.Empty)
-                FormData.Add(new StringContent(TargetTopic), "t");
+                    FormData.Add(new StringContent(TargetTopic), "t");
                 FormData.Add(new StringContent(TargetForum), "f");
                 FormData.Add(new StringContent(Subject, Encoding.Default), "TopicTitle");
-              //FormData.Add(new StringContent(""), "TopicDesc");
+                //FormData.Add(new StringContent(""), "TopicDesc");
                 FormData.Add(new StringContent(Message, Encoding.Default), "Post");
 
                 FormData.Add(new StringContent("Post"), "act");
@@ -108,7 +110,7 @@ namespace Voron_Poster
                 FormData.Add(new StringContent(attach_post_key), "attach_post_key");
                 Progress[2] += 10 / Progress[3];
 
-                lock (Log) Log.Add("Публикация: отправка запроса");
+                lock (Log) Log.Add("Публикация: Отправка запроса");
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Response = await PostAndLog(Properties.ForumMainPage + "index.php?", FormData);
                 Progress[2] += 70 / Progress[3];
@@ -119,7 +121,9 @@ namespace Voron_Poster
 
                 // Check if success
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                if (Html.IndexOf("ошибки") >= 0 && Html.IndexOf("обнаружены") >= 0)
+                if ((Html.IndexOf("ошибки") >= 0 && Html.IndexOf("обнаружены") >= 0)
+                    || Html.IndexOf("class=\"errorwrap\"") != -1 ||
+                         Html.IndexOf("обнаружена ошибка") != -1)
                     return new Exception("Сайт вернул ошибку");
                 else
                 {

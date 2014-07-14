@@ -42,8 +42,8 @@ namespace Voron_Poster
             WB.ScriptErrorsSuppressed = true;
             WB.Parent = a;
             a.WindowState = FormWindowState.Maximized;
-            a.Controls.Add(WB);
-            //       a.Show();
+            //a.Controls.Add(WB);
+                //   a.Show();
             var b = new Button();
             b.Parent = a;
             b.Click += async (o, e) =>
@@ -53,7 +53,7 @@ namespace Voron_Poster
             };
             b.Dock = DockStyle.Top;
             a.Controls.Add(b);
-            WB.Dock = DockStyle.Fill;
+           // WB.Dock = DockStyle.Fill;
             WB.DocumentCompleted += WB_DocumentComplete;
         }
 
@@ -66,11 +66,23 @@ namespace Voron_Poster
             public int FormMatch = -500;
         }
 
+        protected class PostForm
+        {
+            public HtmlElement Form = null;
+            public HtmlElement Title = null;
+            public HtmlElement Message = null;
+            public HtmlElement CaptchaImg = null;
+            public HtmlElement CaptchaRefresh = null;
+            public HtmlElement Captcha = null;
+            public HtmlElement Submit = null;
+            public int FormMatch = -500;
+        }
+
         #region Browser
 
         private void InitBrowser()
         {
-         }
+        }
 
         private void WB_DocumentComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
@@ -129,6 +141,8 @@ namespace Voron_Poster
                     ResultMatch += Expressions[i].Value;
                 if (Html.IndexOf("login_" + Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
                     ResultMatch += Expressions[i].Value;
+                if (Html.IndexOf("input_" + Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
+                    ResultMatch += Expressions[i].Value;
                 if (Html.IndexOf(Expressions[i].Expression, StringComparison.OrdinalIgnoreCase) >= 0)
                     ResultMatch += Expressions[i].Value;
             }
@@ -137,7 +151,6 @@ namespace Voron_Poster
 
         static class Expr
         {
-
             public static SearchExpression[] LoginInput = new SearchExpression[]{
                // new SearchExpression("type=text", 150), // IE don't show type=text it thinks it's default
                 new SearchExpression("login", 30),
@@ -163,16 +176,16 @@ namespace Voron_Poster
                 new SearchExpression("hash", -20),
                 new SearchExpression("пароль", 10)
             };
-            public static SearchExpression[] LoginFormBad1Input = new SearchExpression[]{
+            public static SearchExpression[] BadInput = new SearchExpression[]{
                 new SearchExpression("type=hidden", 50),    
                 new SearchExpression("type=checkbox", 50), 
                 new SearchExpression("type=submit", 50),
                 new SearchExpression("type=button", 50),
                 new SearchExpression("type=", 150),
-                new SearchExpression("display: none", 20)
+                new SearchExpression("display: none", 20),
+                new SearchExpression("display:none", 20)
             };
-
-            public static SearchExpression[] LoginFormBad2Input = new SearchExpression[]{
+            public static SearchExpression[] LoginFormBadInput = new SearchExpression[]{
                 new SearchExpression("repeat", 50),
                 new SearchExpression("signup", 20),
                 new SearchExpression("sign_up", 20),
@@ -192,7 +205,7 @@ namespace Voron_Poster
                 new SearchExpression("signin", 20),
                 new SearchExpression("sign_in", 20),
             };
-            public static SearchExpression[] LoginFormSubmitInput = new SearchExpression[]{
+            public static SearchExpression[] SubmitInput = new SearchExpression[]{
                 new SearchExpression("type=submit", 100),
                 new SearchExpression("type=button", 50),
                 new SearchExpression("type=hidden", -100),    
@@ -200,7 +213,8 @@ namespace Voron_Poster
                 new SearchExpression("type=text", -100),
                 new SearchExpression("type=password", -50),
                 new SearchExpression("submit", 100),
-                new SearchExpression("display: none", -200)
+                new SearchExpression("display: none", -200),
+                new SearchExpression("display:none", -200)
             };
             public static SearchExpression[] LoginSuccess = new SearchExpression[]{
                 new SearchExpression("/logout", 100),
@@ -210,6 +224,54 @@ namespace Voron_Poster
                 new SearchExpression("выход", 100),    
                 new SearchExpression("выйти", 100),
                 new SearchExpression("вы зашли как", 100),
+            };
+            public static SearchExpression[] PostFormMessage = new SearchExpression[]{
+                new SearchExpression("message", 100),
+                new SearchExpression("editor", 100),
+                new SearchExpression("msg", 100),
+                new SearchExpression("text", 100),
+                new SearchExpression("post", 100),
+            };
+            public static SearchExpression[] SubjectInput = new SearchExpression[]{
+               // new SearchExpression("type=text", 150), // IE don't show type=text it thinks it's default
+                new SearchExpression("subject", 30),
+                new SearchExpression("title", 30),
+                new SearchExpression("caption", 30),
+                new SearchExpression("text", 10),
+                new SearchExpression("заголовок", 20),
+                new SearchExpression("тема", 10),
+                new SearchExpression("предмет", 10),
+                new SearchExpression("название", 10),
+            };
+            public static SearchExpression[] PostFormStuffInput = new SearchExpression[]{
+                new SearchExpression("preview", 50),    
+                new SearchExpression("reply", 50), 
+            };
+            public static SearchExpression[] Captcha = new SearchExpression[]{
+                new SearchExpression("captcha", 50),    
+                new SearchExpression("capcha", 50),
+                new SearchExpression("verification", 50),    
+                new SearchExpression("code", 30),
+                new SearchExpression("antibot", 30), 
+                new SearchExpression("security", 30), 
+                new SearchExpression("post_vv[code]", 50)
+            };
+            public static SearchExpression[] CaptchaReshresh = new SearchExpression[]{
+                new SearchExpression("refresh", 50),    
+                new SearchExpression("another", 50),
+                new SearchExpression("change", 50),    
+                new SearchExpression("can't see", 30),
+                new SearchExpression("request", 30), 
+                new SearchExpression("другое", 30), 
+                new SearchExpression("другая", 50)
+            };
+            public static SearchExpression[] Error = new SearchExpression[]{
+                new SearchExpression("обнаружена ошибка", 50),    
+                new SearchExpression("обнаружены ошибки", 50),
+                new SearchExpression("error occurred", 50),    
+                new SearchExpression("errors occurred", 50),
+                new SearchExpression("error", 30), 
+                new SearchExpression("ошибка", 30), 
             };
         }
 
@@ -231,8 +293,8 @@ namespace Voron_Poster
                     {
                         int RateLogin = MatchRate(OuterHtml, Expr.LoginInput) + 150;
                         int RatePass = MatchRate(OuterHtml, Expr.PassInput);
-                        int RateBad1 = MatchRate(OuterHtml, Expr.LoginFormBad1Input);
-                        int RateBad2 = MatchRate(OuterHtml, Expr.LoginFormBad2Input);
+                        int RateBad1 = MatchRate(OuterHtml, Expr.BadInput);
+                        int RateBad2 = MatchRate(OuterHtml, Expr.LoginFormBadInput);
                         int RateStuff = MatchRate(OuterHtml, Expr.LoginFormStuffInput);
                         int RateBadAll = RateBad1 + RateBad2 + RateStuff;
                         int CurrLoginRate = RateLogin * 3 - RatePass - RateBadAll;
@@ -250,7 +312,7 @@ namespace Voron_Poster
                     }
                     if (Forms[i].All[i2].GetAttribute("type") == "submit")
                     {
-                        int RateSubmit = MatchRate(OuterHtml, Expr.LoginFormSubmitInput);
+                        int RateSubmit = MatchRate(OuterHtml, Expr.SubmitInput);
                         if (RateSubmit > BestSubmit)
                         {
                             BestSubmit = RateSubmit;
@@ -262,7 +324,7 @@ namespace Voron_Poster
                 int FormRate = MatchRate(FormOuterHtml, Expr.LoginInput)
                              + MatchRate(FormOuterHtml, Expr.PassInput)
                              + MatchRate(FormOuterHtml, Expr.LoginFormStuffInput)
-                             - MatchRate(FormOuterHtml, Expr.LoginFormBad2Input);
+                             - MatchRate(FormOuterHtml, Expr.LoginFormBadInput);
                 int SummRate = FormRate + BestLogin + BestPass;
                 if (BestLogin > 100 && BestPass > 100 && BestSubmit > 90 && SummRate > BestFormRate)
                 {
@@ -270,6 +332,103 @@ namespace Voron_Poster
                     BestForm.Login = Forms[i].All[BestLoginIndex];
                     BestForm.Password = Forms[i].All[BestPassIndex];
                     BestForm.Submit = Forms[i].All[BestSubmitIndex];
+                    BestFormRate = SummRate;
+                }
+            }
+            if (BestFormRate >= 100)
+                return BestForm;
+            else return null;
+        }
+
+        protected PostForm GetPostForm(HtmlElementCollection Forms)
+        {
+            PostForm BestForm = new PostForm();
+            int BestFormRate = int.MinValue;
+            for (int i = 0; i < Forms.Count; i++)
+            {
+                int BestMessage = -500; int BestMessageIndex = -1;
+                int BestTitle = -500; int BestTitleIndex = -1;
+                int BestSubmit = -500; int BestSubmitIndex = -1;
+                int BestCaptcha = -500; int BestCaptchaIndex = -1;
+                int BestCaptchaImg = -500; int BestCaptchaImgIndex = -1;
+                int BestCaptchaRefresh = -500; int BestCaptchaRefreshIndex = -1;
+                for (int i2 = 0; i2 < Forms[i].All.Count; i2++)
+                {
+                    string OuterHtml = Forms[i].All[i2].OuterHtml.Replace("'", "").Replace("\"", "");
+                    if (Forms[i].All[i2].TagName == "TEXTAREA")
+                    {
+                        int RateMessage = MatchRate(OuterHtml, Expr.PostFormMessage);
+                        if (RateMessage > BestMessage)
+                        {
+                            BestMessage = RateMessage;
+                            BestMessageIndex = i2;
+                        }
+                    }
+                    else if (Forms[i].All[i2].TagName == "INPUT")
+                    {
+                        int RateTitle = MatchRate(OuterHtml, Expr.SubjectInput) + 150;
+                        if (RateTitle > BestTitle)
+                        {
+                            BestTitle = RateTitle;
+                            BestTitleIndex = i2;
+                        }
+                        int RateCaptcha = MatchRate(OuterHtml, Expr.Captcha)
+                                        - MatchRate(OuterHtml, Expr.BadInput) * 2;
+                        if (RateCaptcha > BestCaptcha)
+                        {
+                            BestCaptcha = RateCaptcha;
+                            BestCaptchaIndex = i2;
+                        }
+                    }
+                    else if (Forms[i].All[i2].TagName == "IMG")
+                    {
+                        int RateCaptchaImg = MatchRate(OuterHtml, Expr.Captcha);
+                        if (RateCaptchaImg > BestCaptchaImg)
+                        {
+                            BestCaptchaImg = RateCaptchaImg;
+                            BestCaptchaImgIndex = i2;
+                        }
+                    }
+                    if (Forms[i].All[i2].GetAttribute("href") != String.Empty)
+                    {
+                        int RateCaptchaRefresh = MatchRate(OuterHtml, Expr.Captcha)
+                                               + MatchRate(OuterHtml, Expr.BadInput)
+                                               + MatchRate(OuterHtml, Expr.CaptchaReshresh);
+                        if (RateCaptchaRefresh > BestCaptchaRefresh)
+                        {
+                            BestCaptchaRefresh = RateCaptchaRefresh;
+                            BestCaptchaRefreshIndex = i2;
+                        }
+                    }
+                    if (Forms[i].All[i2].GetAttribute("type") == "submit")
+                    {
+                        int RateSubmit = MatchRate(OuterHtml, Expr.SubmitInput);
+                        if (RateSubmit > BestSubmit)
+                        {
+                            BestSubmit = RateSubmit;
+                            BestSubmitIndex = i2;
+                        }
+                    }
+                }
+                string FormOuterHtml = Forms[i].OuterHtml.Replace("'", "").Replace("\"", "");
+                int FormRate = MatchRate(FormOuterHtml, Expr.PostFormMessage)
+                             + MatchRate(FormOuterHtml, Expr.SubjectInput)
+                             + MatchRate(FormOuterHtml, Expr.Captcha)
+                             + MatchRate(FormOuterHtml, Expr.PostFormStuffInput);
+                int SummRate = FormRate + BestMessage + BestTitle;
+                if (BestMessage > 100 && BestSubmit > 90 && SummRate > BestFormRate)
+                {
+                    BestForm.Form = Forms[i];
+                    BestForm.Message = Forms[i].All[BestMessageIndex];
+                    BestForm.Title = Forms[i].All[BestTitleIndex];
+                    BestForm.Submit = Forms[i].All[BestSubmitIndex];
+                    if (BestCaptcha >= 30 && BestCaptchaImg >= 30)
+                    {
+                        BestForm.Captcha = Forms[i].All[BestCaptchaIndex];
+                        BestForm.CaptchaImg = Forms[i].All[BestCaptchaImgIndex];
+                        if (BestCaptchaRefresh >= 30)
+                            BestForm.CaptchaRefresh = Forms[i].All[BestCaptchaRefreshIndex];
+                    }
                     BestFormRate = SummRate;
                 }
             }
@@ -307,6 +466,29 @@ namespace Voron_Poster
             return LoginLinks.Distinct().ToList();
         }
 
+        protected List<Uri> GetPossiblePostPageLinks(HtmlElementCollection Links)
+        {
+            List<Uri> PostLinks = new List<Uri>();
+            string CurrentHost = new Uri(Properties.ForumMainPage).Host;
+            for (int i = 0; i < Links.Count; i++)
+            {
+                string Href = Links[i].GetAttribute("href");
+                Uri Url;
+                if (Uri.TryCreate(Href, UriKind.RelativeOrAbsolute, out Url) &&
+                    !Url.IsAbsoluteUri || Url.Host.EndsWith(CurrentHost, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (Url.OriginalString.IndexOf("post", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        if (Url.OriginalString.IndexOf("reply", StringComparison.OrdinalIgnoreCase) >= 0)
+                            PostLinks.Insert(0, Url);
+                        else
+                            PostLinks.Add(Url);
+                    }
+                }
+            }
+
+            return PostLinks.Distinct().ToList();
+        }
 
         protected async Task<bool> WaitNavigate(string Url, int Retry)
         {
@@ -341,8 +523,10 @@ namespace Voron_Poster
             }
         }
 
-        protected void LogPage(){
-            WB.Invoke((Action)(() => {
+        protected void LogPage()
+        {
+            WB.Invoke((Action)(() =>
+            {
                 if (WB.Document != null)
                 {
                     Stream documentStream = WB.DocumentStream;
@@ -364,13 +548,63 @@ namespace Voron_Poster
                 new IntPtr(optionPtr), sizeof(int));
         }
 
+        protected Point GetOffset(HtmlElement el)
+        {
+            //get element pos
+            Point pos = new Point(el.OffsetRectangle.Left, el.OffsetRectangle.Top);
+
+            //get the parents pos
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                pos.X += tempEl.OffsetRectangle.Left;
+                pos.Y += tempEl.OffsetRectangle.Top;
+                tempEl = tempEl.OffsetParent;
+            }
+
+            return pos;
+        }
+
+
+
+
+        protected Bitmap GetCaptchaSnapshot(HtmlElement Captcha)
+        {
+            Bitmap bitmap = null;
+            Point LeftTop = new Point();
+            WB.Invoke((Action)(() =>
+            {
+                WB.Size = WB.Document.Body.ScrollRectangle.Size;
+                LeftTop = GetOffset(Captcha);
+               bitmap = new Bitmap(WB.Width, WB.Height);
+               WB.DrawToBitmap(bitmap, new Rectangle(new Point(),WB.Size));
+
+            }));
+
+           // IHTMLImgElement img = (IHTMLImgElement)Captcha.DomElement;
+         //   IHTMLElementRender render = (IHTMLElementRender)img;
+            
+            //Bitmap bmp = new Bitmap(img.width, img.height);
+            //Graphics g = Graphics.FromImage(bmp);
+            //IntPtr hdc = g.GetHdc();
+            //render.DrawToDC(ref );
+            //g.ReleaseHdc(hdc);
+
+            //  Captcha.Style[0].
+            return bitmap.Clone(new Rectangle(LeftTop.X, LeftTop.Y, Captcha.ClientRectangle.Width, Captcha.ClientRectangle.Height), bitmap.PixelFormat);
+        }
+
         public override async Task<Exception> Login()
         {
             // Dispose browser after task done
             Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             {
                 WB.BeginInvoke((Action)(() => WB.Dispose()));
-                return PrevTask.Result;
+                try
+                {
+                    return PrevTask.Result;
+                }
+                catch (Exception e) { return e; }
             });
 
             // Clear cookies
@@ -450,83 +684,106 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
         {
-            return null;
-            // Get post url
-            lock (Log) Log.Add("Публикация: Подготовка данных");
-            string TargetTopic;
-            string TargetForum;
-            var Query = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&'));
-            TargetForum = Query.Get("showforum");
-            TargetTopic = Query.Get("showtopic");
-            if (TargetForum == null) TargetForum = Query.Get("f");
-            if (TargetTopic == null) TargetTopic = Query.Get("t");
-            if (TargetTopic == null) TargetTopic = String.Empty;
-            if (TargetForum == null) return new Exception("Неправильная ссылка на тему или раздел");
-            string Do = "reply_post";
-            if (TargetTopic == null) Do = "new_post";
-            Progress[2] += 10 / Progress[3];
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-
-            //var PostData = new FormUrlEncodedContent(new[]
-            //        {
-            //            new KeyValuePair<string, string>("act", "post"),
-            //            new KeyValuePair<string, string>("do", Do),
-            //            new KeyValuePair<string, string>("t", TargetTopic),        
-            //            new KeyValuePair<string, string>("f", TargetForum)
-            //         });
-
-            // Get the post page
+            // Loading main page
             lock (Log) Log.Add("Публикация: Загрузка страницы");
-            var Response = await GetAndLog(Properties.ForumMainPage + "index.php?act=Post&do="
-                + Do + "&f=" + TargetForum + "&t=" + TargetTopic);
-            Progress[2] += 70 / Progress[3];
-            string Html = await Response.Content.ReadAsStringAsync();
-            Progress[2] += 30 / Progress[3];
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Uri PostPage = TargetBoard;
+            if (!await WaitNavigate(PostPage, 2)) return new Exception("Сервер не отвечает");
+            Progress[2] += 38 / Progress[3];
 
-            lock (Log) Log.Add("Публикация: Поиск переменных");
-            string auth_key = GetFieldValue(Html, "auth_key");
-            string code = GetFieldValue(Html, "code");
-            string attach_post_key = GetFieldValue(Html, "attach_post_key");
-            Progress[2] += 10 / Progress[3];
+            // Extracting possible post links
+            lock (Log) Log.Add("Публикация: Поиск страницы публикации");
+            HtmlElementCollection Links = null;
+            WB.Invoke((Action)(() => { Links = WB.Document.Links; }));
+            List<Uri> PostLinks = GetPossiblePostPageLinks(Links);
+            PostForm PostForm = null;
+            HtmlElementCollection Forms = null;
+            Progress[2] += 18 / Progress[3];
+            int LinkIndex = -1;
 
-            lock (Log) Log.Add("Публикация: Подготовка данных");
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            using (var FormData = new MultipartFormDataContent())
+            int LastProgress = Progress[2];
+            while (PostForm == null && LinkIndex < PostLinks.Count)
             {
-                if (TargetTopic != String.Empty)
-                    FormData.Add(new StringContent(TargetTopic), "t");
-                FormData.Add(new StringContent(TargetForum), "f");
-                FormData.Add(new StringContent(Subject, Encoding.Default), "TopicTitle");
-                //FormData.Add(new StringContent(""), "TopicDesc");
-                FormData.Add(new StringContent(Message, Encoding.Default), "Post");
-
-                FormData.Add(new StringContent("Post"), "act");
-                FormData.Add(new StringContent(auth_key), "auth_key");
-                FormData.Add(new StringContent(code), "CODE");
-                FormData.Add(new StringContent(attach_post_key), "attach_post_key");
-                Progress[2] += 10 / Progress[3];
-
-                lock (Log) Log.Add("Публикация: отправка запроса");
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                Response = await PostAndLog(Properties.ForumMainPage + "index.php?", FormData);
-                Progress[2] += 70 / Progress[3];
-                Html = await Response.Content.ReadAsStringAsync();
-                Progress[2] += 30 / Progress[3];
-                Html = Html.ToLower();
-                Progress[2] += 10 / Progress[3];
-
-                // Check if success
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                if (Html.IndexOf("ошибки") >= 0 && Html.IndexOf("обнаружены") >= 0)
-                    return new Exception("Сайт вернул ошибку");
-                else
+                // Loading next possible page with post form
+                if (LinkIndex >= 0)
                 {
-                    lock (Log) Log.Add("Опубликовано");
-                    Progress[2] += 15 / Progress[3];
-                    return null;
+                    lock (Log) Log.Add("Публикация: Загрузка страницы");
+                    if (!await WaitNavigate(PostLinks[LinkIndex], 2)) return new Exception("Сервер не отвечает");
+                    Progress[2] += 87 / PostLinks.Count / Progress[3];
                 }
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+
+                // Checking if any of forms is a login form
+                lock (Log) Log.Add("Публикация: Поиск формы публикации");
+                WB.Invoke((Action)(() => { Forms = WB.Document.Forms; }));
+                PostForm = GetPostForm(Forms);
+                if (PostForm == null) LinkIndex++;
             }
+            if (PostForm == null) return new Exception("Форма публикации не найдена");
+            Progress[2] = LastProgress + (87 / Progress[3]);
+
+            // Ask for captcha if any
+            if (PostForm.Captcha != null)
+            {
+                Progress[2] += 10 / Progress[3];
+                WaitingForQueue = true;
+                lock (Log) Log.Add("Публикация: В очереди");
+                await WaitFor(CaptchaForm.IsFree);
+                Progress[2] += 20 / Progress[3];
+                WB.Invoke((Action)(() =>
+                {
+                    PostForm.CaptchaImg.AttachEventHandler("onload", (o, e) => { WaitLoad.Set(); });
+                }));
+                CaptchaForm.Picture.Image = GetCaptchaSnapshot(PostForm.CaptchaImg);
+                if (PostForm.CaptchaRefresh != null)
+                    CaptchaForm.RefreshFunction = async () =>
+                    {
+                        lock (Log) Log.Add("Публикация: Загрузка капчи");
+                        WaitLoad.Reset();
+                        PostForm.CaptchaRefresh.InvokeMember("click");
+                        await WaitAndStop();
+                        return GetCaptchaSnapshot(PostForm.CaptchaImg);
+                    };
+                CaptchaForm.CancelFunction = () => Cancel.Cancel();
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+
+                Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
+                PostForm.Captcha.SetAttribute("value", CaptchaForm.Result.Text);
+                CaptchaForm.IsFree.Set();
+                Progress[2] += 20 / Progress[3];
+            }
+            else Progress[2] += 50 / Progress[3];
+
+            // Fill the form and submit
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            lock (Log) Log.Add("Публикация: Отправка запроса");
+            if (LinkIndex != -1) PostPage = PostLinks[LinkIndex];
+            if (PostForm.Title != null)
+                PostForm.Title.SetAttribute("value", Subject);
+            PostForm.Message.SetAttribute("value", Message);
+            Progress[2] += 10 / Progress[3];
+            WaitLoad.Reset();
+            PostForm.Submit.InvokeMember("click");
+            await WaitAndStop();
+            LogPage();
+            Progress[2] += 21 / Progress[3];
+
+            // Check if no error was returned
+            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            string Text = String.Empty;
+            WB.Invoke((Action)(() =>
+            {
+                Forms = WB.Document.Forms;
+                Text = WB.Document.Body.InnerText;
+            }));
+            Progress[2] += 21 / Progress[3];
+            if (MatchRate(Text, Expr.Error) >= 30)
+                return new Exception("Сайт вернул ошибку");
+            else
+            {
+                lock (Log) Log.Add("Опубликовано");
+                Progress[2] += 10 / Progress[3];
+            }
+            return null;
         }
     }
 }

@@ -44,7 +44,7 @@
             this.Picture.Location = new System.Drawing.Point(29, 29);
             this.Picture.Margin = new System.Windows.Forms.Padding(20);
             this.Picture.Name = "Picture";
-            this.Picture.Size = new System.Drawing.Size(231, 88);
+            this.Picture.Size = new System.Drawing.Size(222, 49);
             this.Picture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.Picture.TabIndex = 7;
             this.Picture.TabStop = false;
@@ -54,7 +54,7 @@
             this.buttonRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRefresh.Image = global::Voron_Poster.Properties.Resources.refresh_16xLG;
             this.buttonRefresh.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
-            this.buttonRefresh.Location = new System.Drawing.Point(173, 166);
+            this.buttonRefresh.Location = new System.Drawing.Point(164, 127);
             this.buttonRefresh.MaximumSize = new System.Drawing.Size(23, 23);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(23, 23);
@@ -66,7 +66,7 @@
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Abort;
-            this.buttonCancel.Location = new System.Drawing.Point(202, 166);
+            this.buttonCancel.Location = new System.Drawing.Point(193, 127);
             this.buttonCancel.MaximumSize = new System.Drawing.Size(75, 23);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
@@ -79,7 +79,7 @@
             // 
             this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(92, 166);
+            this.buttonOk.Location = new System.Drawing.Point(83, 127);
             this.buttonOk.MaximumSize = new System.Drawing.Size(75, 23);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
@@ -91,9 +91,9 @@
             // 
             this.Result.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.Result.Location = new System.Drawing.Point(12, 140);
+            this.Result.Location = new System.Drawing.Point(12, 101);
             this.Result.Name = "Result";
-            this.Result.Size = new System.Drawing.Size(265, 20);
+            this.Result.Size = new System.Drawing.Size(256, 20);
             this.Result.TabIndex = 0;
             // 
             // CaptchaForm
@@ -102,18 +102,18 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(289, 201);
+            this.ClientSize = new System.Drawing.Size(280, 162);
             this.Controls.Add(this.Result);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.Picture);
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(225, 172);
             this.Name = "CaptchaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "CAPTCHA";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CaptchaForm_FormClosed);
-            this.Load += new System.EventHandler(this.CaptchaForm_Load);
             this.Shown += new System.EventHandler(this.CaptchaForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.Picture)).EndInit();
             this.ResumeLayout(false);

@@ -648,6 +648,7 @@ namespace Voron_Poster
                 TempProperties = new Forum.TaskBaseProperties();
             LoadTaskBaseProperties(TempProperties);
             propTargetUrl.Text = CurrTask.TargetUrl;
+            ValidateProperties();
             propTargetUrl.Focus();
             //this.AcceptButton = TaskPropApply;
             //this.CancelButton = TaskPropCancel;

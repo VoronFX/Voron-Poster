@@ -224,7 +224,7 @@ namespace Voron_Poster
                 Progress[2] += 11 / Progress[3];
 
                 // Send post
-                lock (Log) Log.Add("Публикация: отправка запроса");
+                lock (Log) Log.Add("Публикация: Отправка запроса");
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Response =  await PostAndLog(TargetBoard.AbsoluteUri, FormData);
                 Progress[2] += 50 / Progress[3];

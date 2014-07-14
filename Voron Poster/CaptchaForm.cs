@@ -13,7 +13,7 @@ namespace Voron_Poster
 {
     public partial class CaptchaForm : Form
     {
-        public Func<Task<Bitmap>> RefreshFunction;
+        public Func<Task<Bitmap>> RefreshFunction = null;
         public Action CancelFunction;
         private bool Resize = true;
         public AutoResetEvent IsFree;
@@ -29,16 +29,18 @@ namespace Voron_Poster
             buttonRefresh.Enabled = false;
             try
             {
-             Picture.Image = await RefreshFunction();
-             if (Resize)
-             ClientSize = ClientSize - Picture.Size + Picture.Image.Size;
-             Resize = false;
+                Picture.Image = await RefreshFunction();
+                if (Resize)
+                    ClientSize = ClientSize - Picture.Size + Picture.Image.Size;
+                Resize = false;
             }
             catch (Exception Error)
             {
-                if (Error is OperationCanceledException) {
+                if (Error is OperationCanceledException)
+                {
                     this.Close();
-                } else
+                }
+                else
                     MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             buttonRefresh.Enabled = true;
@@ -47,6 +49,7 @@ namespace Voron_Poster
         private void CaptchaForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Picture.Image = null;
+            RefreshFunction = null;
             Resize = true;
         }
 
@@ -58,13 +61,13 @@ namespace Voron_Poster
         private void CaptchaForm_Shown(object sender, EventArgs e)
         {
             Result.Text = "";
-            buttonRefresh_Click(sender, e);
+            if (RefreshFunction != null || Picture.Image != null)
+            {
+                buttonRefresh_Click(sender, e);
+                buttonRefresh.Enabled = RefreshFunction != null;
+            }
         }
 
-        private void CaptchaForm_Load(object sender, EventArgs e)
-        {
-
-        }
 
 
     }

@@ -520,7 +520,8 @@ namespace Voron_Poster
             TempForum.Reset();
             TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
-            Task<Exception> LoginTask = TempForum.Login();
+            TempForum.Activity = Task.Run<Exception>(async () => await TempForum.Login());
+            Task<Exception> LoginTask = TempForum.Activity;
             PropertiesActivityTask = LoginTask;
             Exception Error;
             try

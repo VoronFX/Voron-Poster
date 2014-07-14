@@ -28,33 +28,46 @@ namespace Voron_Poster
         Form a;
         private WebBrowser WB;
         private AutoResetEvent WaitLoad = new AutoResetEvent(true);
+        private Thread WBThread;
         public override void Reset()
         {
             base.Reset();
-            if (a != null) a.Dispose();
-            a = new Form();
             if (WB != null)
+                WB.Invoke((Action)(()=>{WB.Dispose();}));
 
-                WB.Dispose();
+            //if (a != null) a.Dispose();
+            //a = new Form();
+           // WB = new WebBrowser();
+           // WB.Visible = true;
+           // WB.ScriptErrorsSuppressed = true;
+           // WB.Parent = a;
+           // a.WindowState = FormWindowState.Maximized;
+           // //a.Controls.Add(WB);
+           //     //   a.Show();
+           // var b = new Button();
+           // b.Parent = a;
+           // b.Click += async (o, e) =>
+           // {
+           //     await Task.Delay(1000);
+           //     await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/", 2);
+           // };
+           // b.Dock = DockStyle.Top;
+           // a.Controls.Add(b);
 
+           //// WB.Dock = DockStyle.Fill;
+           // WB.DocumentCompleted += WB_DocumentComplete;
+
+            WBThread = new Thread(WBContext);
+            WBThread.SetApartmentState(ApartmentState.STA);
+        }
+
+        private void WBContext()
+        {
             WB = new WebBrowser();
-            WB.Visible = true;
             WB.ScriptErrorsSuppressed = true;
-            WB.Parent = a;
-            a.WindowState = FormWindowState.Maximized;
-            //a.Controls.Add(WB);
-                //   a.Show();
-            var b = new Button();
-            b.Parent = a;
-            b.Click += async (o, e) =>
-            {
-                await Task.Delay(1000);
-                await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/", 2);
-            };
-            b.Dock = DockStyle.Top;
-            a.Controls.Add(b);
-           // WB.Dock = DockStyle.Fill;
             WB.DocumentCompleted += WB_DocumentComplete;
+            WB.Disposed += (o, e) => { WB = null;  Application.ExitThread(); };
+            Application.Run();
         }
 
         protected class LoginForm
@@ -533,7 +546,9 @@ namespace Voron_Poster
                     using (StreamReader streamReader = new StreamReader(documentStream, Encoding.GetEncoding(WB.Document.Encoding)))
                     {
                         documentStream.Position = 0L;
-                        HttpLog.Add(new KeyValuePair<object, string>(streamReader.ReadToEnd(), WB.Url.AbsoluteUri));
+                        string Url = String.Empty;
+                        if (WB.Url != null) Url = WB.Url.AbsoluteUri;
+                        HttpLog.Add(new KeyValuePair<object, string>(streamReader.ReadToEnd(), Url));
                     }
                 }
             }));
@@ -596,16 +611,20 @@ namespace Voron_Poster
 
         public override async Task<Exception> Login()
         {
+            // Run WebBrowser thread
+            WBThread.Start();
             // Dispose browser after task done
             Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             {
-                WB.BeginInvoke((Action)(() => WB.Dispose()));
+                WB.BeginInvoke((Action)(() =>{ if (WB != null) WB.Dispose();}));
                 try
                 {
                     return PrevTask.Result;
                 }
                 catch (Exception e) { return e; }
             });
+            // Wait while wb is creating
+            while (WB == null || !WB.IsHandleCreated) Task.Delay(100).Wait();
 
             // Clear cookies
             ClearCookies();

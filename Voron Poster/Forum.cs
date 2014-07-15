@@ -165,7 +165,6 @@ namespace Voron_Poster
             public TaskBaseProperties()
             {
                 PreProcessingScripts = new List<string>();
-                PreProcessingScripts.Add("Опубликовать");
             }
             public TaskBaseProperties(TaskBaseProperties Data)
             {

@@ -353,9 +353,29 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Play_32xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Play_32xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StatusAnnotations_Play_32xMD_color {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Play_32xMD_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Play_32xMD_color1 {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Play_32xMD_color1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

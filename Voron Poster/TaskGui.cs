@@ -367,7 +367,7 @@ namespace Voron_Poster
         public void Properties(object sender, EventArgs e)
         {
             MainForm.CurrTask = this;
-            MainForm.ShowPropertiesPage();
+            MainForm.propShow();
         }
 
         private void Name_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

@@ -86,6 +86,7 @@ namespace Voron_Poster
                     Settings = SettingsData.Load("Settings.xml");
                 if (settingsLoadLastTasklist.Checked && File.Exists("LastTasklist.xml"))
                     TaskList.Load(Tasks, this, "LastTasklist.xml");
+                settingsCancel_Click(sender, e);
             }
             catch (Exception Error)
             {
@@ -116,6 +117,15 @@ namespace Voron_Poster
             wb.Dock = DockStyle.Fill;
             b.Show();
         }
+
+        #region MessagePage
+
+        private void messageNext_Click(object sender, EventArgs e)
+        {
+            Tabs.SelectedTab = tasksTab;
+        }
+
+        #endregion
 
         #region Tasks Page
 
@@ -404,7 +414,7 @@ namespace Voron_Poster
         {
             TempProperties.UseLocalAccount = propAuthLocal.Checked;
             ResetIcon(sender, e);
-            ValidateProperties();
+            propValidate();
         }
 
         private void propAuthShowPassword_CheckedChanged(object sender, EventArgs e)
@@ -456,6 +466,16 @@ namespace Voron_Poster
                                 if ((s as String).ToLower().IndexOf(Domain) >= 0)
                                 {
                                     propProfiles.Text = (s as String);
+                                    if (Settings.ApplySuggestedProfile)
+                                    {
+                                        propApply_Click(sender, e);
+                                        propValidate();
+                                        if (propApply.Enabled)
+                                        {
+                                            propApply_Click(sender, e);
+                                            return;
+                                        }
+                                    }
                                     break;
                                 }
                             }
@@ -469,7 +489,7 @@ namespace Voron_Poster
             if (sender == propMainUrl && propMainUrl.Focused) DetectMainPage = false;
             if (propMainUrl.Text == "http://" || propMainUrl.Text == "https://") DetectMainPage = true;
             ResetIcon(sender, e);
-            ValidateProperties();
+            propValidate();
         }
 
         private void propAuthUsername_TextChanged(object sender, EventArgs e)
@@ -489,7 +509,7 @@ namespace Voron_Poster
             if (propEngine.SelectedIndex >= 0)
                 TempProperties.Engine = (Forum.Engine)Enum.Parse(typeof(Forum.Engine),
             (string)propEngine.SelectedItem);
-            ValidateProperties();
+            propValidate();
             ResetIcon(sender, e);
         }
 
@@ -501,7 +521,7 @@ namespace Voron_Poster
         private async void propEngineDetect_Click(object sender, EventArgs e)
         {
             PropertiesActivity = true;
-            ValidateProperties();
+            propValidate();
             propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
             Forum.Engine Detected = Forum.Engine.Unknown;
             HttpClient Client = new HttpClient();
@@ -537,14 +557,14 @@ namespace Voron_Poster
             }
             else propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
             PropertiesActivity = false;
-            ValidateProperties();
+            propValidate();
         }
 
         private async void propAuthTryLogin_Click(object sender, EventArgs e)
         {
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
-            ValidateProperties();
+            propValidate();
             propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
             TempForum = Forum.New(TempProperties.Engine);
             StopProperties = new CancellationTokenSource();
@@ -572,7 +592,7 @@ namespace Voron_Poster
             }
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
-            ValidateProperties();
+            propValidate();
         }
 
         private void propAuthLog_Click(object sender, EventArgs e)
@@ -594,7 +614,7 @@ namespace Voron_Poster
             }
         }
 
-        private void ValidateProperties()
+        private void propValidate()
         {
             //if (PropertiesActivity == null)
             //{
@@ -658,14 +678,13 @@ namespace Voron_Poster
             TempForum = null;
             CurrTask.New = false;
             TasksUpdater_Tick(sender, e);
-            ClosePropertiesPage(sender, e);
+            propClose(sender, e);
             propApply.Enabled = true;
         }
 
-        public void ShowPropertiesPage()
+        public void propShow()
         {
-            //
-            Tabs.TabPages.Add(propTab);
+            Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(tasksTab) + 1, propTab);
             //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
             Tabs.SelectTab(propTab);
             for (int i = 0; i < Tabs.TabPages.Count; i++)
@@ -678,10 +697,14 @@ namespace Voron_Poster
             if (CurrTask.Forum != null)
                 TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
             else
+            {
                 TempProperties = new Forum.TaskBaseProperties();
+                TempProperties.PreProcessingScripts.Add("(built in) Опубликовать");
+            }
             LoadTaskBaseProperties(TempProperties);
             propTargetUrl.Text = CurrTask.TargetUrl;
-            ValidateProperties();
+            propAuthGlobalUsername.Text = Settings.Account.Username;
+            propValidate();
             propTargetUrl.Focus();
             //this.AcceptButton = TaskPropApply;
             //this.CancelButton = TaskPropCancel;
@@ -705,7 +728,7 @@ namespace Voron_Poster
             propScriptsList.Items.AddRange(TempProperties.PreProcessingScripts.ToArray());
         }
 
-        private async void ClosePropertiesPage(object sender, EventArgs e)
+        private async void propClose(object sender, EventArgs e)
         {
             propCancel.Enabled = false;
             propTab.Enabled = false;
@@ -739,7 +762,9 @@ namespace Voron_Poster
         {
             propScriptsList.SelectedIndex -= 1;
             propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex + 1);
-            ValidateProperties();
+            if (propScriptsList.SelectedIndex == -1 && propScriptsList.Items.Count > 0)
+                propScriptsList.SelectedIndex = 0;
+            propValidate();
         }
 
         private void propScriptsUp_Click(object sender, EventArgs e)
@@ -747,7 +772,7 @@ namespace Voron_Poster
             propScriptsList.Items.Insert(propScriptsList.SelectedIndex - 1, propScriptsList.SelectedItem);
             propScriptsList.SelectedIndex = propScriptsList.SelectedIndex - 2;
             propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex + 2);
-            ValidateProperties();
+            propValidate();
         }
 
         private void propScriptsDown_Click(object sender, EventArgs e)
@@ -755,12 +780,20 @@ namespace Voron_Poster
             propScriptsList.Items.Insert(propScriptsList.SelectedIndex + 2, propScriptsList.SelectedItem);
             propScriptsList.SelectedIndex = propScriptsList.SelectedIndex + 2;
             propScriptsList.Items.RemoveAt(propScriptsList.SelectedIndex - 2);
-            ValidateProperties();
+            propValidate();
         }
 
         private void propScriptsList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ValidateProperties();
+            propValidate();
+        }
+
+        private void propScriptsAdd_Click(object sender, EventArgs e)
+        {
+            Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(propTab) + 1, scriptsTab);
+            Tabs.SelectedTab = scriptsTab;
+            propTab.Enabled = false;
+            propValidate();
         }
 
         private void propScriptsEdit_Click(object sender, EventArgs e)
@@ -769,6 +802,11 @@ namespace Voron_Poster
             propScriptsRemove_Click(sender, e);
             propScriptsAdd_Click(sender, e);
             scriptsSave.Enabled = false;
+        }
+
+        private void propScriptsList_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (propScriptsEdit.Enabled && propScriptsList.IndexFromPoint(e.Location) >= 0) propScriptsEdit_Click(sender, e);
         }
 
         #region PropertiesProfiles
@@ -784,7 +822,7 @@ namespace Voron_Poster
 
         private void ProfileComboBox_TextChanged(object sender, EventArgs e)
         {
-            ValidateProperties();
+            propValidate();
         }
 
         private void ProfileComboBox_Enter(object sender, EventArgs e)
@@ -834,7 +872,7 @@ namespace Voron_Poster
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
                     Xml.Serialize(F, TempProperties);
-                ValidateProperties();
+                propValidate();
                 propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
             }
             catch (Exception Error)
@@ -858,7 +896,7 @@ namespace Voron_Poster
                 using (FileStream F = File.OpenRead(GetProfilePath(propProfiles.Text)))
                     TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
                 LoadTaskBaseProperties(TempProperties);
-                ValidateProperties();
+                propValidate();
             }
             catch (Exception Error)
             {
@@ -885,189 +923,328 @@ namespace Voron_Poster
             propProfiles.Text = NameBase;
         }
 
+        private void propProfileBrowse_Click(object sender, EventArgs e)
+        {
+            propProfileBrowse.Enabled = false;
+            try
+            {
+                Directory.CreateDirectory(@".\Profiles\");
+                var OpenFileDialog = new OpenFileDialog();
+                OpenFileDialog.CheckFileExists = false;
+                OpenFileDialog.DefaultExt = ".xml";
+                OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
+                OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"Profiles");
+                if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    propProfiles.Text = OpenFileDialog.FileName;
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            propProfileBrowse.Enabled = true;
+        }
+
         #endregion
 
         #endregion
 
         #region Scripts
 
-        string OpenedScript;
-        bool IgnoreEvents;
-
-        private void scriptsTab_Enter(object sender, EventArgs e)
+        string openedScript;
+        bool ignoreEvents;
+        bool scriptsUnsaved
         {
-            IgnoreEvents = true;
+            get { return scriptsSave.Enabled; }
+            set
+            {
+                if (!value)
+                {
+                    scriptsSave.Enabled = false;
+                }
+                else
+                {
+                    scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
+                    scriptsSave.Enabled = true;
+                }
+                scriptsAccept.Enabled = scriptsList.SelectedIndex >= 0 || scriptsSave.Enabled;
+            }
+        }
+
+        private void scriptsLoadList()
+        {
             scriptsList.Items.Clear();
             scriptsName.AutoCompleteCustomSource.Clear();
             Directory.CreateDirectory(".\\Scripts\\");
             string[] Paths = Directory.GetFiles(".\\Scripts\\", "*.cs");
-            //trying complicated constructions =D
             Array.ForEach<string>(Paths, s =>
             {
                 s = s.Replace(".\\Scripts\\", String.Empty).Replace(".cs", String.Empty);
-                scriptsList.Items.Add(s);
-                scriptsName.AutoCompleteCustomSource.Add(s);
-            }); ;
-            SelectScriptInList();
-            IgnoreEvents = false;
+                if (!s.StartsWith("(built in)"))
+                {
+                    scriptsList.Items.Add(s);
+                    scriptsName.AutoCompleteCustomSource.Add(s);
+                }
+            });
+            Directory.CreateDirectory(".\\Scripts\\BuiltIn\\");
+            Paths = Directory.GetFiles(".\\Scripts\\BuiltIn\\", "*.cs");
+            Array.ForEach<string>(Paths, s =>
+            {
+                s = s.Replace(".\\Scripts\\BuiltIn\\", String.Empty).Replace(".cs", String.Empty);
+                if (s.StartsWith("(built in)"))
+                {
+                    scriptsList.Items.Add(s);
+                    scriptsName.AutoCompleteCustomSource.Add(s);
+                }
+            });
+
+        }
+
+        private bool scriptsSelectInList(string name)
+        {
+            if (!String.IsNullOrEmpty(name)) //return false;
+                for (int i = 0; i < scriptsList.Items.Count; i++)
+                {
+                    if (name.Equals((string)scriptsList.Items[i],
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        scriptsList.SelectedItem = scriptsList.Items[i];
+                        return true;
+                    }
+                }
+            scriptsList.SelectedIndex = -1;
+            return false;
+        }
+
+        private void scriptsLoadScript(string name)
+        {
+            scriptsEditor.Text = System.IO.File.ReadAllText(GetScriptPath(name));
+#if !DEBUG
+            scriptsEditor.IsReadOnly = name.StartsWith("(built in)");
+#endif
+            scriptsName.Text = name;
+            openedScript = name;
+            scriptsUnsaved = false;
+        }
+
+        private void scriptsSaveScript(string name)
+        {
+#if !DEBUG
+            if (name.StartsWith("(built in)")) throw new Exception("Нельзя изменять и сохранять встроенные скрипты");
+#endif
+            System.IO.File.WriteAllText(GetScriptPath(scriptsName.Text), scriptsEditor.Text);
+            openedScript = name;
+            scriptsUnsaved = false;
+        }
+
+        private string scriptsNewName()
+        {
+            int i = 1;
+            while (File.Exists(GetScriptPath("Script #" + i.ToString()))) i++;
+            return "Script #" + i.ToString();
+        }
+
+        private void scriptsTab_Enter(object sender, EventArgs e)
+        {
+            ignoreEvents = true;
+            scriptsLoadList();
+            scriptsSelectInList(scriptsName.Text);
+            if (scriptsList.SelectedIndex >= 0)
+                scriptsLoadScript((string)scriptsList.SelectedItem);
+            ignoreEvents = false;
         }
 
         public static string GetScriptPath(string Path)
         {
             if (!Path.EndsWith(".cs")) Path += ".cs";
-            if (Path.IndexOf('\\') < 0) Path = "Scripts\\" + Path;
+            if (Path.IndexOf('\\') < 0)
+            {
+                if (Path.StartsWith("(built in)"))
+                    Path = "Scripts\\BuiltIn\\" + Path;
+                else
+                    Path = "Scripts\\" + Path;
+            }
             return Path;
         }
 
-        private bool AskSave()
+        private bool scriptsAskSave()
         {
-            switch (MessageBox.Show("Сохранить изменения в файле \""
-                + scriptsName.Text + "\"?", "Изменения", MessageBoxButtons.YesNoCancel))
+            string SaveName = openedScript;
+            string Message = "Сохранить изменения в скрипте ";
+            if (String.IsNullOrEmpty(openedScript))
+            {
+                SaveName = String.IsNullOrEmpty(scriptsName.Text) ? scriptsNewName() : scriptsName.Text;
+                if (scriptsList.Items.Contains(SaveName)) Message = "Перезаписать скрипт ";
+                else Message = "Сохранить скрипт ";
+            }
+            switch (MessageBox.Show(Message + SaveName + "\"?", "Изменения", MessageBoxButtons.YesNoCancel))
             {
                 case System.Windows.Forms.DialogResult.Yes:
-                    scriptsSave_Click(scriptsSave, EventArgs.Empty);
+                    scriptsSaveScript(SaveName);
                     break;
                 case System.Windows.Forms.DialogResult.Cancel:
-                    IgnoreEvents = true;
-                    if (OpenedScript == null)
-                        scriptsList.SelectedIndex = -1;
-                    else
-                    {
-                        scriptsName.Text = OpenedScript;
-                        SelectScriptInList();
-                    }
-                    IgnoreEvents = false;
                     return false;
             }
             return true;
         }
 
-        private void SelectScriptInList()
-        {
-            IgnoreEvents = true;
-            Console.WriteLine("select begins");
-            int i;
-            for (i = 0; i < scriptsList.Items.Count; i++)
-            {
-                if (scriptsName.Text.Equals((string)scriptsList.Items[i],
-                    StringComparison.OrdinalIgnoreCase))
-                {
-                    scriptsList.SelectedItem = scriptsList.Items[i];
-                    break;
-                }
-            }
-            if (i >= scriptsList.Items.Count)
-            {
-                scriptsList.SelectedIndex = -1;
-                if (scriptsEditor.Text != String.Empty)
-                {
-                    OpenedScript = (string)scriptsList.SelectedItem;
-                    if (scriptsName.Text != String.Empty)
-                    {
-                        scriptsSave.Enabled = true;
-                        scriptsAccept.Enabled = true;
-                    }
-                }
-                else scriptsAccept.Enabled = false;
-            }
-            else
-                scriptsAccept.Enabled = true;
-            IgnoreEvents = false;
-            Console.WriteLine("select ends");
-            //}
-        }
-
         private void scriptsName_TextChanged(object sender, EventArgs e)
         {
-            if (!IgnoreEvents)
+            if (ignoreEvents) return;
+            ignoreEvents = true;
+            try
             {
-                Console.WriteLine("namechange begins");
-                scriptsSave.Enabled = scriptsEditor.Text != String.Empty && scriptsName.Text != String.Empty;
-                SelectScriptInList();
-                Console.WriteLine("namechange ends");
+                if (scriptsUnsaved && !String.IsNullOrEmpty(openedScript))
+                {
+                    if (!scriptsAskSave())
+                    {
+                        scriptsName.Text = openedScript;
+                        ignoreEvents = false;
+                        return;
+                    }
+                    else
+                    {
+                        scriptsLoadList();
+                        scriptsSelectInList(scriptsName.Text);
+                    }
+                }
+                scriptsSelectInList(scriptsName.Text);
+                if (scriptsList.SelectedIndex >= 0 && !String.IsNullOrEmpty(openedScript))
+                    scriptsLoadScript((string)scriptsList.SelectedItem);
+                else
+                {
+                    openedScript = null;
+                    if (!String.IsNullOrEmpty(scriptsEditor.Text)) scriptsUnsaved = true;
+                }
+                scriptsDelete.Enabled = scriptsList.SelectedIndex >= 0;
+#if !DEBUG
+                if (scriptsEditor.Text.StartsWith("(built in)")) scriptsDelete.Enabled = false;
+#endif
+                //if (!settingsUnsaved)
+                //{
+                //    scriptsSelectInList(scriptsName.Text);
+                //        if (scriptsList.SelectedIndex > 0)
+                //            scriptsLoad((string)scriptsList.SelectedItem);
+                //}
+                //else if (!String.IsNullOrEmpty(openedScript))
+                //{
+                //    if scriptsAskSave()
+                //        scriptsSave(openedScript);
+                //}
             }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            ignoreEvents = false;
         }
 
         private void scriptsList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!IgnoreEvents)
+            if (ignoreEvents) return;
+            ignoreEvents = true;
+            try
             {
-                Console.WriteLine("indexchange begins");
-                IgnoreEvents = true;
-                if (OpenedScript != (string)scriptsList.SelectedItem && scriptsList.SelectedIndex != -1)
+                string CurrentSelected = scriptsList.SelectedIndex > 0 ? (string)scriptsList.SelectedItem : String.Empty;
+                if ((string)scriptsList.SelectedItem != openedScript)
                 {
-                    if (scriptsSave.Enabled && !AskSave()) return;
-                    scriptsEditor.Text = String.Empty;
-                    try
+                    if (scriptsUnsaved)
                     {
-                        scriptsEditor.Text = System.IO.File.ReadAllText(GetScriptPath((string)scriptsList.SelectedItem));
-                        OpenedScript = (string)scriptsList.SelectedItem;
-                        scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
+                        if (!scriptsAskSave())
+                        {
+                            scriptsSelectInList(openedScript);
+                            ignoreEvents = false;
+                            return;
+                        }
+                        else
+                        {
+                            scriptsLoadList();
+                            scriptsSelectInList(CurrentSelected);
+                        }
                     }
-                    catch (Exception Error)
-                    {
-                        MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    scriptsSave.Enabled = false;
+
+
+                    //if (String.IsNullOrEmpty(openedScript))
+                    //{
+                    //    string CurrentSelected = scriptsList.SelectedIndex > 0 ? (string)scriptsList.SelectedItem : String.Empty;
+                    //    scriptsSaveScript(scriptsNewName());
+                    //    scriptsLoadList();
+                    //    scriptsSelectInList(CurrentSelected);
+                    //}
+                    //else
+                    //    scriptsSaveScript(openedScript);
+
+
+                    if (scriptsList.SelectedIndex >= 0)
+                        scriptsLoadScript((string)scriptsList.SelectedItem);
                 }
-                scriptsDelete.Enabled = scriptsList.SelectedIndex != -1;
-                scriptsAccept.Enabled = scriptsDelete.Enabled;
-                scriptsName.Text = (string)scriptsList.SelectedItem;
-                IgnoreEvents = false;
-                Console.WriteLine("indexchange ends");
+                scriptsDelete.Enabled = scriptsList.SelectedIndex >= 0;
+#if !DEBUG
+                if (scriptsEditor.Text.StartsWith("(built in)")) scriptsDelete.Enabled = false;
+#endif
             }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            ignoreEvents = false;
         }
 
         private void scriptsEditor_TextChanged(object sender, EventArgs e)
         {
-            if (!IgnoreEvents)
-            {
-                scriptsSave.Enabled = true;
-                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
-            }
+            if (ignoreEvents) return;
+            scriptsUnsaved = true;
         }
 
         private void scriptsSave_Click(object sender, EventArgs e)
         {
             scriptsSave.Enabled = false;
-            IgnoreEvents = true;
+            ignoreEvents = true;
             try
             {
-                if (scriptsName.Text == String.Empty) scriptsNew_Click(sender, e);
-                System.IO.File.WriteAllText(GetScriptPath(scriptsName.Text), scriptsEditor.Text);
-                OpenedScript = scriptsName.Text;
-                scriptsTab_Enter(sender, e);
+                if (String.IsNullOrEmpty(openedScript))
+                {
+                    if (scriptsList.Items.Contains(scriptsName.Text)) scriptsAskSave();
+                    else
+                    {
+                        if (String.IsNullOrEmpty(scriptsName.Text))
+                            scriptsName.Text = scriptsNewName();
+                        scriptsSaveScript(scriptsName.Text);
+                        scriptsLoadList();
+                        scriptsSelectInList(scriptsName.Text);
+                    }
+                }
+                else
+                    scriptsSaveScript(openedScript);
+
             }
             catch (Exception Error)
             {
                 MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                scriptsSave.Enabled = true;
             }
-            IgnoreEvents = false;
+            ignoreEvents = false;
         }
 
         private void scriptsNew_Click(object sender, EventArgs e)
         {
-            if (scriptsSave.Enabled && !AskSave()) return;
+            if (scriptsSave.Enabled && !scriptsAskSave()) return;
+            scriptsEditor.IsReadOnly = false;
             scriptsEditor.Text = String.Empty;
-            OpenedScript = null;
-            int i = 1;
-            while (File.Exists(GetScriptPath("Script #" + i.ToString()))) i++;
-            scriptsName.Text = "Script #" + i.ToString();
+            openedScript = null;
+            scriptsName.Text = scriptsNewName();
+            scriptsUnsaved = false;
         }
 
         private void scriptsDelete_Click(object sender, EventArgs e)
         {
             scriptsDelete.Enabled = false;
-            if (MessageBox.Show(this, "Удалить скрипт " + OpenedScript + "?",
+            if (MessageBox.Show(this, "Удалить скрипт " + openedScript + "?",
                 "Удалить скрипт?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                 try
                 {
-                    File.Delete(GetScriptPath(OpenedScript));
-                    scriptsTab_Enter(sender, e);
+                    File.Delete(GetScriptPath(openedScript));
+                    scriptsLoadList();
                     scriptsSave.Enabled = false;
                     scriptsList.SelectedIndex = scriptsList.Items.Count - 1;
-
                 }
                 catch (Exception Error)
                 {
@@ -1078,7 +1255,7 @@ namespace Voron_Poster
 
         private void scriptsCancel_Click(object sender, EventArgs e)
         {
-            if (scriptsSave.Enabled && !AskSave()) return;
+            if (scriptsSave.Enabled && !scriptsAskSave()) return;
             propTab.Enabled = true;
             Tabs.TabPages.Remove(scriptsTab);
             Tabs.SelectedTab = propTab;
@@ -1089,6 +1266,11 @@ namespace Voron_Poster
             scriptsCancel_Click(sender, e);
             propScriptsList.Items.Insert(propScriptsList.SelectedIndex + 1, scriptsName.Text);
             propScriptsList.SelectedIndex = propScriptsList.SelectedIndex + 1;
+        }
+
+        private void scriptsList_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (scriptsAccept.Enabled && scriptsList.IndexFromPoint(e.Location) >= 0) scriptsAccept_Click(sender, e);
         }
 
         #region TestTab
@@ -1103,6 +1285,7 @@ namespace Voron_Poster
             scriptsSave.Enabled = false;
             scriptsDelete.Enabled = false;
             scriptsEditor.IsReadOnly = true;
+            scriptsNew.Enabled = false;
             scriptsSubject.TextChanged -= scriptsSubject_TextChanged;
             scriptsMessage.TextChanged -= scriptsSubject_TextChanged;
             scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
@@ -1164,6 +1347,7 @@ namespace Voron_Poster
             scriptsMessage.TextChanged += scriptsSubject_TextChanged;
             scriptsRun.Enabled = true;
             scriptsListPanel.Enabled = true;
+            scriptsNew.Enabled = true;
             scriptsSave.Enabled = SaveState;
             scriptsDelete.Enabled = DeleteState;
             scriptsEditor.IsReadOnly = false;
@@ -1230,40 +1414,25 @@ namespace Voron_Poster
 
         #endregion
 
-        private void propScriptsAdd_Click(object sender, EventArgs e)
-        {
-            Tabs.TabPages.Add(scriptsTab);
-            Tabs.SelectedTab = scriptsTab;
-            propTab.Enabled = false;
-            ValidateProperties();
-        }
-
         #endregion
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        #region Settings Page
+
+        bool settingsUnsaved
         {
-
-        }
-
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
+            get { return settingsSave.Enabled; }
+            set
+            {
+                settingsSave.Enabled = value;
+                settingsCancel.Enabled = value;
+            }
         }
 
         SettingsData Settings;
-        struct SettingsData
+        public struct SettingsData
         {
             public bool LoadLastTaskList;
+            public bool ApplySuggestedProfile;
             public Forum.TaskBaseProperties.AccountData Account;
             public static void Save(SettingsData Data, string path)
             {
@@ -1275,23 +1444,45 @@ namespace Voron_Poster
             {
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(SettingsData));
                 using (FileStream F = File.OpenRead(path))
-                   return (SettingsData)Xml.Deserialize(F);
+                    return (SettingsData)Xml.Deserialize(F);
             }
         }
 
         private void settingsSave_Click(object sender, EventArgs e)
         {
-            try{
-            Settings.LoadLastTaskList = settingsLoadLastTasklist.Checked;
-            Settings.Account.Username = settingsGAuthUsername.Text;
-            Settings.Account.Password = settingsGAuthPassword.Text;
-            SettingsData.Save(Settings, "Settings.xml");
+            try
+            {
+                Settings.LoadLastTaskList = settingsLoadLastTasklist.Checked;
+                Settings.ApplySuggestedProfile = settingsApplySuggestedProfile.Checked;
+                Settings.Account.Username = settingsGAuthUsername.Text;
+                Settings.Account.Password = settingsGAuthPassword.Text;
+                SettingsData.Save(Settings, "Settings.xml");
             }
             catch (Exception Error)
             {
                 MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }     
+            }
+            settingsUnsaved = false;
         }
+
+        private void settingsCancel_Click(object sender, EventArgs e)
+        {
+            settingsLoadLastTasklist.Checked = Settings.LoadLastTaskList;
+            settingsApplySuggestedProfile.Checked = Settings.ApplySuggestedProfile;
+            settingsGAuthUsername.Text = Settings.Account.Username;
+            settingsGAuthPassword.Text = Settings.Account.Password;
+            settingsUnsaved = false;
+        }
+
+        private void settings_Changed(object sender, EventArgs e)
+        {
+            settingsUnsaved = true;
+        }
+
+        #endregion
+
+
+
 
     }
 }

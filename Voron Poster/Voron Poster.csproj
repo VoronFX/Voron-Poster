@@ -54,6 +54,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>89175433CF1A906066C4C301F391CE09C8C26329</ManifestCertificateThumbprint>
@@ -304,6 +305,8 @@
     <None Include="Resources\test_32x_SM.png" />
     <None Include="Resources\test_32x_SMcuted.png" />
     <None Include="Resources\YAAvatar %282%29.jpg" />
+    <None Include="Resources\StatusAnnotations_Play_32xLG_color.png" />
+    <None Include="Resources\StatusAnnotations_Play_32xMD_color1.png" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

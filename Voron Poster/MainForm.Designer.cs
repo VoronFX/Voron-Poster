@@ -1179,7 +1179,6 @@
             // settingsGAuthShowPassword
             // 
             this.settingsGAuthShowPassword.AutoSize = true;
-            this.settingsGAuthShowPassword.Enabled = false;
             this.settingsGAuthShowPassword.Location = new System.Drawing.Point(11, 102);
             this.settingsGAuthShowPassword.Name = "settingsGAuthShowPassword";
             this.settingsGAuthShowPassword.Size = new System.Drawing.Size(128, 17);
@@ -1201,7 +1200,6 @@
             // 
             this.settingsGAuthPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.settingsGAuthPassword.Enabled = false;
             this.settingsGAuthPassword.Location = new System.Drawing.Point(11, 76);
             this.settingsGAuthPassword.Name = "settingsGAuthPassword";
             this.settingsGAuthPassword.Size = new System.Drawing.Size(169, 20);
@@ -1221,7 +1219,6 @@
             // 
             this.settingsGAuthUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.settingsGAuthUsername.Enabled = false;
             this.settingsGAuthUsername.Location = new System.Drawing.Point(11, 37);
             this.settingsGAuthUsername.Name = "settingsGAuthUsername";
             this.settingsGAuthUsername.Size = new System.Drawing.Size(169, 20);
@@ -1240,6 +1237,7 @@
             this.settingsSave.Text = "Сохранить";
             this.settingsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.settingsSave.UseVisualStyleBackColor = true;
+            this.settingsSave.Click += new System.EventHandler(this.settingsSave_Click);
             // 
             // settingsCancel
             // 

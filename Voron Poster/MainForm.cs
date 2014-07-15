@@ -82,6 +82,8 @@ namespace Voron_Poster
         {
             try
             {
+                if (File.Exists("Settings.xml"))
+                    Settings = SettingsData.Load("Settings.xml");
                 if (settingsLoadLastTasklist.Checked && File.Exists("LastTasklist.xml"))
                     TaskList.Load(Tasks, this, "LastTasklist.xml");
             }
@@ -93,9 +95,10 @@ namespace Voron_Poster
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            try { 
-            if (settingsLoadLastTasklist.Checked)
-                TaskList.Save(Tasks, "LastTasklist.xml");
+            try
+            {
+                if (settingsLoadLastTasklist.Checked)
+                    TaskList.Save(Tasks, "LastTasklist.xml");
             }
             catch (Exception Error)
             {
@@ -1255,6 +1258,39 @@ namespace Voron_Poster
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        SettingsData Settings;
+        struct SettingsData
+        {
+            public bool LoadLastTaskList;
+            public Forum.TaskBaseProperties.AccountData Account;
+            public static void Save(SettingsData Data, string path)
+            {
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(SettingsData));
+                using (FileStream F = File.Create(path))
+                    Xml.Serialize(F, Data);
+            }
+            public static SettingsData Load(string path)
+            {
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(SettingsData));
+                using (FileStream F = File.OpenRead(path))
+                   return (SettingsData)Xml.Deserialize(F);
+            }
+        }
+
+        private void settingsSave_Click(object sender, EventArgs e)
+        {
+            try{
+            Settings.LoadLastTaskList = settingsLoadLastTasklist.Checked;
+            Settings.Account.Username = settingsGAuthUsername.Text;
+            Settings.Account.Password = settingsGAuthPassword.Text;
+            SettingsData.Save(Settings, "Settings.xml");
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }     
         }
 
     }

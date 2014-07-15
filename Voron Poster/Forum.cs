@@ -165,6 +165,7 @@ namespace Voron_Poster
             public TaskBaseProperties()
             {
                 PreProcessingScripts = new List<string>();
+                PreProcessingScripts.Add("Опубликовать");
             }
             public TaskBaseProperties(TaskBaseProperties Data)
             {
@@ -319,7 +320,6 @@ namespace Voron_Poster
                 return Html.Substring(b + Beg.Length, e - b - Beg.Length);
             return "";
         }
-
 
         ~Forum()
         {

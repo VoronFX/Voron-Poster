@@ -20,6 +20,7 @@ using Roslyn.Scripting;
 using System.Reflection;
 using ScintillaNET;
 using Microsoft.Win32;
+using System.Runtime.Serialization;
 
 namespace Voron_Poster
 {
@@ -38,7 +39,6 @@ namespace Voron_Poster
                 typeof(TabPage).InvokeMember("DoubleBuffered",
         BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
         null, Tabs.TabPages[i], new object[] { true });
-
             }
             Tabs.TabPages.Remove(propTab);
             Tabs.TabPages.Remove(scriptsTab);
@@ -76,6 +76,31 @@ namespace Voron_Poster
             scriptsEditor.TextChanged += scriptsEditor_TextChanged;
             scriptsCodeBox.Dispose();
             scriptsCodeTab.Controls.Add(scriptsEditor);
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                if (settingsLoadLastTasklist.Checked && File.Exists("LastTasklist.xml"))
+                    TaskList.Load(Tasks, this, "LastTasklist.xml");
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            try { 
+            if (settingsLoadLastTasklist.Checked)
+                TaskList.Save(Tasks, "LastTasklist.xml");
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void RenderHtml(string Html)
@@ -285,6 +310,37 @@ namespace Voron_Poster
         {
             public Forum.TaskBaseProperties[] Properties;
             public string[] TargetUrls;
+            public static void Save(List<TaskGui> tasks, string path)
+            {
+                TaskList TaskList;
+                TaskList.Properties = new Forum.TaskBaseProperties[tasks.Count];
+                TaskList.TargetUrls = new string[tasks.Count];
+                for (int i = 0; i < tasks.Count; i++)
+                {
+                    TaskList.Properties[i] = tasks[i].Forum.Properties;
+                    TaskList.TargetUrls[i] = tasks[i].TargetUrl;
+                }
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                using (FileStream F = File.Create(path))
+                    Xml.Serialize(F, TaskList);
+            }
+            public static void Load(List<TaskGui> tasks, MainForm parent, string path)
+            {
+                TaskList TaskList;
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
+                using (FileStream F = File.OpenRead(path))
+                    TaskList = (TaskList)Xml.Deserialize(F);
+                for (int i = 0; i < TaskList.Properties.Length; i++)
+                {
+                    TaskGui NewTask = new TaskGui(parent);
+                    NewTask.New = false;
+                    NewTask.TargetUrl = TaskList.TargetUrls[i];
+                    NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
+                    NewTask.Forum.Properties = TaskList.Properties[i];
+                    NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
+                    tasks.Add(NewTask);
+                }
+            }
         }
 
         private void tasksSave_Click(object sender, EventArgs e)
@@ -298,19 +354,7 @@ namespace Voron_Poster
                 SaveFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
                 SaveFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (SaveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    TaskList TaskList;
-                    TaskList.Properties = new Forum.TaskBaseProperties[Tasks.Count];
-                    TaskList.TargetUrls = new string[Tasks.Count];
-                    for (int i = 0; i < Tasks.Count; i++)
-                    {
-                        TaskList.Properties[i] = Tasks[i].Forum.Properties;
-                        TaskList.TargetUrls[i] = Tasks[i].TargetUrl;
-                    }
-                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
-                    using (FileStream F = File.Create(SaveFileDialog.FileName))
-                        Xml.Serialize(F, TaskList);
-                }
+                    TaskList.Save(Tasks, SaveFileDialog.FileName);
             }
             catch (Exception Error)
             {
@@ -330,22 +374,7 @@ namespace Voron_Poster
                 OpenFileDialog.Filter = "Список задач (*.xml)|*.xml|Все файлы (*.*)|*.*";
                 OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    TaskList TaskList;
-                    var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
-                    using (FileStream F = File.OpenRead(OpenFileDialog.FileName))
-                        TaskList = (TaskList)Xml.Deserialize(F);
-                    for (int i = 0; i < TaskList.Properties.Length; i++)
-                    {
-                        TaskGui NewTask = new TaskGui(this);
-                        NewTask.New = false;
-                        NewTask.TargetUrl = TaskList.TargetUrls[i];
-                        NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
-                        NewTask.Forum.Properties = TaskList.Properties[i];
-                        NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
-                        Tasks.Add(NewTask);
-                    }
-                }
+                    TaskList.Load(Tasks, this, OpenFileDialog.FileName);
             }
             catch (Exception Error)
             {
@@ -442,13 +471,13 @@ namespace Voron_Poster
 
         private void propAuthUsername_TextChanged(object sender, EventArgs e)
         {
-            TempProperties.Username = propUsername.Text;
+            TempProperties.Account.Username = propUsername.Text;
             ResetIcon(sender, e);
         }
 
         private void propAuthPassword_TextChanged(object sender, EventArgs e)
         {
-            TempProperties.Password = propPassword.Text;
+            TempProperties.Account.Password = propPassword.Text;
             ResetIcon(sender, e);
         }
 
@@ -667,8 +696,8 @@ namespace Voron_Poster
                 || TempProperties.ForumMainPage == String.Empty;
             propEngine.SelectedIndex = propEngine.Items.IndexOf(
                 Enum.GetName(typeof(Forum.Engine), TempProperties.Engine));
-            propUsername.Text = TempProperties.Username;
-            propPassword.Text = TempProperties.Password;
+            propUsername.Text = TempProperties.Account.Username;
+            propPassword.Text = TempProperties.Account.Password;
             propScriptsList.Items.Clear();
             propScriptsList.Items.AddRange(TempProperties.PreProcessingScripts.ToArray());
         }
@@ -1208,27 +1237,25 @@ namespace Voron_Poster
 
         #endregion
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-
-       
-        private void button1_Click(object sender, EventArgs e)
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
-            //CefSharp.BrowserSettings b = new CefSharp.BrowserSettings();
-            //WebView w = new WebView("http://google.com", b);
-            //w.Width = 200;
-            //w.Height = 200;
-            //w.Visible = true;
-            //w.Enabled = true;
-            //this.Controls.Add(w);
+
         }
 
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
 
+        }
 
+        private void label2_Click(object sender, EventArgs e)
+        {
 
+        }
 
     }
 }

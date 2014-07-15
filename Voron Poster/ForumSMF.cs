@@ -54,14 +54,14 @@ namespace Voron_Poster
             AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
             Progress[0] += 8;
             lock (Log) Log.Add("Авторизация: Подготовка данных");
-            string HashPswd = hashLoginPassword(Properties.Username, Properties.Password, CurrSessionID);
+            string HashPswd = hashLoginPassword(Properties.Account.Username, Properties.Account.Password, CurrSessionID);
             Progress[0] += 8;
 
             var PostData = new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string>("user", Properties.Username.ToLower()),
+                        new KeyValuePair<string, string>("user", Properties.Account.Username.ToLower()),
                         new KeyValuePair<string, string>("cookielength", "-1"),
-                        new KeyValuePair<string, string>("passwrd", Properties.Password),        
+                        new KeyValuePair<string, string>("passwrd", Properties.Account.Password),        
                         new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
                         new KeyValuePair<string, string>(AnotherID, CurrSessionID)
                      });

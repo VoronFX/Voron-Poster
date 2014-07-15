@@ -11,13 +11,14 @@ using System.Runtime.Remoting.Messaging;
 using System.Xml.Serialization;
 using System.Windows.Forms;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace Voron_Poster
 {
     public abstract class Forum
     {
 
-        static ConcurrentDictionary<string, AutoResetEvent> DomainQueue 
+        static ConcurrentDictionary<string, AutoResetEvent> DomainQueue
             = new ConcurrentDictionary<string, AutoResetEvent>();
         public bool WaitingForQueue;
         private Task WaitOrAdd(string Domain)
@@ -124,8 +125,42 @@ namespace Voron_Poster
             public Engine Engine;
             public string ForumMainPage;
             public bool UseLocalAccount;
-            public string Username;
-            public string Password;
+
+            public struct AccountData
+            {
+                public byte[] username;
+                public byte[] password;
+                [XmlIgnore]
+                public string Username
+                {
+                    get { return username != null ? Decrypt(username) : String.Empty; }
+                    set { username = value != null ? Encrypt(value) : null; }
+                }
+                [XmlIgnore]
+                public string Password
+                {
+                    get { return password != null ? Decrypt(password) : String.Empty; }
+                    set { password = value != null ? Encrypt(value) : null; }
+                }
+                private static AesCryptoServiceProvider AES = new AesCryptoServiceProvider()
+                {
+                    Key = new byte[256 / 8] { 240, 119, 82, 224, 93, 215, 250, 43, 78, 192, 95, 229, 166, 27,                  
+                    4, 105, 40, 251, 211, 19, 190, 77, 207, 34, 116, 39, 244, 211, 54, 212, 5, 205 },
+                    IV = new byte[128 / 8] { 58, 41, 152, 142, 81, 7, 185, 181, 153, 139, 240, 86, 160, 125, 97, 233 } 
+                };
+                public static byte[] Encrypt(string source)
+                {
+                    byte[] raw = Encoding.UTF8.GetBytes(source);
+                    return AES.CreateEncryptor().TransformFinalBlock(raw, 0, raw.Length);
+                }
+                public static string Decrypt(byte[] encrypted)
+                {
+                    return Encoding.UTF8.GetString(AES.CreateDecryptor().
+                        TransformFinalBlock(encrypted, 0, encrypted.Length));
+                }
+            }
+            public AccountData Account;
+
             public List<String> PreProcessingScripts;
             public TaskBaseProperties()
             {
@@ -136,8 +171,8 @@ namespace Voron_Poster
                 Engine = Data.Engine;
                 ForumMainPage = Data.ForumMainPage;
                 UseLocalAccount = Data.UseLocalAccount;
-                Username = Data.Username;
-                Password = Data.Password;
+                Account.Username = Data.Account.Username;
+                Account.Password = Data.Account.Password;
                 PreProcessingScripts = new List<string>(Data.PreProcessingScripts);
             }
         }
@@ -171,7 +206,7 @@ namespace Voron_Poster
         }
 
         protected Task<bool> WaitFor(AutoResetEvent waitHandle)
-        { 
+        {
             return WaitFor(waitHandle, Timeout.InfiniteTimeSpan);
         }
 
@@ -396,9 +431,6 @@ namespace Voron_Poster
         //    return null;
         //    Console.WriteLine("Script end");
         //}
-
-
-
 
         public Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
         {

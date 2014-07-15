@@ -33,29 +33,29 @@ namespace Voron_Poster
         {
             base.Reset();
             if (WB != null)
-                WB.Invoke((Action)(()=>{WB.Dispose();}));
+                WB.Invoke((Action)(() => { WB.Dispose(); }));
 
             //if (a != null) a.Dispose();
             //a = new Form();
-           // WB = new WebBrowser();
-           // WB.Visible = true;
-           // WB.ScriptErrorsSuppressed = true;
-           // WB.Parent = a;
-           // a.WindowState = FormWindowState.Maximized;
-           // //a.Controls.Add(WB);
-           //     //   a.Show();
-           // var b = new Button();
-           // b.Parent = a;
-           // b.Click += async (o, e) =>
-           // {
-           //     await Task.Delay(1000);
-           //     await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/", 2);
-           // };
-           // b.Dock = DockStyle.Top;
-           // a.Controls.Add(b);
+            // WB = new WebBrowser();
+            // WB.Visible = true;
+            // WB.ScriptErrorsSuppressed = true;
+            // WB.Parent = a;
+            // a.WindowState = FormWindowState.Maximized;
+            // //a.Controls.Add(WB);
+            //     //   a.Show();
+            // var b = new Button();
+            // b.Parent = a;
+            // b.Click += async (o, e) =>
+            // {
+            //     await Task.Delay(1000);
+            //     await WaitNavigate("https://ssl.aukro.ua/fnd/authentication/", 2);
+            // };
+            // b.Dock = DockStyle.Top;
+            // a.Controls.Add(b);
 
-           //// WB.Dock = DockStyle.Fill;
-           // WB.DocumentCompleted += WB_DocumentComplete;
+            //// WB.Dock = DockStyle.Fill;
+            // WB.DocumentCompleted += WB_DocumentComplete;
 
             WBThread = new Thread(WBContext);
             WBThread.SetApartmentState(ApartmentState.STA);
@@ -66,7 +66,7 @@ namespace Voron_Poster
             WB = new WebBrowser();
             WB.ScriptErrorsSuppressed = true;
             WB.DocumentCompleted += WB_DocumentComplete;
-            WB.Disposed += (o, e) => { WB = null;  Application.ExitThread(); };
+            WB.Disposed += (o, e) => { WB = null; Application.ExitThread(); };
             Application.Run();
         }
 
@@ -591,14 +591,14 @@ namespace Voron_Poster
             {
                 WB.Size = WB.Document.Body.ScrollRectangle.Size;
                 LeftTop = GetOffset(Captcha);
-               bitmap = new Bitmap(WB.Width, WB.Height);
-               WB.DrawToBitmap(bitmap, new Rectangle(new Point(),WB.Size));
+                bitmap = new Bitmap(WB.Width, WB.Height);
+                WB.DrawToBitmap(bitmap, new Rectangle(new Point(), WB.Size));
 
             }));
 
-           // IHTMLImgElement img = (IHTMLImgElement)Captcha.DomElement;
-         //   IHTMLElementRender render = (IHTMLElementRender)img;
-            
+            // IHTMLImgElement img = (IHTMLImgElement)Captcha.DomElement;
+            //   IHTMLElementRender render = (IHTMLElementRender)img;
+
             //Bitmap bmp = new Bitmap(img.width, img.height);
             //Graphics g = Graphics.FromImage(bmp);
             //IntPtr hdc = g.GetHdc();
@@ -616,7 +616,7 @@ namespace Voron_Poster
             // Dispose browser after task done
             Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             {
-                WB.BeginInvoke((Action)(() =>{ if (WB != null) WB.Dispose();}));
+                WB.BeginInvoke((Action)(() => { if (WB != null) WB.Dispose(); }));
                 try
                 {
                     return PrevTask.Result;
@@ -669,8 +669,8 @@ namespace Voron_Poster
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             lock (Log) Log.Add("Авторизация: Запрос авторизации");
             if (LinkIndex != -1) LoginPage = LoginLinks[LinkIndex];
-            LoginForm.Login.SetAttribute("value", Properties.Username);
-            LoginForm.Password.SetAttribute("value", Properties.Password);
+            LoginForm.Login.SetAttribute("value", Properties.Account.Username);
+            LoginForm.Password.SetAttribute("value", Properties.Account.Password);
             Progress[0] += 18;
             WaitLoad.Reset();
             LoginForm.Submit.InvokeMember("click");

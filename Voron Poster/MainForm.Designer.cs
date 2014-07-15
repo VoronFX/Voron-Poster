@@ -33,7 +33,7 @@
             this.messageTab = new System.Windows.Forms.TabPage();
             this.splitter2 = new System.Windows.Forms.Splitter();
             this.messageText = new System.Windows.Forms.TextBox();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.messagePanel = new System.Windows.Forms.Panel();
             this.messageSubject = new System.Windows.Forms.TextBox();
             this.tasksTab = new System.Windows.Forms.TabPage();
             this.tasksGroup = new System.Windows.Forms.GroupBox();
@@ -42,15 +42,6 @@
             this.tasksAdd = new System.Windows.Forms.Button();
             this.tasksUrl = new System.Windows.Forms.TextBox();
             this.tasksUrlLabel = new System.Windows.Forms.Label();
-            this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
-            this.GTName = new System.Windows.Forms.Label();
-            this.GTStatus = new System.Windows.Forms.Label();
-            this.GTStart = new System.Windows.Forms.Button();
-            this.GTSelected = new System.Windows.Forms.CheckBox();
-            this.GTProgress = new System.Windows.Forms.ProgressBar();
-            this.GTStatusIcon = new System.Windows.Forms.PictureBox();
-            this.GTStop = new System.Windows.Forms.Button();
-            this.GTDelete = new System.Windows.Forms.Button();
             this.propTab = new System.Windows.Forms.TabPage();
             this.propEngineDetect = new System.Windows.Forms.Button();
             this.propEngine = new System.Windows.Forms.ComboBox();
@@ -70,9 +61,9 @@
             this.propAuthLocal = new System.Windows.Forms.RadioButton();
             this.propAuthGlobal = new System.Windows.Forms.RadioButton();
             this.propAuthShowPassword = new System.Windows.Forms.CheckBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.propPasswordLabel = new System.Windows.Forms.Label();
             this.propPassword = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.propUsernameLabel = new System.Windows.Forms.Label();
             this.propUsername = new System.Windows.Forms.TextBox();
             this.propProfilesGroup = new System.Windows.Forms.GroupBox();
             this.propProfileBrowse = new System.Windows.Forms.Button();
@@ -110,16 +101,37 @@
             this.scriptsName = new System.Windows.Forms.TextBox();
             this.scriptsList = new System.Windows.Forms.ListBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.button1 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.listBox1 = new System.Windows.Forms.ListBox();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
+            this.settingsTab = new System.Windows.Forms.TabPage();
+            this.settingsGAuthGroup = new System.Windows.Forms.GroupBox();
+            this.settingsGAuthShowPassword = new System.Windows.Forms.CheckBox();
+            this.settingsGAuthPasswordLabel = new System.Windows.Forms.Label();
+            this.settingsGAuthPassword = new System.Windows.Forms.TextBox();
+            this.settingsGAuthUsenameLabel = new System.Windows.Forms.Label();
+            this.settingsGAuthUsername = new System.Windows.Forms.TextBox();
+            this.settingsSave = new System.Windows.Forms.Button();
+            this.settingsCancel = new System.Windows.Forms.Button();
+            this.settingsLoadLastTasklist = new System.Windows.Forms.CheckBox();
+            this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
+            this.GTName = new System.Windows.Forms.Label();
+            this.GTStatus = new System.Windows.Forms.Label();
+            this.GTStart = new System.Windows.Forms.Button();
+            this.GTSelected = new System.Windows.Forms.CheckBox();
+            this.GTProgress = new System.Windows.Forms.ProgressBar();
+            this.GTStatusIcon = new System.Windows.Forms.PictureBox();
+            this.GTStop = new System.Windows.Forms.Button();
+            this.GTDelete = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.messageTab.SuspendLayout();
             this.tasksTab.SuspendLayout();
             this.tasksGroup.SuspendLayout();
-            this.tasksTable.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.propTab.SuspendLayout();
             this.propScriptsGroup.SuspendLayout();
             this.propAuthGroup.SuspendLayout();
@@ -131,6 +143,12 @@
             this.scriptsRunPanel.SuspendLayout();
             this.scriptsListPanel.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.settingsTab.SuspendLayout();
+            this.settingsGAuthGroup.SuspendLayout();
+            this.tasksTable.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.SuspendLayout();
             // 
             // Tabs
@@ -139,6 +157,7 @@
             this.Tabs.Controls.Add(this.tasksTab);
             this.Tabs.Controls.Add(this.propTab);
             this.Tabs.Controls.Add(this.scriptsTab);
+            this.Tabs.Controls.Add(this.settingsTab);
             this.Tabs.Controls.Add(this.tabPage1);
             this.Tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Tabs.Location = new System.Drawing.Point(3, 3);
@@ -152,7 +171,7 @@
             // 
             this.messageTab.Controls.Add(this.splitter2);
             this.messageTab.Controls.Add(this.messageText);
-            this.messageTab.Controls.Add(this.panel1);
+            this.messageTab.Controls.Add(this.messagePanel);
             this.messageTab.Controls.Add(this.messageSubject);
             this.messageTab.Location = new System.Drawing.Point(4, 22);
             this.messageTab.Name = "messageTab";
@@ -189,15 +208,15 @@
     "color=#12830a]купаться[/color] на речку.";
             this.messageText.WordWrap = false;
             // 
-            // panel1
+            // messagePanel
             // 
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(20, 40);
-            this.panel1.MaximumSize = new System.Drawing.Size(0, 10);
-            this.panel1.MinimumSize = new System.Drawing.Size(0, 10);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(561, 10);
-            this.panel1.TabIndex = 43;
+            this.messagePanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.messagePanel.Location = new System.Drawing.Point(20, 40);
+            this.messagePanel.MaximumSize = new System.Drawing.Size(0, 10);
+            this.messagePanel.MinimumSize = new System.Drawing.Size(0, 10);
+            this.messagePanel.Name = "messagePanel";
+            this.messagePanel.Size = new System.Drawing.Size(0, 10);
+            this.messagePanel.TabIndex = 43;
             // 
             // messageSubject
             // 
@@ -299,163 +318,6 @@
             this.tasksUrlLabel.Size = new System.Drawing.Size(212, 13);
             this.tasksUrlLabel.TabIndex = 7;
             this.tasksUrlLabel.Text = "Ссылка на тему/раздел для публикации";
-            // 
-            // tasksTable
-            // 
-            this.tasksTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tasksTable.AutoScroll = true;
-            this.tasksTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tasksTable.BackColor = System.Drawing.Color.White;
-            this.tasksTable.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.tasksTable.ColumnCount = 8;
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tasksTable.Controls.Add(this.GTName, 0, 0);
-            this.tasksTable.Controls.Add(this.GTStatus, 2, 0);
-            this.tasksTable.Controls.Add(this.GTStart, 5, 0);
-            this.tasksTable.Controls.Add(this.GTSelected, 0, 0);
-            this.tasksTable.Controls.Add(this.GTProgress, 4, 0);
-            this.tasksTable.Controls.Add(this.GTStatusIcon, 3, 0);
-            this.tasksTable.Controls.Add(this.GTStop, 6, 0);
-            this.tasksTable.Controls.Add(this.GTDelete, 7, 0);
-            this.tasksTable.Location = new System.Drawing.Point(23, 106);
-            this.tasksTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
-            this.tasksTable.Name = "tasksTable";
-            this.tasksTable.RowCount = 2;
-            this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tasksTable.Size = new System.Drawing.Size(555, 339);
-            this.tasksTable.TabIndex = 0;
-            this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
-            // 
-            // GTName
-            // 
-            this.GTName.BackColor = System.Drawing.Color.Transparent;
-            this.GTName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTName.Location = new System.Drawing.Point(26, 1);
-            this.GTName.Margin = new System.Windows.Forms.Padding(0);
-            this.GTName.MaximumSize = new System.Drawing.Size(0, 24);
-            this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
-            this.GTName.Name = "GTName";
-            this.GTName.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
-            this.GTName.Size = new System.Drawing.Size(236, 24);
-            this.GTName.TabIndex = 13;
-            this.GTName.Text = "Тема/Раздел";
-            this.GTName.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // GTStatus
-            // 
-            this.GTStatus.BackColor = System.Drawing.Color.Transparent;
-            this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatus.Location = new System.Drawing.Point(263, 1);
-            this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
-            this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
-            this.GTStatus.Name = "GTStatus";
-            this.GTStatus.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
-            this.GTStatus.Size = new System.Drawing.Size(120, 24);
-            this.GTStatus.TabIndex = 12;
-            this.GTStatus.Text = "Состояние";
-            this.GTStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // GTStart
-            // 
-            this.GTStart.BackColor = System.Drawing.Color.Transparent;
-            this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStart.Enabled = false;
-            this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-            this.GTStart.Location = new System.Drawing.Point(480, 1);
-            this.GTStart.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStart.Name = "GTStart";
-            this.GTStart.Size = new System.Drawing.Size(24, 24);
-            this.GTStart.TabIndex = 8;
-            this.GTStart.UseVisualStyleBackColor = false;
-            this.GTStart.Click += new System.EventHandler(this.GTStartStop_Click);
-            // 
-            // GTSelected
-            // 
-            this.GTSelected.BackColor = System.Drawing.Color.Transparent;
-            this.GTSelected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.GTSelected.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTSelected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.GTSelected.Location = new System.Drawing.Point(1, 1);
-            this.GTSelected.Margin = new System.Windows.Forms.Padding(0);
-            this.GTSelected.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTSelected.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTSelected.Name = "GTSelected";
-            this.GTSelected.Size = new System.Drawing.Size(24, 24);
-            this.GTSelected.TabIndex = 0;
-            this.GTSelected.ThreeState = true;
-            this.GTSelected.UseVisualStyleBackColor = false;
-            this.GTSelected.Click += new System.EventHandler(this.GTSelected_Click);
-            // 
-            // GTProgress
-            // 
-            this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTProgress.Location = new System.Drawing.Point(412, 4);
-            this.GTProgress.Maximum = 765;
-            this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
-            this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
-            this.GTProgress.Name = "GTProgress";
-            this.GTProgress.Size = new System.Drawing.Size(64, 18);
-            this.GTProgress.TabIndex = 2;
-            // 
-            // GTStatusIcon
-            // 
-            this.GTStatusIcon.BackColor = System.Drawing.Color.Transparent;
-            this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            this.GTStatusIcon.Location = new System.Drawing.Point(384, 1);
-            this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.Name = "GTStatusIcon";
-            this.GTStatusIcon.Size = new System.Drawing.Size(24, 24);
-            this.GTStatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.GTStatusIcon.TabIndex = 9;
-            this.GTStatusIcon.TabStop = false;
-            // 
-            // GTStop
-            // 
-            this.GTStop.BackColor = System.Drawing.Color.Transparent;
-            this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStop.Enabled = false;
-            this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-            this.GTStop.Location = new System.Drawing.Point(505, 1);
-            this.GTStop.Margin = new System.Windows.Forms.Padding(0);
-            this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTStop.Name = "GTStop";
-            this.GTStop.Size = new System.Drawing.Size(24, 24);
-            this.GTStop.TabIndex = 7;
-            this.GTStop.UseVisualStyleBackColor = false;
-            this.GTStop.Click += new System.EventHandler(this.GTStartStop_Click);
-            // 
-            // GTDelete
-            // 
-            this.GTDelete.BackColor = System.Drawing.Color.Transparent;
-            this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTDelete.Enabled = false;
-            this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.GTDelete.Location = new System.Drawing.Point(530, 1);
-            this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
-            this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
-            this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
-            this.GTDelete.Name = "GTDelete";
-            this.GTDelete.Size = new System.Drawing.Size(24, 24);
-            this.GTDelete.TabIndex = 10;
-            this.GTDelete.UseVisualStyleBackColor = false;
-            this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
             // 
             // propTab
             // 
@@ -602,7 +464,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.propScriptsList.Location = new System.Drawing.Point(13, 19);
             this.propScriptsList.Name = "propScriptsList";
-            this.propScriptsList.Size = new System.Drawing.Size(254, 186);
+            this.propScriptsList.Size = new System.Drawing.Size(254, 173);
             this.propScriptsList.TabIndex = 3;
             this.propScriptsList.SelectedIndexChanged += new System.EventHandler(this.propScriptsList_SelectedIndexChanged);
             // 
@@ -617,9 +479,9 @@
             this.propAuthGroup.Controls.Add(this.propAuthLocal);
             this.propAuthGroup.Controls.Add(this.propAuthGlobal);
             this.propAuthGroup.Controls.Add(this.propAuthShowPassword);
-            this.propAuthGroup.Controls.Add(this.label5);
+            this.propAuthGroup.Controls.Add(this.propPasswordLabel);
             this.propAuthGroup.Controls.Add(this.propPassword);
-            this.propAuthGroup.Controls.Add(this.label4);
+            this.propAuthGroup.Controls.Add(this.propUsernameLabel);
             this.propAuthGroup.Controls.Add(this.propUsername);
             this.propAuthGroup.Location = new System.Drawing.Point(341, 151);
             this.propAuthGroup.Name = "propAuthGroup";
@@ -711,14 +573,14 @@
             this.propAuthShowPassword.UseVisualStyleBackColor = true;
             this.propAuthShowPassword.CheckedChanged += new System.EventHandler(this.propAuthShowPassword_CheckedChanged);
             // 
-            // label5
+            // propPasswordLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 143);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(48, 13);
-            this.label5.TabIndex = 6;
-            this.label5.Text = "Пароль:";
+            this.propPasswordLabel.AutoSize = true;
+            this.propPasswordLabel.Location = new System.Drawing.Point(8, 143);
+            this.propPasswordLabel.Name = "propPasswordLabel";
+            this.propPasswordLabel.Size = new System.Drawing.Size(48, 13);
+            this.propPasswordLabel.TabIndex = 6;
+            this.propPasswordLabel.Text = "Пароль:";
             // 
             // propPassword
             // 
@@ -732,14 +594,14 @@
             this.propPassword.UseSystemPasswordChar = true;
             this.propPassword.TextChanged += new System.EventHandler(this.propAuthPassword_TextChanged);
             // 
-            // label4
+            // propUsernameLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 104);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(106, 13);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "Имя пользователя:";
+            this.propUsernameLabel.AutoSize = true;
+            this.propUsernameLabel.Location = new System.Drawing.Point(8, 104);
+            this.propUsernameLabel.Name = "propUsernameLabel";
+            this.propUsernameLabel.Size = new System.Drawing.Size(106, 13);
+            this.propUsernameLabel.TabIndex = 4;
+            this.propUsernameLabel.Text = "Имя пользователя:";
             // 
             // propUsername
             // 
@@ -912,7 +774,7 @@
             this.propCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.propCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.propCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.propCancel.Location = new System.Drawing.Point(465, 407);
+            this.propCancel.Location = new System.Drawing.Point(462, 407);
             this.propCancel.Name = "propCancel";
             this.propCancel.Size = new System.Drawing.Size(116, 38);
             this.propCancel.TabIndex = 12;
@@ -1121,7 +983,7 @@
             this.scriptsSpacePanel.MaximumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.MinimumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.Name = "scriptsSpacePanel";
-            this.scriptsSpacePanel.Size = new System.Drawing.Size(418, 10);
+            this.scriptsSpacePanel.Size = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.TabIndex = 39;
             // 
             // scriptsSubject
@@ -1200,14 +1062,17 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.scriptsList.Location = new System.Drawing.Point(3, 29);
             this.scriptsList.Name = "scriptsList";
-            this.scriptsList.Size = new System.Drawing.Size(140, 381);
+            this.scriptsList.Size = new System.Drawing.Size(140, 368);
             this.scriptsList.Sorted = true;
             this.scriptsList.TabIndex = 2;
             this.scriptsList.SelectedIndexChanged += new System.EventHandler(this.scriptsList_SelectedIndexChanged);
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.button1);
+            this.tabPage1.Controls.Add(this.label1);
+            this.tabPage1.Controls.Add(this.textBox1);
+            this.tabPage1.Controls.Add(this.groupBox1);
+            this.tabPage1.Controls.Add(this.listBox1);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -1216,15 +1081,54 @@
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // label1
             // 
-            this.button1.Location = new System.Drawing.Point(19, 20);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(222, 33);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(43, 39);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "label1\r\ngyjhghj\r\njkjhkhjk";
+            // 
+            // textBox1
+            // 
+            this.textBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox1.Location = new System.Drawing.Point(267, 302);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(270, 133);
+            this.textBox1.TabIndex = 2;
+            this.textBox1.Text = "label1\r\ngyjhghj\r\njkjhkhjk";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.pictureBox1);
+            this.groupBox1.Location = new System.Drawing.Point(76, 75);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(436, 156);
+            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "groupBox1";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::Voron_Poster.Properties.Resources.YAAvatar__2_;
+            this.pictureBox1.Location = new System.Drawing.Point(6, 19);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(80, 80);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point(76, 288);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(161, 147);
+            this.listBox1.TabIndex = 0;
             // 
             // TasksUpdater
             // 
@@ -1241,6 +1145,284 @@
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
             // 
+            // settingsTab
+            // 
+            this.settingsTab.Controls.Add(this.settingsLoadLastTasklist);
+            this.settingsTab.Controls.Add(this.settingsGAuthGroup);
+            this.settingsTab.Controls.Add(this.settingsSave);
+            this.settingsTab.Controls.Add(this.settingsCancel);
+            this.settingsTab.Location = new System.Drawing.Point(4, 22);
+            this.settingsTab.Name = "settingsTab";
+            this.settingsTab.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
+            this.settingsTab.Size = new System.Drawing.Size(601, 468);
+            this.settingsTab.TabIndex = 7;
+            this.settingsTab.Text = "Настройки";
+            this.settingsTab.UseVisualStyleBackColor = true;
+            // 
+            // settingsGAuthGroup
+            // 
+            this.settingsGAuthGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsGAuthGroup.Controls.Add(this.settingsGAuthShowPassword);
+            this.settingsGAuthGroup.Controls.Add(this.settingsGAuthPasswordLabel);
+            this.settingsGAuthGroup.Controls.Add(this.settingsGAuthPassword);
+            this.settingsGAuthGroup.Controls.Add(this.settingsGAuthUsenameLabel);
+            this.settingsGAuthGroup.Controls.Add(this.settingsGAuthUsername);
+            this.settingsGAuthGroup.Location = new System.Drawing.Point(379, 33);
+            this.settingsGAuthGroup.Name = "settingsGAuthGroup";
+            this.settingsGAuthGroup.Padding = new System.Windows.Forms.Padding(5, 8, 3, 3);
+            this.settingsGAuthGroup.Size = new System.Drawing.Size(199, 136);
+            this.settingsGAuthGroup.TabIndex = 13;
+            this.settingsGAuthGroup.TabStop = false;
+            this.settingsGAuthGroup.Text = "Глобальная учетная запись";
+            // 
+            // settingsGAuthShowPassword
+            // 
+            this.settingsGAuthShowPassword.AutoSize = true;
+            this.settingsGAuthShowPassword.Enabled = false;
+            this.settingsGAuthShowPassword.Location = new System.Drawing.Point(11, 102);
+            this.settingsGAuthShowPassword.Name = "settingsGAuthShowPassword";
+            this.settingsGAuthShowPassword.Size = new System.Drawing.Size(128, 17);
+            this.settingsGAuthShowPassword.TabIndex = 8;
+            this.settingsGAuthShowPassword.Tag = "";
+            this.settingsGAuthShowPassword.Text = "Показывать пароль";
+            this.settingsGAuthShowPassword.UseVisualStyleBackColor = true;
+            // 
+            // settingsGAuthPasswordLabel
+            // 
+            this.settingsGAuthPasswordLabel.AutoSize = true;
+            this.settingsGAuthPasswordLabel.Location = new System.Drawing.Point(8, 60);
+            this.settingsGAuthPasswordLabel.Name = "settingsGAuthPasswordLabel";
+            this.settingsGAuthPasswordLabel.Size = new System.Drawing.Size(48, 13);
+            this.settingsGAuthPasswordLabel.TabIndex = 6;
+            this.settingsGAuthPasswordLabel.Text = "Пароль:";
+            // 
+            // settingsGAuthPassword
+            // 
+            this.settingsGAuthPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsGAuthPassword.Enabled = false;
+            this.settingsGAuthPassword.Location = new System.Drawing.Point(11, 76);
+            this.settingsGAuthPassword.Name = "settingsGAuthPassword";
+            this.settingsGAuthPassword.Size = new System.Drawing.Size(169, 20);
+            this.settingsGAuthPassword.TabIndex = 7;
+            this.settingsGAuthPassword.UseSystemPasswordChar = true;
+            // 
+            // settingsGAuthUsenameLabel
+            // 
+            this.settingsGAuthUsenameLabel.AutoSize = true;
+            this.settingsGAuthUsenameLabel.Location = new System.Drawing.Point(8, 21);
+            this.settingsGAuthUsenameLabel.Name = "settingsGAuthUsenameLabel";
+            this.settingsGAuthUsenameLabel.Size = new System.Drawing.Size(106, 13);
+            this.settingsGAuthUsenameLabel.TabIndex = 4;
+            this.settingsGAuthUsenameLabel.Text = "Имя пользователя:";
+            // 
+            // settingsGAuthUsername
+            // 
+            this.settingsGAuthUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsGAuthUsername.Enabled = false;
+            this.settingsGAuthUsername.Location = new System.Drawing.Point(11, 37);
+            this.settingsGAuthUsername.Name = "settingsGAuthUsername";
+            this.settingsGAuthUsername.Size = new System.Drawing.Size(169, 20);
+            this.settingsGAuthUsername.TabIndex = 5;
+            // 
+            // settingsSave
+            // 
+            this.settingsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsSave.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.settingsSave.Enabled = false;
+            this.settingsSave.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.settingsSave.Location = new System.Drawing.Point(341, 407);
+            this.settingsSave.Name = "settingsSave";
+            this.settingsSave.Size = new System.Drawing.Size(115, 38);
+            this.settingsSave.TabIndex = 14;
+            this.settingsSave.Text = "Сохранить";
+            this.settingsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.settingsSave.UseVisualStyleBackColor = true;
+            // 
+            // settingsCancel
+            // 
+            this.settingsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.settingsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.settingsCancel.Location = new System.Drawing.Point(462, 407);
+            this.settingsCancel.Name = "settingsCancel";
+            this.settingsCancel.Size = new System.Drawing.Size(116, 38);
+            this.settingsCancel.TabIndex = 15;
+            this.settingsCancel.Text = "Отмена";
+            this.settingsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.settingsCancel.UseVisualStyleBackColor = true;
+            // 
+            // settingsLoadLastTasklist
+            // 
+            this.settingsLoadLastTasklist.AutoSize = true;
+            this.settingsLoadLastTasklist.Checked = true;
+            this.settingsLoadLastTasklist.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.settingsLoadLastTasklist.Location = new System.Drawing.Point(23, 50);
+            this.settingsLoadLastTasklist.Name = "settingsLoadLastTasklist";
+            this.settingsLoadLastTasklist.Size = new System.Drawing.Size(256, 17);
+            this.settingsLoadLastTasklist.TabIndex = 16;
+            this.settingsLoadLastTasklist.Text = "Загружать последний список тем при старте";
+            this.settingsLoadLastTasklist.UseVisualStyleBackColor = true;
+            // 
+            // tasksTable
+            // 
+            this.tasksTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tasksTable.AutoScroll = true;
+            this.tasksTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tasksTable.BackColor = System.Drawing.Color.White;
+            this.tasksTable.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.tasksTable.ColumnCount = 8;
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tasksTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tasksTable.Controls.Add(this.GTName, 0, 0);
+            this.tasksTable.Controls.Add(this.GTStatus, 2, 0);
+            this.tasksTable.Controls.Add(this.GTStart, 5, 0);
+            this.tasksTable.Controls.Add(this.GTSelected, 0, 0);
+            this.tasksTable.Controls.Add(this.GTProgress, 4, 0);
+            this.tasksTable.Controls.Add(this.GTStatusIcon, 3, 0);
+            this.tasksTable.Controls.Add(this.GTStop, 6, 0);
+            this.tasksTable.Controls.Add(this.GTDelete, 7, 0);
+            this.tasksTable.Location = new System.Drawing.Point(23, 106);
+            this.tasksTable.Margin = new System.Windows.Forms.Padding(3, 23, 3, 3);
+            this.tasksTable.Name = "tasksTable";
+            this.tasksTable.RowCount = 2;
+            this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tasksTable.Size = new System.Drawing.Size(555, 339);
+            this.tasksTable.TabIndex = 0;
+            this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
+            // 
+            // GTName
+            // 
+            this.GTName.BackColor = System.Drawing.Color.Transparent;
+            this.GTName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTName.Location = new System.Drawing.Point(26, 1);
+            this.GTName.Margin = new System.Windows.Forms.Padding(0);
+            this.GTName.MaximumSize = new System.Drawing.Size(0, 24);
+            this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
+            this.GTName.Name = "GTName";
+            this.GTName.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
+            this.GTName.Size = new System.Drawing.Size(236, 24);
+            this.GTName.TabIndex = 13;
+            this.GTName.Text = "Тема/Раздел";
+            this.GTName.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // GTStatus
+            // 
+            this.GTStatus.BackColor = System.Drawing.Color.Transparent;
+            this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStatus.Location = new System.Drawing.Point(263, 1);
+            this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
+            this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
+            this.GTStatus.Name = "GTStatus";
+            this.GTStatus.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
+            this.GTStatus.Size = new System.Drawing.Size(120, 24);
+            this.GTStatus.TabIndex = 12;
+            this.GTStatus.Text = "Состояние";
+            this.GTStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // GTStart
+            // 
+            this.GTStart.BackColor = System.Drawing.Color.Transparent;
+            this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStart.Enabled = false;
+            this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
+            this.GTStart.Location = new System.Drawing.Point(480, 1);
+            this.GTStart.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStart.Name = "GTStart";
+            this.GTStart.Size = new System.Drawing.Size(24, 24);
+            this.GTStart.TabIndex = 8;
+            this.GTStart.UseVisualStyleBackColor = false;
+            this.GTStart.Click += new System.EventHandler(this.GTStartStop_Click);
+            // 
+            // GTSelected
+            // 
+            this.GTSelected.BackColor = System.Drawing.Color.Transparent;
+            this.GTSelected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.GTSelected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTSelected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.GTSelected.Location = new System.Drawing.Point(1, 1);
+            this.GTSelected.Margin = new System.Windows.Forms.Padding(0);
+            this.GTSelected.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTSelected.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTSelected.Name = "GTSelected";
+            this.GTSelected.Size = new System.Drawing.Size(24, 24);
+            this.GTSelected.TabIndex = 0;
+            this.GTSelected.ThreeState = true;
+            this.GTSelected.UseVisualStyleBackColor = false;
+            this.GTSelected.Click += new System.EventHandler(this.GTSelected_Click);
+            // 
+            // GTProgress
+            // 
+            this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTProgress.Location = new System.Drawing.Point(412, 4);
+            this.GTProgress.Maximum = 765;
+            this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
+            this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
+            this.GTProgress.Name = "GTProgress";
+            this.GTProgress.Size = new System.Drawing.Size(64, 18);
+            this.GTProgress.TabIndex = 2;
+            // 
+            // GTStatusIcon
+            // 
+            this.GTStatusIcon.BackColor = System.Drawing.Color.Transparent;
+            this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
+            this.GTStatusIcon.Location = new System.Drawing.Point(384, 1);
+            this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.Name = "GTStatusIcon";
+            this.GTStatusIcon.Size = new System.Drawing.Size(24, 24);
+            this.GTStatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.GTStatusIcon.TabIndex = 9;
+            this.GTStatusIcon.TabStop = false;
+            // 
+            // GTStop
+            // 
+            this.GTStop.BackColor = System.Drawing.Color.Transparent;
+            this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTStop.Enabled = false;
+            this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
+            this.GTStop.Location = new System.Drawing.Point(505, 1);
+            this.GTStop.Margin = new System.Windows.Forms.Padding(0);
+            this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTStop.Name = "GTStop";
+            this.GTStop.Size = new System.Drawing.Size(24, 24);
+            this.GTStop.TabIndex = 7;
+            this.GTStop.UseVisualStyleBackColor = false;
+            this.GTStop.Click += new System.EventHandler(this.GTStartStop_Click);
+            // 
+            // GTDelete
+            // 
+            this.GTDelete.BackColor = System.Drawing.Color.Transparent;
+            this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GTDelete.Enabled = false;
+            this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.GTDelete.Location = new System.Drawing.Point(530, 1);
+            this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
+            this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
+            this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
+            this.GTDelete.Name = "GTDelete";
+            this.GTDelete.Size = new System.Drawing.Size(24, 24);
+            this.GTDelete.TabIndex = 10;
+            this.GTDelete.UseVisualStyleBackColor = false;
+            this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1251,14 +1433,14 @@
             this.Name = "MainForm";
             this.Padding = new System.Windows.Forms.Padding(3);
             this.Text = "Voron Poster";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.Tabs.ResumeLayout(false);
             this.messageTab.ResumeLayout(false);
             this.messageTab.PerformLayout();
             this.tasksTab.ResumeLayout(false);
             this.tasksGroup.ResumeLayout(false);
             this.tasksGroup.PerformLayout();
-            this.tasksTable.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.propTab.ResumeLayout(false);
             this.propTab.PerformLayout();
             this.propScriptsGroup.ResumeLayout(false);
@@ -1275,6 +1457,15 @@
             this.scriptsListPanel.ResumeLayout(false);
             this.scriptsListPanel.PerformLayout();
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.settingsTab.ResumeLayout(false);
+            this.settingsTab.PerformLayout();
+            this.settingsGAuthGroup.ResumeLayout(false);
+            this.settingsGAuthGroup.PerformLayout();
+            this.tasksTable.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1305,9 +1496,9 @@
         private System.Windows.Forms.Button propCancel;
         private System.Windows.Forms.Button propApply;
         private System.Windows.Forms.GroupBox propAuthGroup;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label propPasswordLabel;
         private System.Windows.Forms.TextBox propPassword;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label propUsernameLabel;
         private System.Windows.Forms.TextBox propUsername;
         private System.Windows.Forms.GroupBox propScriptsGroup;
         private System.Windows.Forms.Button propScriptsAdd;
@@ -1361,12 +1552,26 @@
         private System.Windows.Forms.Button scriptsAccept;
         private System.Windows.Forms.Button propScriptsEdit;
         private System.Windows.Forms.Splitter splitter2;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel messagePanel;
         public System.Windows.Forms.TextBox messageText;
         public System.Windows.Forms.TextBox messageSubject;
         private System.Windows.Forms.Button propAuthLog;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TabPage settingsTab;
+        private System.Windows.Forms.GroupBox settingsGAuthGroup;
+        public System.Windows.Forms.CheckBox settingsGAuthShowPassword;
+        private System.Windows.Forms.Label settingsGAuthPasswordLabel;
+        private System.Windows.Forms.TextBox settingsGAuthPassword;
+        private System.Windows.Forms.Label settingsGAuthUsenameLabel;
+        private System.Windows.Forms.TextBox settingsGAuthUsername;
+        private System.Windows.Forms.Button settingsSave;
+        private System.Windows.Forms.Button settingsCancel;
+        private System.Windows.Forms.CheckBox settingsLoadLastTasklist;
 
 
     }

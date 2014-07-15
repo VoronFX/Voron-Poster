@@ -303,6 +303,7 @@
     <None Include="Resources\action_add_32xLG.png" />
     <None Include="Resources\test_32x_SM.png" />
     <None Include="Resources\test_32x_SMcuted.png" />
+    <None Include="Resources\YAAvatar %282%29.jpg" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

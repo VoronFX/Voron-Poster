@@ -24,8 +24,8 @@ namespace Voron_Poster
 
             var PostData = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("UserName", Properties.Username.ToLower()),
-                    new KeyValuePair<string, string>("PassWord", Properties.Password)
+                    new KeyValuePair<string, string>("UserName", Properties.Account.Username.ToLower()),
+                    new KeyValuePair<string, string>("PassWord", Properties.Account.Password)
                  });
             Progress[0] += 40;
 

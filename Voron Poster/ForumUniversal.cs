@@ -32,7 +32,7 @@ namespace Voron_Poster
         public override void Reset()
         {
             base.Reset();
-            if (WB != null)
+            if (WB != null && !WB.Disposing)
                 WB.Invoke((Action)(() => { WB.Dispose(); }));
 
             //if (a != null) a.Dispose();
@@ -616,7 +616,7 @@ namespace Voron_Poster
             // Dispose browser after task done
             Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             {
-                WB.BeginInvoke((Action)(() => { if (WB != null) WB.Dispose(); }));
+                WB.BeginInvoke((Action)(() => { if (WB != null) { WB.Dispose(); WB = null; } }));
                 try
                 {
                     return PrevTask.Result;
@@ -669,8 +669,8 @@ namespace Voron_Poster
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             lock (Log) Log.Add("Авторизация: Запрос авторизации");
             if (LinkIndex != -1) LoginPage = LoginLinks[LinkIndex];
-            LoginForm.Login.SetAttribute("value", Properties.Account.Username);
-            LoginForm.Password.SetAttribute("value", Properties.Account.Password);
+            LoginForm.Login.SetAttribute("value", AccountToUse.Username);
+            LoginForm.Password.SetAttribute("value", AccountToUse.Password);
             Progress[0] += 18;
             WaitLoad.Reset();
             LoginForm.Submit.InvokeMember("click");

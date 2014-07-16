@@ -43,6 +43,7 @@ namespace Voron_Poster
             Tabs.TabPages.Remove(propTab);
             Tabs.TabPages.Remove(scriptsTab);
             propEngine.Items.AddRange(Enum.GetNames(typeof(Forum.Engine)));
+            propEngine.Items[propEngine.Items.IndexOf("Universal")] = "Universal (Slow)";
             propEngine.Items.RemoveAt(0);
 
             GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
@@ -508,7 +509,7 @@ namespace Voron_Poster
         {
             if (propEngine.SelectedIndex >= 0)
                 TempProperties.Engine = (Forum.Engine)Enum.Parse(typeof(Forum.Engine),
-            (string)propEngine.SelectedItem);
+            ((string)propEngine.SelectedItem).Replace("Universal (Slow)", "Universal"));
             propValidate();
             ResetIcon(sender, e);
         }
@@ -551,7 +552,7 @@ namespace Voron_Poster
                 {
                     TempProperties.Engine = Detected;
                     propEngine.SelectedIndex =
-                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.Engine), Detected));
+                        propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.Engine), Detected).Replace("Universal", "Universal (Slow)"));
                     propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
                 }
             }
@@ -653,7 +654,8 @@ namespace Voron_Poster
             propScriptsRemove.Enabled =
                 propScriptsList.SelectedIndex > -1;
             propScriptsUp.Enabled = propScriptsList.SelectedIndex > 0;
-            propScriptsDown.Enabled = propScriptsList.SelectedIndex < propScriptsList.Items.Count - 1;
+            propScriptsDown.Enabled = propScriptsList.SelectedIndex < propScriptsList.Items.Count - 1
+                && propScriptsList.SelectedIndex >= 0;
 
             propApply.Enabled =
                 propTargetUrl.ForeColor == Color.Black &&
@@ -721,7 +723,7 @@ namespace Voron_Poster
                 || TempProperties.ForumMainPage == "http://"
                 || TempProperties.ForumMainPage == String.Empty;
             propEngine.SelectedIndex = propEngine.Items.IndexOf(
-                Enum.GetName(typeof(Forum.Engine), TempProperties.Engine));
+                Enum.GetName(typeof(Forum.Engine), TempProperties.Engine).Replace("Universal", "Universal (Slow)"));
             propUsername.Text = TempProperties.Account.Username;
             propPassword.Text = TempProperties.Account.Password;
             propScriptsList.Items.Clear();
@@ -1236,9 +1238,10 @@ namespace Voron_Poster
 
         private void scriptsDelete_Click(object sender, EventArgs e)
         {
-            scriptsDelete.Enabled = false;
             if (MessageBox.Show(this, "Удалить скрипт " + openedScript + "?",
                 "Удалить скрипт?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+            {
+                scriptsDelete.Enabled = false;
                 try
                 {
                     File.Delete(GetScriptPath(openedScript));
@@ -1251,6 +1254,7 @@ namespace Voron_Poster
                     scriptsDelete.Enabled = true;
                     MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
         }
 
         private void scriptsCancel_Click(object sender, EventArgs e)
@@ -1428,7 +1432,7 @@ namespace Voron_Poster
             }
         }
 
-        SettingsData Settings;
+        public SettingsData Settings;
         public struct SettingsData
         {
             public bool LoadLastTaskList;
@@ -1479,7 +1483,20 @@ namespace Voron_Poster
             settingsUnsaved = true;
         }
 
+        private void settingsGAuthShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            settingsGAuthPassword.UseSystemPasswordChar = !settingsGAuthShowPassword.Checked;
+        }
+
         #endregion
+
+        private void tasksTable_SizeChanged(object sender, EventArgs e)
+        {
+            //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
+            //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
+            //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
+            //else tasksTable.ColumnStyles[2].Width = 100;
+        }
 
 
 

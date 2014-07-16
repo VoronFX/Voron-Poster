@@ -47,13 +47,13 @@ namespace Voron_Poster
             SecurityToken = GetFieldValue(Html, "securitytoken");
             Progress[0] += 12;
             lock (Log) Log.Add("Авторизация: Подготовка данных");
-            string HashPswd = MD5HashStringForUTF8String(str_to_ent(Properties.Account.Password.Trim()));
-            string HashPswdUtf = MD5HashStringForUTF8String(Properties.Account.Password.Trim());
+            string HashPswd = MD5HashStringForUTF8String(str_to_ent(AccountToUse.Password.Trim()));
+            string HashPswdUtf = MD5HashStringForUTF8String(AccountToUse.Password.Trim());
             Progress[0] += 13;
             var PostData =
                 new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string>("vb_login_username", Properties.Account.Username.ToLower()),
+                        new KeyValuePair<string, string>("vb_login_username", AccountToUse.Username.ToLower()),
                         new KeyValuePair<string, string>("do", "login"),
                         new KeyValuePair<string, string>("vb_login_md5password", HashPswd),        
                         new KeyValuePair<string, string>("vb_login_md5password_utf", HashPswdUtf), 

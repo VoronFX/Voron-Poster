@@ -34,18 +34,9 @@ namespace Voron_Poster
 
                 if (WaitHandle == null) MessageBox.Show("WaitHandler null");
                 if (Activity == null) MessageBox.Show("Activity null");
-                try
-                {
+
                     WaitHandle.Reset();
                     Activity.ContinueWith((uselessvar) => WaitHandle.Set());
-
-                }
-                catch (Exception err)
-                {
-                    MessageBox.Show("It here. Don't lose this exception");
-                    int f = 4;
-                    string fff = "fd";
-                }
                 return Task.FromResult(true);
             }
             else
@@ -183,6 +174,8 @@ namespace Voron_Poster
         [XmlIgnore]
         public Task<Exception> Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
+        [XmlIgnore]
+        public TaskBaseProperties.AccountData AccountToUse;
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
         public List<string> Log;
         public int[] Progress;
@@ -441,6 +434,7 @@ namespace Voron_Poster
 
                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                    WaitingForQueue = false;
+                   if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
                    // Async Magic. Wait for domain free and then run login operation 
                    Task<Exception> LoginProcess = null;
                    Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).

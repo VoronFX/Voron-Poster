@@ -93,7 +93,8 @@ namespace Voron_Poster
                 lock (Forum.Log)
                 {
                      string StatusText = Forum.Log.Last<string>();
-                     Ctrls.Status.Text = new string(StatusText.Skip(Math.Max(0, StatusText.IndexOf(":")+1)).ToArray());
+                     Ctrls.Status.Text = StatusText;
+                    //Ctrls.Status.Text = new string(StatusText.Skip(Math.Max(0, StatusText.IndexOf(":")+1)).ToArray());
                 }
             MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
             if (Forum == null || Forum.Activity == null)
@@ -151,18 +152,21 @@ namespace Voron_Poster
                         break;
                 }
             }
+            ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
             if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
             else
                 Ctrls.Progress.Value = Math.Min(765, Forum.Progress[0] + Forum.Progress[1] + Forum.Progress[2]);
             Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
 
-            if (Status == InfoIcons.Error)
+            switch (Status)
             {
-                ModifyProgressBarColor.SetState(Ctrls.Progress, 2);
+                case InfoIcons.Error: ModifyProgressBarColor.SetState(Ctrls.Progress, 2); break;
+                case InfoIcons.Waiting: ModifyProgressBarColor.SetState(Ctrls.Progress, 3); break;
+                default: ModifyProgressBarColor.SetState(Ctrls.Progress, 1); break;
             }
-            else ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
-
+            
+          // Ctrls.Progress.Value = Ctrls.Progress.Value;
             if (Status == InfoIcons.Error)
             {
                 Ctrls.Status.LinkColor = Color.Red;
@@ -415,6 +419,7 @@ namespace Voron_Poster
                 try
                 {
                     Forum.Reset();
+                    Forum.AccountToUse = MainForm.Settings.Account;
                     Forum.Activity =
                         Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
                     SetStatusIcon();
@@ -432,7 +437,7 @@ namespace Voron_Poster
                     if (Forum.Error is OperationCanceledException)
                         lock (Forum.Log) Forum.Log.Add("Отменено");
                     else
-                        lock (Forum.Log) Forum.Log.Add("Ошибка\n" + Forum.Error.Message);
+                        lock (Forum.Log) Forum.Log.Add("Ошибка: " + Forum.Error.Message);
                 }
                 SetStatusIcon();
                 Ctrls.Delete.Enabled = true;

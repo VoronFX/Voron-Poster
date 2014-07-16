@@ -17,7 +17,6 @@ using System.Windows.Forms;
 
 namespace Voron_Poster
 {
-
     public class ForumUniversal : Forum
     {
         public ForumUniversal()

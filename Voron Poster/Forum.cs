@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using System.Windows.Forms;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Voron_Poster
 {
@@ -35,8 +36,8 @@ namespace Voron_Poster
                 if (WaitHandle == null) MessageBox.Show("WaitHandler null");
                 if (Activity == null) MessageBox.Show("Activity null");
 
-                    WaitHandle.Reset();
-                    Activity.ContinueWith((uselessvar) => WaitHandle.Set());
+                WaitHandle.Reset();
+                Activity.ContinueWith((uselessvar) => WaitHandle.Set());
                 return Task.FromResult(true);
             }
             else
@@ -137,7 +138,7 @@ namespace Voron_Poster
                 {
                     Key = new byte[256 / 8] { 240, 119, 82, 224, 93, 215, 250, 43, 78, 192, 95, 229, 166, 27,                  
                     4, 105, 40, 251, 211, 19, 190, 77, 207, 34, 116, 39, 244, 211, 54, 212, 5, 205 },
-                    IV = new byte[128 / 8] { 58, 41, 152, 142, 81, 7, 185, 181, 153, 139, 240, 86, 160, 125, 97, 233 } 
+                    IV = new byte[128 / 8] { 58, 41, 152, 142, 81, 7, 185, 181, 153, 139, 240, 86, 160, 125, 97, 233 }
                 };
                 public static byte[] Encrypt(string source)
                 {
@@ -172,6 +173,7 @@ namespace Voron_Poster
         [XmlIgnore]
         public Exception Error;
         [XmlIgnore]
+        [NonSerialized]
         public Task<Exception> Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         [XmlIgnore]
@@ -251,25 +253,57 @@ namespace Voron_Poster
 
         public void ShowData(string Title)
         {
-            var LogOutput = new LogOutput(HttpLog);
-            LogOutput.Text = Title;
             var Xml = new System.Xml.Serialization.XmlSerializer(this.GetType());
             try
             {
                 using (var Text = new System.IO.StringWriter())
                 {
                     Xml.Serialize(Text, this);
-                    LogOutput.VariablesBox.Text = Text.ToString();
+                    Text.WriteLine();
+                    if (Error != null)
+                    {
+                        Text.WriteLine("Error:");
+                        Text.WriteLine("Message: \n" + Error.Message);
+                        Text.WriteLine("InnerException: \n" + Error.InnerException);
+                        Text.WriteLine("StackTrace: \n" + Error.StackTrace);
+                    }
+                    Text.WriteLine();
+                    if (Activity != null)
+                        Text.WriteLine("Task status: " + Activity.Status.ToString());
+                    Text.WriteLine();
+                    Text.WriteLine("Username: " + AccountToUse.Username);
+                    Text.WriteLine("Password: " + AccountToUse.Password);
+                    var LogOutput = new LogOutput(HttpLog, Text.ToString());
+                    LogOutput.Text = Title;
+                    LogOutput.Show();
                 }
             }
-            catch (Exception)
+            catch (Exception Error)
             {
+                MessageBox.Show(Error.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            LogOutput.VariablesBox.IsReadOnly = true;
-            LogOutput.Show();
         }
 
-        [NonSerialized]
+        //public byte[] GetDump(bool inludeAccount)
+        //{
+        //    BinaryFormatter Dumper = new BinaryFormatter();
+        //    var LocalAccountBackup = Properties.Account;
+        //    var CurrentAccountBackup = AccountToUse;
+        //    if (!inludeAccount)
+        //    {
+        //        Properties.Account = new TaskBaseProperties.AccountData();
+        //        LocalAccountBackup = new TaskBaseProperties.AccountData();
+        //    }
+        //    byte[] Result;
+        //    using (var Stream = new System.IO.MemoryStream()){
+        //        Dumper.Serialize(Stream, this);
+        //        Result = Stream.ToArray();
+        //    }
+        //    Properties.Account = LocalAccountBackup;
+        //    AccountToUse = CurrentAccountBackup;
+        //    return Result;
+        //}
+
         protected HttpClient Client;
 
         public virtual void Reset()

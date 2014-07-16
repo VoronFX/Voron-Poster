@@ -307,6 +307,7 @@
     <None Include="Resources\YAAvatar %282%29.jpg" />
     <None Include="Resources\StatusAnnotations_Play_32xLG_color.png" />
     <None Include="Resources\StatusAnnotations_Play_32xMD_color1.png" />
+    <None Include="Resources\Bug_16xLG.png" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

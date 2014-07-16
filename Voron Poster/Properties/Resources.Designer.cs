@@ -153,6 +153,16 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Bug_16xLG {
+            get {
+                object obj = ResourceManager.GetObject("Bug_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Execute_10024 {
             get {
                 object obj = ResourceManager.GetObject("Execute_10024", resourceCulture);

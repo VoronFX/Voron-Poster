@@ -12,7 +12,6 @@ using System.Windows.Forms;
 
 namespace Voron_Poster
 {
-
     public class ForumIPB : Forum
     {
         public ForumIPB() : base() { }

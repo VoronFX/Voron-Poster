@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogOutput));
             this.ResponseList = new System.Windows.Forms.ListBox();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.BrowserTab = new System.Windows.Forms.TabPage();
@@ -35,20 +36,20 @@
             this.HtmlTab = new System.Windows.Forms.TabPage();
             this.ResponseTab = new System.Windows.Forms.TabPage();
             this.VariablesTab = new System.Windows.Forms.TabPage();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.reportTab = new System.Windows.Forms.TabPage();
-            this.reportSend = new System.Windows.Forms.Button();
-            this.reportAccountInclude = new System.Windows.Forms.CheckBox();
-            this.propProfileSave = new System.Windows.Forms.Button();
-            this.propProfileLoad = new System.Windows.Forms.Button();
-            this.reportComments = new System.Windows.Forms.TextBox();
             this.reportSendGroup = new System.Windows.Forms.GroupBox();
-            this.reportCommentsLabel = new System.Windows.Forms.Label();
             this.reportSaveLoad = new System.Windows.Forms.GroupBox();
-            this.reportIKnowAboutPrivateInfo = new System.Windows.Forms.CheckBox();
-            this.reportEmail = new System.Windows.Forms.TextBox();
-            this.reportEmailLabel = new System.Windows.Forms.Label();
+            this.propProfileLoad = new System.Windows.Forms.Button();
+            this.propProfileSave = new System.Windows.Forms.Button();
             this.reportInfoLabel = new System.Windows.Forms.Label();
+            this.reportEmailLabel = new System.Windows.Forms.Label();
+            this.reportEmail = new System.Windows.Forms.TextBox();
+            this.reportIKnowAboutPrivateInfo = new System.Windows.Forms.CheckBox();
+            this.reportCommentsLabel = new System.Windows.Forms.Label();
+            this.reportComments = new System.Windows.Forms.TextBox();
+            this.reportAccountInclude = new System.Windows.Forms.CheckBox();
+            this.reportSend = new System.Windows.Forms.Button();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.Tabs.SuspendLayout();
             this.BrowserTab.SuspendLayout();
             this.reportTab.SuspendLayout();
@@ -85,7 +86,7 @@
             this.BrowserTab.Location = new System.Drawing.Point(4, 22);
             this.BrowserTab.Name = "BrowserTab";
             this.BrowserTab.Padding = new System.Windows.Forms.Padding(3);
-            this.BrowserTab.Size = new System.Drawing.Size(667, 544);
+            this.BrowserTab.Size = new System.Drawing.Size(537, 433);
             this.BrowserTab.TabIndex = 0;
             this.BrowserTab.Text = "Браузер";
             this.BrowserTab.UseVisualStyleBackColor = true;
@@ -98,7 +99,7 @@
             this.Browser.MinimumSize = new System.Drawing.Size(20, 20);
             this.Browser.Name = "Browser";
             this.Browser.ScriptErrorsSuppressed = true;
-            this.Browser.Size = new System.Drawing.Size(661, 538);
+            this.Browser.Size = new System.Drawing.Size(531, 427);
             this.Browser.TabIndex = 0;
             // 
             // HtmlTab
@@ -106,7 +107,7 @@
             this.HtmlTab.Location = new System.Drawing.Point(4, 22);
             this.HtmlTab.Name = "HtmlTab";
             this.HtmlTab.Padding = new System.Windows.Forms.Padding(3);
-            this.HtmlTab.Size = new System.Drawing.Size(667, 544);
+            this.HtmlTab.Size = new System.Drawing.Size(537, 433);
             this.HtmlTab.TabIndex = 1;
             this.HtmlTab.Text = "Код страницы";
             this.HtmlTab.UseVisualStyleBackColor = true;
@@ -116,7 +117,7 @@
             this.ResponseTab.Location = new System.Drawing.Point(4, 22);
             this.ResponseTab.Name = "ResponseTab";
             this.ResponseTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ResponseTab.Size = new System.Drawing.Size(667, 544);
+            this.ResponseTab.Size = new System.Drawing.Size(537, 433);
             this.ResponseTab.TabIndex = 3;
             this.ResponseTab.Text = "Запрос \\ Ответ";
             this.ResponseTab.UseVisualStyleBackColor = true;
@@ -126,18 +127,10 @@
             this.VariablesTab.Location = new System.Drawing.Point(4, 22);
             this.VariablesTab.Name = "VariablesTab";
             this.VariablesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.VariablesTab.Size = new System.Drawing.Size(667, 544);
+            this.VariablesTab.Size = new System.Drawing.Size(537, 433);
             this.VariablesTab.TabIndex = 2;
             this.VariablesTab.Text = "Переменные";
             this.VariablesTab.UseVisualStyleBackColor = true;
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(129, 0);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 459);
-            this.splitter1.TabIndex = 4;
-            this.splitter1.TabStop = false;
             // 
             // reportTab
             // 
@@ -149,66 +142,6 @@
             this.reportTab.TabIndex = 4;
             this.reportTab.Text = "Отчет";
             this.reportTab.UseVisualStyleBackColor = true;
-            // 
-            // reportSend
-            // 
-            this.reportSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.reportSend.Enabled = false;
-            this.reportSend.Image = global::Voron_Poster.Properties.Resources.Bug_16xLG;
-            this.reportSend.Location = new System.Drawing.Point(374, 126);
-            this.reportSend.Name = "reportSend";
-            this.reportSend.Size = new System.Drawing.Size(120, 23);
-            this.reportSend.TabIndex = 0;
-            this.reportSend.Text = "Отправить отчет";
-            this.reportSend.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.reportSend.UseVisualStyleBackColor = true;
-            this.reportSend.Click += new System.EventHandler(this.reportSend_Click);
-            // 
-            // reportAccountInclude
-            // 
-            this.reportAccountInclude.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.reportAccountInclude.Location = new System.Drawing.Point(14, 65);
-            this.reportAccountInclude.Name = "reportAccountInclude";
-            this.reportAccountInclude.Size = new System.Drawing.Size(354, 17);
-            this.reportAccountInclude.TabIndex = 1;
-            this.reportAccountInclude.Text = "Включить в отчет данные авторизации";
-            this.reportAccountInclude.UseVisualStyleBackColor = true;
-            // 
-            // propProfileSave
-            // 
-            this.propProfileSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.propProfileSave.Location = new System.Drawing.Point(11, 19);
-            this.propProfileSave.Name = "propProfileSave";
-            this.propProfileSave.Size = new System.Drawing.Size(97, 24);
-            this.propProfileSave.TabIndex = 5;
-            this.propProfileSave.Text = "Сохранить";
-            this.propProfileSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileSave.UseVisualStyleBackColor = true;
-            this.propProfileSave.Click += new System.EventHandler(this.propProfileSave_Click);
-            // 
-            // propProfileLoad
-            // 
-            this.propProfileLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.propProfileLoad.Location = new System.Drawing.Point(11, 49);
-            this.propProfileLoad.Name = "propProfileLoad";
-            this.propProfileLoad.Size = new System.Drawing.Size(97, 24);
-            this.propProfileLoad.TabIndex = 4;
-            this.propProfileLoad.Text = "Открыть";
-            this.propProfileLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileLoad.UseVisualStyleBackColor = true;
-            this.propProfileLoad.Click += new System.EventHandler(this.propProfileLoad_Click);
-            // 
-            // reportComments
-            // 
-            this.reportComments.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.reportComments.Location = new System.Drawing.Point(11, 167);
-            this.reportComments.Multiline = true;
-            this.reportComments.Name = "reportComments";
-            this.reportComments.Size = new System.Drawing.Size(483, 173);
-            this.reportComments.TabIndex = 6;
             // 
             // reportSendGroup
             // 
@@ -231,15 +164,6 @@
             this.reportSendGroup.TabStop = false;
             this.reportSendGroup.Text = "Отправить отчет";
             // 
-            // reportCommentsLabel
-            // 
-            this.reportCommentsLabel.AutoSize = true;
-            this.reportCommentsLabel.Location = new System.Drawing.Point(11, 151);
-            this.reportCommentsLabel.Name = "reportCommentsLabel";
-            this.reportCommentsLabel.Size = new System.Drawing.Size(80, 13);
-            this.reportCommentsLabel.TabIndex = 8;
-            this.reportCommentsLabel.Text = "Комментарии:";
-            // 
             // reportSaveLoad
             // 
             this.reportSaveLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -253,35 +177,29 @@
             this.reportSaveLoad.TabStop = false;
             this.reportSaveLoad.Text = "Отчет";
             // 
-            // reportIKnowAboutPrivateInfo
+            // propProfileLoad
             // 
-            this.reportIKnowAboutPrivateInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.reportIKnowAboutPrivateInfo.Location = new System.Drawing.Point(14, 88);
-            this.reportIKnowAboutPrivateInfo.Name = "reportIKnowAboutPrivateInfo";
-            this.reportIKnowAboutPrivateInfo.Size = new System.Drawing.Size(354, 21);
-            this.reportIKnowAboutPrivateInfo.TabIndex = 9;
-            this.reportIKnowAboutPrivateInfo.Text = "Я знаю что в отчет может попасть личная информация";
-            this.reportIKnowAboutPrivateInfo.UseVisualStyleBackColor = true;
-            this.reportIKnowAboutPrivateInfo.CheckedChanged += new System.EventHandler(this.reportIKnowAboutPrivateInfo_CheckedChanged);
+            this.propProfileLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
+            this.propProfileLoad.Location = new System.Drawing.Point(11, 49);
+            this.propProfileLoad.Name = "propProfileLoad";
+            this.propProfileLoad.Size = new System.Drawing.Size(97, 24);
+            this.propProfileLoad.TabIndex = 4;
+            this.propProfileLoad.Text = "Открыть";
+            this.propProfileLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileLoad.UseVisualStyleBackColor = true;
+            this.propProfileLoad.Click += new System.EventHandler(this.propProfileLoad_Click);
             // 
-            // reportEmail
+            // propProfileSave
             // 
-            this.reportEmail.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.reportEmail.Location = new System.Drawing.Point(11, 128);
-            this.reportEmail.Name = "reportEmail";
-            this.reportEmail.Size = new System.Drawing.Size(357, 20);
-            this.reportEmail.TabIndex = 9;
-            // 
-            // reportEmailLabel
-            // 
-            this.reportEmailLabel.AutoSize = true;
-            this.reportEmailLabel.Location = new System.Drawing.Point(11, 112);
-            this.reportEmailLabel.Name = "reportEmailLabel";
-            this.reportEmailLabel.Size = new System.Drawing.Size(102, 13);
-            this.reportEmailLabel.TabIndex = 10;
-            this.reportEmailLabel.Text = "Контактный E-mail:";
+            this.propProfileSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.propProfileSave.Location = new System.Drawing.Point(11, 19);
+            this.propProfileSave.Name = "propProfileSave";
+            this.propProfileSave.Size = new System.Drawing.Size(97, 24);
+            this.propProfileSave.TabIndex = 5;
+            this.propProfileSave.Text = "Сохранить";
+            this.propProfileSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileSave.UseVisualStyleBackColor = true;
+            this.propProfileSave.Click += new System.EventHandler(this.propProfileSave_Click);
             // 
             // reportInfoLabel
             // 
@@ -294,6 +212,89 @@
             this.reportInfoLabel.TabIndex = 11;
             this.reportInfoLabel.Text = "Если у вас возникли проблемы с этим сайтом вы можете отправить отчет здесь";
             // 
+            // reportEmailLabel
+            // 
+            this.reportEmailLabel.AutoSize = true;
+            this.reportEmailLabel.Location = new System.Drawing.Point(11, 112);
+            this.reportEmailLabel.Name = "reportEmailLabel";
+            this.reportEmailLabel.Size = new System.Drawing.Size(102, 13);
+            this.reportEmailLabel.TabIndex = 10;
+            this.reportEmailLabel.Text = "Контактный E-mail:";
+            // 
+            // reportEmail
+            // 
+            this.reportEmail.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.reportEmail.Location = new System.Drawing.Point(11, 128);
+            this.reportEmail.Name = "reportEmail";
+            this.reportEmail.Size = new System.Drawing.Size(357, 20);
+            this.reportEmail.TabIndex = 9;
+            // 
+            // reportIKnowAboutPrivateInfo
+            // 
+            this.reportIKnowAboutPrivateInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.reportIKnowAboutPrivateInfo.Location = new System.Drawing.Point(14, 88);
+            this.reportIKnowAboutPrivateInfo.Name = "reportIKnowAboutPrivateInfo";
+            this.reportIKnowAboutPrivateInfo.Size = new System.Drawing.Size(354, 21);
+            this.reportIKnowAboutPrivateInfo.TabIndex = 9;
+            this.reportIKnowAboutPrivateInfo.Text = "Я знаю что в отчет может попасть личная информация";
+            this.reportIKnowAboutPrivateInfo.UseVisualStyleBackColor = true;
+            this.reportIKnowAboutPrivateInfo.CheckedChanged += new System.EventHandler(this.reportIKnowAboutPrivateInfo_CheckedChanged);
+            // 
+            // reportCommentsLabel
+            // 
+            this.reportCommentsLabel.AutoSize = true;
+            this.reportCommentsLabel.Location = new System.Drawing.Point(11, 151);
+            this.reportCommentsLabel.Name = "reportCommentsLabel";
+            this.reportCommentsLabel.Size = new System.Drawing.Size(80, 13);
+            this.reportCommentsLabel.TabIndex = 8;
+            this.reportCommentsLabel.Text = "Комментарии:";
+            // 
+            // reportComments
+            // 
+            this.reportComments.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.reportComments.Location = new System.Drawing.Point(11, 167);
+            this.reportComments.Multiline = true;
+            this.reportComments.Name = "reportComments";
+            this.reportComments.Size = new System.Drawing.Size(483, 173);
+            this.reportComments.TabIndex = 6;
+            // 
+            // reportAccountInclude
+            // 
+            this.reportAccountInclude.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.reportAccountInclude.Location = new System.Drawing.Point(14, 65);
+            this.reportAccountInclude.Name = "reportAccountInclude";
+            this.reportAccountInclude.Size = new System.Drawing.Size(354, 17);
+            this.reportAccountInclude.TabIndex = 1;
+            this.reportAccountInclude.Text = "Включить в отчет данные авторизации";
+            this.reportAccountInclude.UseVisualStyleBackColor = true;
+            // 
+            // reportSend
+            // 
+            this.reportSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.reportSend.Enabled = false;
+            this.reportSend.Image = global::Voron_Poster.Properties.Resources.Bug_16xLG;
+            this.reportSend.Location = new System.Drawing.Point(374, 126);
+            this.reportSend.Name = "reportSend";
+            this.reportSend.Size = new System.Drawing.Size(120, 23);
+            this.reportSend.TabIndex = 0;
+            this.reportSend.Text = "Отправить отчет";
+            this.reportSend.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.reportSend.UseVisualStyleBackColor = true;
+            this.reportSend.Click += new System.EventHandler(this.reportSend_Click);
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(129, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 459);
+            this.splitter1.TabIndex = 4;
+            this.splitter1.TabStop = false;
+            // 
             // LogOutput
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -302,6 +303,7 @@
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.Tabs);
             this.Controls.Add(this.ResponseList);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(630, 445);
             this.Name = "LogOutput";
             this.Text = "Лог";

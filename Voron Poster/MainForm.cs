@@ -139,6 +139,15 @@ namespace Voron_Poster
 
         #region MessagePage
 
+        private void messageText_Enter(object sender, EventArgs e)
+        {
+            if ((sender as TextBox).Font.Italic)
+            {
+                (sender as TextBox).Font = new Font((sender as TextBox).Font, FontStyle.Regular);
+                (sender as TextBox).Text = String.Empty;
+            }
+        }
+
         private void messageNext_Click(object sender, EventArgs e)
         {
             if (previewPanel.Parent != previewTab)
@@ -1600,16 +1609,20 @@ namespace Voron_Poster
             }
         }
 
+        private void aboutAuthorEmail_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("mailto:"+(sender as LinkLabel).Text);
+        }
 
+        private void aboutAurhorVK_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start((sender as LinkLabel).Text);
+        }
 
-
-
-
-
-
-
-
-
+        private void aboutAuthorSkype_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("skype:Voron.exe?chat");
+        }
 
     }
 }

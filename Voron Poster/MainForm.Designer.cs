@@ -89,19 +89,19 @@
             this.settingsGAuthUsenameLabel = new System.Windows.Forms.Label();
             this.settingsGAuthUsername = new System.Windows.Forms.TextBox();
             this.aboutTab = new System.Windows.Forms.TabPage();
-            this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
-            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
-            this.aboutSupportLabel = new System.Windows.Forms.Label();
             this.aboutAuthorGroup = new System.Windows.Forms.GroupBox();
             this.aboutAurhorVK = new System.Windows.Forms.LinkLabel();
             this.aboutAuthorEmail = new System.Windows.Forms.LinkLabel();
-            this.aboutAuthorSkype = new System.Windows.Forms.Label();
             this.aboutAuthorName = new System.Windows.Forms.Label();
+            this.aboutLicenseLabel = new System.Windows.Forms.Label();
+            this.aboutAboutInfo = new System.Windows.Forms.Label();
+            this.aboutProgramName = new System.Windows.Forms.Label();
             this.aboutLicenseBox = new System.Windows.Forms.TextBox();
             this.aboutLicenseList = new System.Windows.Forms.ListBox();
-            this.aboutProgramName = new System.Windows.Forms.Label();
-            this.aboutAboutInfo = new System.Windows.Forms.Label();
+            this.aboutSupportLabel = new System.Windows.Forms.Label();
+            this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
+            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
             this.messageNext = new System.Windows.Forms.Button();
             this.messagePreview = new System.Windows.Forms.Button();
             this.previewNext = new System.Windows.Forms.Button();
@@ -132,8 +132,10 @@
             this.scriptsCancel = new System.Windows.Forms.Button();
             this.settingsSave = new System.Windows.Forms.Button();
             this.settingsCancel = new System.Windows.Forms.Button();
+            this.aboutLogo = new System.Windows.Forms.PictureBox();
             this.aboutAuthorAvatar = new System.Windows.Forms.PictureBox();
-            this.aboutLicenseLabel = new System.Windows.Forms.Label();
+            this.messageSubjectLabel = new System.Windows.Forms.Label();
+            this.messageTextLabel = new System.Windows.Forms.Label();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -143,6 +145,7 @@
             this.GTStatusIcon = new System.Windows.Forms.PictureBox();
             this.GTStop = new System.Windows.Forms.Button();
             this.GTDelete = new System.Windows.Forms.Button();
+            this.aboutAuthorSkype = new System.Windows.Forms.LinkLabel();
             this.Tabs.SuspendLayout();
             this.messageTab.SuspendLayout();
             this.previewTab.SuspendLayout();
@@ -164,6 +167,7 @@
             this.settingsGAuthGroup.SuspendLayout();
             this.aboutTab.SuspendLayout();
             this.aboutAuthorGroup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.aboutLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.aboutAuthorAvatar)).BeginInit();
             this.tasksTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
@@ -188,6 +192,8 @@
             // 
             // messageTab
             // 
+            this.messageTab.Controls.Add(this.messageTextLabel);
+            this.messageTab.Controls.Add(this.messageSubjectLabel);
             this.messageTab.Controls.Add(this.messageNext);
             this.messageTab.Controls.Add(this.messagePreview);
             this.messageTab.Controls.Add(this.messageText);
@@ -205,30 +211,29 @@
             this.messageText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.messageText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.messageText.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.messageText.Location = new System.Drawing.Point(23, 79);
+            this.messageText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.messageText.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.messageText.Location = new System.Drawing.Point(23, 92);
             this.messageText.Multiline = true;
             this.messageText.Name = "messageText";
             this.messageText.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.messageText.Size = new System.Drawing.Size(514, 366);
+            this.messageText.Size = new System.Drawing.Size(514, 353);
             this.messageText.TabIndex = 44;
-            this.messageText.Text = "Текст сообщения";
             this.messageText.WordWrap = false;
             this.messageText.TextChanged += new System.EventHandler(this.previewTab_Enter);
+            this.messageText.Enter += new System.EventHandler(this.messageText_Enter);
             // 
             // messageSubject
             // 
             this.messageSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.messageSubject.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.messageSubject.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.messageSubject.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.messageSubject.ForeColor = System.Drawing.SystemColors.ControlText;
             this.messageSubject.Location = new System.Drawing.Point(23, 53);
             this.messageSubject.Name = "messageSubject";
             this.messageSubject.Size = new System.Drawing.Size(514, 20);
             this.messageSubject.TabIndex = 41;
-            this.messageSubject.Text = "Тема сообщения";
-            this.messageSubject.TextChanged += new System.EventHandler(this.previewTab_Enter);
+            this.messageSubject.Enter += new System.EventHandler(this.messageText_Enter);
             // 
             // previewTab
             // 
@@ -743,7 +748,7 @@
             this.scriptsSpacePanel.MaximumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.MinimumSize = new System.Drawing.Size(0, 10);
             this.scriptsSpacePanel.Name = "scriptsSpacePanel";
-            this.scriptsSpacePanel.Size = new System.Drawing.Size(0, 10);
+            this.scriptsSpacePanel.Size = new System.Drawing.Size(377, 10);
             this.scriptsSpacePanel.TabIndex = 39;
             // 
             // scriptsSubject
@@ -907,6 +912,7 @@
             // 
             // aboutTab
             // 
+            this.aboutTab.Controls.Add(this.aboutLogo);
             this.aboutTab.Controls.Add(this.aboutAuthorGroup);
             this.aboutTab.Controls.Add(this.aboutLicenseLabel);
             this.aboutTab.Controls.Add(this.aboutAboutInfo);
@@ -922,37 +928,12 @@
             this.aboutTab.Text = "О программе";
             this.aboutTab.UseVisualStyleBackColor = true;
             // 
-            // TasksUpdater
-            // 
-            this.TasksUpdater.Tick += new System.EventHandler(this.TasksUpdater_Tick);
-            // 
-            // ToolTip
-            // 
-            this.ToolTip.AutoPopDelay = 5000;
-            this.ToolTip.InitialDelay = 250;
-            this.ToolTip.ReshowDelay = 100;
-            // 
-            // scriptsTestAbortTimer
-            // 
-            this.scriptsTestAbortTimer.Interval = 5000;
-            this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
-            // 
-            // aboutSupportLabel
-            // 
-            this.aboutSupportLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutSupportLabel.Location = new System.Drawing.Point(23, 73);
-            this.aboutSupportLabel.Name = "aboutSupportLabel";
-            this.aboutSupportLabel.Size = new System.Drawing.Size(514, 47);
-            this.aboutSupportLabel.TabIndex = 25;
-            this.aboutSupportLabel.Text = resources.GetString("aboutSupportLabel.Text");
-            // 
             // aboutAuthorGroup
             // 
             this.aboutAuthorGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.aboutAuthorGroup.Controls.Add(this.aboutAuthorSkype);
             this.aboutAuthorGroup.Controls.Add(this.aboutAurhorVK);
             this.aboutAuthorGroup.Controls.Add(this.aboutAuthorEmail);
-            this.aboutAuthorGroup.Controls.Add(this.aboutAuthorSkype);
             this.aboutAuthorGroup.Controls.Add(this.aboutAuthorName);
             this.aboutAuthorGroup.Controls.Add(this.aboutAuthorAvatar);
             this.aboutAuthorGroup.Location = new System.Drawing.Point(285, 110);
@@ -973,6 +954,7 @@
             this.aboutAurhorVK.TabIndex = 6;
             this.aboutAurhorVK.TabStop = true;
             this.aboutAurhorVK.Text = "https://vk.com/id100633452";
+            this.aboutAurhorVK.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.aboutAurhorVK_LinkClicked);
             // 
             // aboutAuthorEmail
             // 
@@ -984,16 +966,7 @@
             this.aboutAuthorEmail.TabIndex = 5;
             this.aboutAuthorEmail.TabStop = true;
             this.aboutAuthorEmail.Text = "Voron.exe@gmail.com";
-            // 
-            // aboutAuthorSkype
-            // 
-            this.aboutAuthorSkype.AutoSize = true;
-            this.aboutAuthorSkype.Location = new System.Drawing.Point(97, 76);
-            this.aboutAuthorSkype.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
-            this.aboutAuthorSkype.Name = "aboutAuthorSkype";
-            this.aboutAuthorSkype.Size = new System.Drawing.Size(91, 13);
-            this.aboutAuthorSkype.TabIndex = 4;
-            this.aboutAuthorSkype.Text = "Skype: Voron.exe";
+            this.aboutAuthorEmail.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.aboutAuthorEmail_LinkClicked);
             // 
             // aboutAuthorName
             // 
@@ -1001,9 +974,41 @@
             this.aboutAuthorName.Location = new System.Drawing.Point(97, 28);
             this.aboutAuthorName.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.aboutAuthorName.Name = "aboutAuthorName";
-            this.aboutAuthorName.Size = new System.Drawing.Size(147, 13);
+            this.aboutAuthorName.Size = new System.Drawing.Size(141, 13);
             this.aboutAuthorName.TabIndex = 3;
-            this.aboutAuthorName.Text = "Воронин Игорь Борисовичь";
+            this.aboutAuthorName.Text = "Воронин Игорь Борисович";
+            // 
+            // aboutLicenseLabel
+            // 
+            this.aboutLicenseLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.aboutLicenseLabel.Location = new System.Drawing.Point(23, 120);
+            this.aboutLicenseLabel.Name = "aboutLicenseLabel";
+            this.aboutLicenseLabel.Size = new System.Drawing.Size(256, 91);
+            this.aboutLicenseLabel.TabIndex = 28;
+            this.aboutLicenseLabel.Text = resources.GetString("aboutLicenseLabel.Text");
+            // 
+            // aboutAboutInfo
+            // 
+            this.aboutAboutInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.aboutAboutInfo.Location = new System.Drawing.Point(129, 48);
+            this.aboutAboutInfo.Name = "aboutAboutInfo";
+            this.aboutAboutInfo.Size = new System.Drawing.Size(408, 16);
+            this.aboutAboutInfo.TabIndex = 27;
+            this.aboutAboutInfo.Text = "Программа для автоматической публикации сообщений на форумы. Написана по заказу.";
+            // 
+            // aboutProgramName
+            // 
+            this.aboutProgramName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.aboutProgramName.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.aboutProgramName.Location = new System.Drawing.Point(129, 20);
+            this.aboutProgramName.Name = "aboutProgramName";
+            this.aboutProgramName.Size = new System.Drawing.Size(408, 28);
+            this.aboutProgramName.TabIndex = 26;
+            this.aboutProgramName.Text = "Voron Poster";
+            this.aboutProgramName.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // aboutLicenseBox
             // 
@@ -1039,27 +1044,30 @@
             this.aboutLicenseList.TabIndex = 22;
             this.aboutLicenseList.SelectedIndexChanged += new System.EventHandler(this.aboutLicenseList_SelectedIndexChanged);
             // 
-            // aboutProgramName
+            // aboutSupportLabel
             // 
-            this.aboutProgramName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.aboutSupportLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutProgramName.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.aboutProgramName.Location = new System.Drawing.Point(23, 20);
-            this.aboutProgramName.Name = "aboutProgramName";
-            this.aboutProgramName.Size = new System.Drawing.Size(514, 37);
-            this.aboutProgramName.TabIndex = 26;
-            this.aboutProgramName.Text = "Voron Poster";
-            this.aboutProgramName.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.aboutSupportLabel.Location = new System.Drawing.Point(129, 64);
+            this.aboutSupportLabel.Name = "aboutSupportLabel";
+            this.aboutSupportLabel.Size = new System.Drawing.Size(408, 47);
+            this.aboutSupportLabel.TabIndex = 25;
+            this.aboutSupportLabel.Text = resources.GetString("aboutSupportLabel.Text");
             // 
-            // aboutAboutInfo
+            // TasksUpdater
             // 
-            this.aboutAboutInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutAboutInfo.Location = new System.Drawing.Point(23, 57);
-            this.aboutAboutInfo.Name = "aboutAboutInfo";
-            this.aboutAboutInfo.Size = new System.Drawing.Size(514, 16);
-            this.aboutAboutInfo.TabIndex = 27;
-            this.aboutAboutInfo.Text = "Программа для автоматической публикации сообщений на форумы. Написана по заказу.";
+            this.TasksUpdater.Tick += new System.EventHandler(this.TasksUpdater_Tick);
+            // 
+            // ToolTip
+            // 
+            this.ToolTip.AutoPopDelay = 5000;
+            this.ToolTip.InitialDelay = 250;
+            this.ToolTip.ReshowDelay = 100;
+            // 
+            // scriptsTestAbortTimer
+            // 
+            this.scriptsTestAbortTimer.Interval = 5000;
+            this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
             // 
             // messageNext
             // 
@@ -1467,6 +1475,16 @@
             this.settingsCancel.UseVisualStyleBackColor = true;
             this.settingsCancel.Click += new System.EventHandler(this.settingsCancel_Click);
             // 
+            // aboutLogo
+            // 
+            this.aboutLogo.Image = global::Voron_Poster.Properties.Resources.VoronPosterIcon;
+            this.aboutLogo.Location = new System.Drawing.Point(23, 20);
+            this.aboutLogo.Name = "aboutLogo";
+            this.aboutLogo.Size = new System.Drawing.Size(100, 100);
+            this.aboutLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.aboutLogo.TabIndex = 29;
+            this.aboutLogo.TabStop = false;
+            // 
             // aboutAuthorAvatar
             // 
             this.aboutAuthorAvatar.Image = global::Voron_Poster.Properties.Resources.YAAvatar__2_;
@@ -1476,15 +1494,23 @@
             this.aboutAuthorAvatar.TabIndex = 0;
             this.aboutAuthorAvatar.TabStop = false;
             // 
-            // aboutLicenseLabel
+            // messageSubjectLabel
             // 
-            this.aboutLicenseLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutLicenseLabel.Location = new System.Drawing.Point(23, 120);
-            this.aboutLicenseLabel.Name = "aboutLicenseLabel";
-            this.aboutLicenseLabel.Size = new System.Drawing.Size(256, 91);
-            this.aboutLicenseLabel.TabIndex = 28;
-            this.aboutLicenseLabel.Text = resources.GetString("aboutLicenseLabel.Text");
+            this.messageSubjectLabel.AutoSize = true;
+            this.messageSubjectLabel.Location = new System.Drawing.Point(23, 37);
+            this.messageSubjectLabel.Name = "messageSubjectLabel";
+            this.messageSubjectLabel.Size = new System.Drawing.Size(97, 13);
+            this.messageSubjectLabel.TabIndex = 48;
+            this.messageSubjectLabel.Text = "Тема сообщения:";
+            // 
+            // messageTextLabel
+            // 
+            this.messageTextLabel.AutoSize = true;
+            this.messageTextLabel.Location = new System.Drawing.Point(23, 76);
+            this.messageTextLabel.Name = "messageTextLabel";
+            this.messageTextLabel.Size = new System.Drawing.Size(100, 13);
+            this.messageTextLabel.TabIndex = 49;
+            this.messageTextLabel.Text = "Текст сообщения:";
             // 
             // tasksTable
             // 
@@ -1644,6 +1670,18 @@
             this.GTDelete.UseVisualStyleBackColor = false;
             this.GTDelete.Click += new System.EventHandler(this.GTDelete_Click);
             // 
+            // aboutAuthorSkype
+            // 
+            this.aboutAuthorSkype.AutoSize = true;
+            this.aboutAuthorSkype.Location = new System.Drawing.Point(97, 76);
+            this.aboutAuthorSkype.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.aboutAuthorSkype.Name = "aboutAuthorSkype";
+            this.aboutAuthorSkype.Size = new System.Drawing.Size(91, 13);
+            this.aboutAuthorSkype.TabIndex = 7;
+            this.aboutAuthorSkype.TabStop = true;
+            this.aboutAuthorSkype.Text = "Skype: Voron.exe";
+            this.aboutAuthorSkype.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.aboutAuthorSkype_LinkClicked);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1651,6 +1689,7 @@
             this.ClientSize = new System.Drawing.Size(574, 500);
             this.Controls.Add(this.Tabs);
             this.DoubleBuffered = true;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(590, 539);
             this.Name = "MainForm";
             this.Padding = new System.Windows.Forms.Padding(3);
@@ -1689,6 +1728,7 @@
             this.aboutTab.PerformLayout();
             this.aboutAuthorGroup.ResumeLayout(false);
             this.aboutAuthorGroup.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.aboutLogo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.aboutAuthorAvatar)).EndInit();
             this.tasksTable.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
@@ -1806,12 +1846,15 @@
         private System.Windows.Forms.GroupBox aboutAuthorGroup;
         private System.Windows.Forms.LinkLabel aboutAurhorVK;
         private System.Windows.Forms.LinkLabel aboutAuthorEmail;
-        private System.Windows.Forms.Label aboutAuthorSkype;
         private System.Windows.Forms.Label aboutAuthorName;
         private System.Windows.Forms.PictureBox aboutAuthorAvatar;
         private System.Windows.Forms.TextBox aboutLicenseBox;
         private System.Windows.Forms.ListBox aboutLicenseList;
         private System.Windows.Forms.Label aboutLicenseLabel;
+        private System.Windows.Forms.PictureBox aboutLogo;
+        private System.Windows.Forms.Label messageTextLabel;
+        private System.Windows.Forms.Label messageSubjectLabel;
+        private System.Windows.Forms.LinkLabel aboutAuthorSkype;
 
 
     }

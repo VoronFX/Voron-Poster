@@ -1,0 +1,1 @@
+Post(Input.Subject, Input.Message);

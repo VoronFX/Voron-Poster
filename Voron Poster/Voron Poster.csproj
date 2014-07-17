@@ -68,9 +68,7 @@
   <PropertyGroup>
     <TargetZone>Internet</TargetZone>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
@@ -83,6 +81,12 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>VoronPosterIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CodeKicker.BBCode, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -161,6 +165,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Content Include="Scripts\BuiltIn\%28built in%29 Опубликовать.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="TaskGui.cs" />
     <EmbeddedResource Include="CaptchaForm.resx">
       <DependentUpon>CaptchaForm.cs</DependentUpon>
@@ -298,10 +305,11 @@
     <None Include="Resources\Execute_10024.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Icon\VoronPosterIcon.png" />
     <Content Include="Libraries\CodeKicker.BBCode.dll" />
     <Content Include="Libraries\CodeKicker.BBCode.pdb" />
     <Content Include="Libraries\CodeKicker.BBCode.XML" />
-    <Content Include="Libraries\License.txt" />
+    <Content Include="VoronPosterIcon.ico" />
     <None Include="Resources\save_32xLG.png" />
     <None Include="Resources\folder_Open_32xLG.png" />
     <None Include="Resources\folder_Open_32xSM.png" />

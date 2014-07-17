@@ -21,6 +21,7 @@ using System.Reflection;
 using ScintillaNET;
 using Microsoft.Win32;
 using System.Runtime.Serialization;
+using CodeKicker.BBCode;
 
 namespace Voron_Poster
 {
@@ -77,6 +78,8 @@ namespace Voron_Poster
             scriptsEditor.TextChanged += scriptsEditor_TextChanged;
             scriptsCodeBox.Dispose();
             scriptsCodeTab.Controls.Add(scriptsEditor);
+
+            previewWB.Navigate("about:blank");
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -123,9 +126,69 @@ namespace Voron_Poster
 
         private void messageNext_Click(object sender, EventArgs e)
         {
+            if (previewPanel.Parent != previewTab)
+                Tabs.SelectedTab = tasksTab;
+            else messagePreview_Click(sender, e);
+        }
+
+        private void previewNext_Click(object sender, EventArgs e)
+        {
+            if (previewPanel.Parent != previewTab)
+                previewDockUndock_Click(sender, e);
             Tabs.SelectedTab = tasksTab;
         }
 
+        private void messagePreview_Click(object sender, EventArgs e)
+        {
+            if (previewPanel.Parent != previewTab)
+            {
+                previewPanel.Parent.Show();
+                previewTab_Enter(sender, e);
+                previewWBPanel.Enabled = true;
+            }
+            else  Tabs.SelectedTab = previewTab;
+        }
+
+
+        private void previewTab_Enter(object sender, EventArgs e)
+        {
+            previewWBPanel.Enabled = false;
+            previewWB.Document.Write(BBCode.ToHtml(messageSubject.Text + "\r\n" + messageText.Text).Replace("\n", "<br>"));
+            previewWB.Refresh();
+        }
+
+        private void previewDockUndock_Click(object sender, EventArgs e)
+        {
+            if (previewPanel.Parent == previewTab)
+            {
+                Form F = new Form();
+                previewPanel.Parent = F;
+                F.Controls.Add(previewPanel);
+                Tabs.TabPages.Remove(previewTab);
+                F.FormClosing += previewDockUndock_Click;
+                previewDockUndock.Image = global::Voron_Poster.Properties.Resources.GenericVSProject_9906_16x;
+                previewDockUndock.Text = "В главном окне";
+                F.MinimumSize = new System.Drawing.Size(250, 200);
+                previewPanel.MouseEnter += (o2, e2) =>
+                { 
+                    previewWBPanel.Enabled = true; 
+                };
+                F.Show();
+            }
+            else
+            {
+                if (sender is Form)
+                {
+                    previewPanel.Parent = previewTab;
+                    previewTab.Controls.Add(previewPanel);
+                    Tabs.TabPages.Insert(1, previewTab);
+                    previewDockUndock.Image = global::Voron_Poster.Properties.Resources.frame_16xLG;
+                    previewDockUndock.Text = "В отдельном окне";
+                }
+                else (previewPanel.Parent as Form).Close();
+            }
+        }
+       
         #endregion
 
         #region Tasks Page
@@ -201,6 +264,7 @@ namespace Voron_Poster
 
         private void TasksUpdater_Tick(object sender, EventArgs e)
         {
+            if (Tabs.SelectedTab != tasksTab) return;
             bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
             bool Checked = false, Unchecked = false;
             int ProgressSum = 0;
@@ -1409,8 +1473,8 @@ namespace Voron_Poster
         {
             if (scriptsMessage.Text == String.Empty)
             {
-                scriptsMessage.Text = "[b]Тестовое сообщение[b]\nСегодня [color=red]" +
-                    "хорошая[/color] погода.\nМы пойдем [color=#12830a]купаться[/color] на речку.";
+                scriptsMessage.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]" +
+                    "хорошая[/color] погода.\r\nМы пойдем [color=#12830a]купаться[/color] на речку.";
                 scriptsMessage.ForeColor = SystemColors.GrayText;
                 scriptsMessage.Font = new Font(scriptsMessage.Font, FontStyle.Italic);
             }
@@ -1497,6 +1561,14 @@ namespace Voron_Poster
             //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
             //else tasksTable.ColumnStyles[2].Width = 100;
         }
+
+
+
+
+
+
+
+
 
 
 

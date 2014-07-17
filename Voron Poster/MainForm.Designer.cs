@@ -29,20 +29,38 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.Tabs = new System.Windows.Forms.TabControl();
             this.messageTab = new System.Windows.Forms.TabPage();
+            this.messageNext = new System.Windows.Forms.Button();
+            this.messagePreview = new System.Windows.Forms.Button();
             this.messageText = new System.Windows.Forms.TextBox();
             this.messageSubject = new System.Windows.Forms.TextBox();
+            this.previewTab = new System.Windows.Forms.TabPage();
+            this.previewPanel = new System.Windows.Forms.Panel();
+            this.previewNext = new System.Windows.Forms.Button();
+            this.previewDockUndock = new System.Windows.Forms.Button();
             this.tasksTab = new System.Windows.Forms.TabPage();
             this.tasksGroup = new System.Windows.Forms.GroupBox();
+            this.tasksSave = new System.Windows.Forms.Button();
+            this.tasksLoad = new System.Windows.Forms.Button();
+            this.tasksAdd = new System.Windows.Forms.Button();
             this.tasksUrl = new System.Windows.Forms.TextBox();
             this.tasksUrlLabel = new System.Windows.Forms.Label();
             this.propTab = new System.Windows.Forms.TabPage();
+            this.propEngineDetect = new System.Windows.Forms.Button();
             this.propEngine = new System.Windows.Forms.ComboBox();
             this.propEngineLabel = new System.Windows.Forms.Label();
             this.propScriptsGroup = new System.Windows.Forms.GroupBox();
+            this.propScriptsEdit = new System.Windows.Forms.Button();
+            this.propScriptsDown = new System.Windows.Forms.Button();
+            this.propScriptsUp = new System.Windows.Forms.Button();
+            this.propScriptsAdd = new System.Windows.Forms.Button();
+            this.propScriptsRemove = new System.Windows.Forms.Button();
             this.propScriptsList = new System.Windows.Forms.ListBox();
             this.propAuthGroup = new System.Windows.Forms.GroupBox();
+            this.propAuthLog = new System.Windows.Forms.Button();
+            this.propAuthTryLogin = new System.Windows.Forms.Button();
             this.propAuthGlobalLabel = new System.Windows.Forms.Label();
             this.propAuthGlobalUsername = new System.Windows.Forms.TextBox();
             this.propAuthLocal = new System.Windows.Forms.RadioButton();
@@ -53,25 +71,38 @@
             this.propUsernameLabel = new System.Windows.Forms.Label();
             this.propUsername = new System.Windows.Forms.TextBox();
             this.propProfilesGroup = new System.Windows.Forms.GroupBox();
+            this.propProfileBrowse = new System.Windows.Forms.Button();
+            this.propProfileDelete = new System.Windows.Forms.Button();
+            this.propProfileNew = new System.Windows.Forms.Button();
+            this.propProfileSave = new System.Windows.Forms.Button();
+            this.propProfileLoad = new System.Windows.Forms.Button();
             this.propProfiles = new System.Windows.Forms.ComboBox();
             this.propMainUrlLabel = new System.Windows.Forms.Label();
             this.propMainUrl = new System.Windows.Forms.TextBox();
             this.propTargetLabel = new System.Windows.Forms.Label();
             this.propTargetUrl = new System.Windows.Forms.TextBox();
+            this.propApply = new System.Windows.Forms.Button();
+            this.propCancel = new System.Windows.Forms.Button();
             this.scriptsTab = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.scriptsTabs = new System.Windows.Forms.TabControl();
             this.scriptsCodeTab = new System.Windows.Forms.TabPage();
+            this.scriptsDelete = new System.Windows.Forms.Button();
+            this.scriptsNew = new System.Windows.Forms.Button();
+            this.scriptsSave = new System.Windows.Forms.Button();
             this.scriptsCodeBox = new System.Windows.Forms.TextBox();
             this.scriptsTestTab = new System.Windows.Forms.TabPage();
             this.scriptsResult = new System.Windows.Forms.TextBox();
             this.scriptsRunPanel = new System.Windows.Forms.Panel();
             this.scriptsStatusLabel = new System.Windows.Forms.Label();
+            this.scriptsRun = new System.Windows.Forms.Button();
             this.splitter3 = new System.Windows.Forms.Splitter();
             this.scriptsMessage = new System.Windows.Forms.TextBox();
             this.scriptsSpacePanel = new System.Windows.Forms.Panel();
             this.scriptsSubject = new System.Windows.Forms.TextBox();
             this.scriptsListPanel = new System.Windows.Forms.Panel();
+            this.scriptsAccept = new System.Windows.Forms.Button();
+            this.scriptsCancel = new System.Windows.Forms.Button();
             this.scriptsName = new System.Windows.Forms.TextBox();
             this.scriptsList = new System.Windows.Forms.ListBox();
             this.settingsTab = new System.Windows.Forms.TabPage();
@@ -83,42 +114,19 @@
             this.settingsGAuthPassword = new System.Windows.Forms.TextBox();
             this.settingsGAuthUsenameLabel = new System.Windows.Forms.Label();
             this.settingsGAuthUsername = new System.Windows.Forms.TextBox();
+            this.settingsSave = new System.Windows.Forms.Button();
+            this.settingsCancel = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
-            this.messageNext = new System.Windows.Forms.Button();
-            this.tasksSave = new System.Windows.Forms.Button();
-            this.tasksLoad = new System.Windows.Forms.Button();
-            this.tasksAdd = new System.Windows.Forms.Button();
-            this.propEngineDetect = new System.Windows.Forms.Button();
-            this.propScriptsEdit = new System.Windows.Forms.Button();
-            this.propScriptsDown = new System.Windows.Forms.Button();
-            this.propScriptsUp = new System.Windows.Forms.Button();
-            this.propScriptsAdd = new System.Windows.Forms.Button();
-            this.propScriptsRemove = new System.Windows.Forms.Button();
-            this.propAuthLog = new System.Windows.Forms.Button();
-            this.propAuthTryLogin = new System.Windows.Forms.Button();
-            this.propProfileBrowse = new System.Windows.Forms.Button();
-            this.propProfileDelete = new System.Windows.Forms.Button();
-            this.propProfileNew = new System.Windows.Forms.Button();
-            this.propProfileSave = new System.Windows.Forms.Button();
-            this.propProfileLoad = new System.Windows.Forms.Button();
-            this.propApply = new System.Windows.Forms.Button();
-            this.propCancel = new System.Windows.Forms.Button();
-            this.scriptsDelete = new System.Windows.Forms.Button();
-            this.scriptsNew = new System.Windows.Forms.Button();
-            this.scriptsSave = new System.Windows.Forms.Button();
-            this.scriptsRun = new System.Windows.Forms.Button();
-            this.scriptsAccept = new System.Windows.Forms.Button();
-            this.scriptsCancel = new System.Windows.Forms.Button();
-            this.settingsSave = new System.Windows.Forms.Button();
-            this.settingsCancel = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.previewWBPanel = new System.Windows.Forms.Panel();
+            this.previewWB = new System.Windows.Forms.WebBrowser();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -130,6 +138,8 @@
             this.GTDelete = new System.Windows.Forms.Button();
             this.Tabs.SuspendLayout();
             this.messageTab.SuspendLayout();
+            this.previewTab.SuspendLayout();
+            this.previewPanel.SuspendLayout();
             this.tasksTab.SuspendLayout();
             this.tasksGroup.SuspendLayout();
             this.propTab.SuspendLayout();
@@ -147,6 +157,7 @@
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.previewWBPanel.SuspendLayout();
             this.tasksTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).BeginInit();
             this.SuspendLayout();
@@ -154,6 +165,7 @@
             // Tabs
             // 
             this.Tabs.Controls.Add(this.messageTab);
+            this.Tabs.Controls.Add(this.previewTab);
             this.Tabs.Controls.Add(this.tasksTab);
             this.Tabs.Controls.Add(this.propTab);
             this.Tabs.Controls.Add(this.scriptsTab);
@@ -163,22 +175,51 @@
             this.Tabs.Location = new System.Drawing.Point(3, 3);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
-            this.Tabs.Size = new System.Drawing.Size(609, 494);
+            this.Tabs.Size = new System.Drawing.Size(568, 494);
             this.Tabs.TabIndex = 8;
             this.Tabs.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.Tabs_Selecting);
             // 
             // messageTab
             // 
             this.messageTab.Controls.Add(this.messageNext);
+            this.messageTab.Controls.Add(this.messagePreview);
             this.messageTab.Controls.Add(this.messageText);
             this.messageTab.Controls.Add(this.messageSubject);
             this.messageTab.Location = new System.Drawing.Point(4, 22);
             this.messageTab.Name = "messageTab";
             this.messageTab.Padding = new System.Windows.Forms.Padding(20);
-            this.messageTab.Size = new System.Drawing.Size(601, 468);
+            this.messageTab.Size = new System.Drawing.Size(560, 468);
             this.messageTab.TabIndex = 3;
             this.messageTab.Text = "Сообщение";
             this.messageTab.UseVisualStyleBackColor = true;
+            // 
+            // messageNext
+            // 
+            this.messageNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.messageNext.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.messageNext.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
+            this.messageNext.Location = new System.Drawing.Point(455, 23);
+            this.messageNext.Name = "messageNext";
+            this.messageNext.Size = new System.Drawing.Size(82, 24);
+            this.messageNext.TabIndex = 47;
+            this.messageNext.Text = "Далее";
+            this.messageNext.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.messageNext.UseVisualStyleBackColor = true;
+            this.messageNext.Click += new System.EventHandler(this.messageNext_Click);
+            // 
+            // messagePreview
+            // 
+            this.messagePreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.messagePreview.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.messagePreview.Image = ((System.Drawing.Image)(resources.GetObject("messagePreview.Image")));
+            this.messagePreview.Location = new System.Drawing.Point(322, 23);
+            this.messagePreview.Name = "messagePreview";
+            this.messagePreview.Size = new System.Drawing.Size(127, 24);
+            this.messagePreview.TabIndex = 46;
+            this.messagePreview.Text = "Предв. просмотр";
+            this.messagePreview.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.messagePreview.UseVisualStyleBackColor = true;
+            this.messagePreview.Click += new System.EventHandler(this.messagePreview_Click);
             // 
             // messageText
             // 
@@ -187,14 +228,15 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.messageText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.messageText.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.messageText.Location = new System.Drawing.Point(23, 94);
+            this.messageText.Location = new System.Drawing.Point(23, 79);
             this.messageText.Multiline = true;
             this.messageText.Name = "messageText";
             this.messageText.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.messageText.Size = new System.Drawing.Size(555, 351);
+            this.messageText.Size = new System.Drawing.Size(514, 366);
             this.messageText.TabIndex = 44;
             this.messageText.Text = "Текст сообщения";
             this.messageText.WordWrap = false;
+            this.messageText.TextChanged += new System.EventHandler(this.previewTab_Enter);
             // 
             // messageSubject
             // 
@@ -202,11 +244,61 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.messageSubject.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.messageSubject.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.messageSubject.Location = new System.Drawing.Point(23, 64);
+            this.messageSubject.Location = new System.Drawing.Point(23, 53);
             this.messageSubject.Name = "messageSubject";
-            this.messageSubject.Size = new System.Drawing.Size(555, 20);
+            this.messageSubject.Size = new System.Drawing.Size(514, 20);
             this.messageSubject.TabIndex = 41;
             this.messageSubject.Text = "Тема сообщения";
+            this.messageSubject.TextChanged += new System.EventHandler(this.previewTab_Enter);
+            // 
+            // previewTab
+            // 
+            this.previewTab.Controls.Add(this.previewPanel);
+            this.previewTab.Location = new System.Drawing.Point(4, 22);
+            this.previewTab.Name = "previewTab";
+            this.previewTab.Padding = new System.Windows.Forms.Padding(20);
+            this.previewTab.Size = new System.Drawing.Size(560, 468);
+            this.previewTab.TabIndex = 8;
+            this.previewTab.Text = "Предв. просмотр";
+            this.previewTab.UseVisualStyleBackColor = true;
+            this.previewTab.Enter += new System.EventHandler(this.previewTab_Enter);
+            // 
+            // previewPanel
+            // 
+            this.previewPanel.Controls.Add(this.previewWBPanel);
+            this.previewPanel.Controls.Add(this.previewNext);
+            this.previewPanel.Controls.Add(this.previewDockUndock);
+            this.previewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.previewPanel.Location = new System.Drawing.Point(20, 20);
+            this.previewPanel.Name = "previewPanel";
+            this.previewPanel.Size = new System.Drawing.Size(520, 428);
+            this.previewPanel.TabIndex = 0;
+            // 
+            // previewNext
+            // 
+            this.previewNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.previewNext.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.previewNext.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
+            this.previewNext.Location = new System.Drawing.Point(435, 3);
+            this.previewNext.Name = "previewNext";
+            this.previewNext.Size = new System.Drawing.Size(82, 24);
+            this.previewNext.TabIndex = 48;
+            this.previewNext.Text = "Далее";
+            this.previewNext.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.previewNext.UseVisualStyleBackColor = true;
+            this.previewNext.Click += new System.EventHandler(this.previewNext_Click);
+            // 
+            // previewDockUndock
+            // 
+            this.previewDockUndock.Image = global::Voron_Poster.Properties.Resources.frame_16xLG;
+            this.previewDockUndock.Location = new System.Drawing.Point(3, 3);
+            this.previewDockUndock.Name = "previewDockUndock";
+            this.previewDockUndock.Size = new System.Drawing.Size(140, 24);
+            this.previewDockUndock.TabIndex = 0;
+            this.previewDockUndock.Text = "В отдельном окне";
+            this.previewDockUndock.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.previewDockUndock.UseVisualStyleBackColor = true;
+            this.previewDockUndock.Click += new System.EventHandler(this.previewDockUndock_Click);
             // 
             // tasksTab
             // 
@@ -215,7 +307,7 @@
             this.tasksTab.Location = new System.Drawing.Point(4, 22);
             this.tasksTab.Name = "tasksTab";
             this.tasksTab.Padding = new System.Windows.Forms.Padding(20, 15, 20, 20);
-            this.tasksTab.Size = new System.Drawing.Size(601, 468);
+            this.tasksTab.Size = new System.Drawing.Size(560, 468);
             this.tasksTab.TabIndex = 2;
             this.tasksTab.Text = "Публикация";
             this.tasksTab.UseVisualStyleBackColor = true;
@@ -232,10 +324,52 @@
             this.tasksGroup.Location = new System.Drawing.Point(23, 18);
             this.tasksGroup.Name = "tasksGroup";
             this.tasksGroup.Padding = new System.Windows.Forms.Padding(3, 0, 4, 3);
-            this.tasksGroup.Size = new System.Drawing.Size(555, 71);
+            this.tasksGroup.Size = new System.Drawing.Size(514, 71);
             this.tasksGroup.TabIndex = 12;
             this.tasksGroup.TabStop = false;
             this.tasksGroup.Text = "Список тем";
+            // 
+            // tasksSave
+            // 
+            this.tasksSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.tasksSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.tasksSave.Location = new System.Drawing.Point(331, 13);
+            this.tasksSave.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.tasksSave.Name = "tasksSave";
+            this.tasksSave.Size = new System.Drawing.Size(86, 24);
+            this.tasksSave.TabIndex = 11;
+            this.tasksSave.Text = "Сохранить";
+            this.tasksSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.tasksSave.UseVisualStyleBackColor = true;
+            this.tasksSave.Click += new System.EventHandler(this.tasksSave_Click);
+            // 
+            // tasksLoad
+            // 
+            this.tasksLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.tasksLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
+            this.tasksLoad.Location = new System.Drawing.Point(421, 13);
+            this.tasksLoad.Margin = new System.Windows.Forms.Padding(10, 0, 1, 0);
+            this.tasksLoad.Name = "tasksLoad";
+            this.tasksLoad.Size = new System.Drawing.Size(86, 24);
+            this.tasksLoad.TabIndex = 11;
+            this.tasksLoad.Text = "...Открыть";
+            this.tasksLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.tasksLoad.UseVisualStyleBackColor = true;
+            this.tasksLoad.Click += new System.EventHandler(this.tasksLoad_Click);
+            // 
+            // tasksAdd
+            // 
+            this.tasksAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.tasksAdd.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.tasksAdd.Location = new System.Drawing.Point(421, 40);
+            this.tasksAdd.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
+            this.tasksAdd.Name = "tasksAdd";
+            this.tasksAdd.Size = new System.Drawing.Size(86, 24);
+            this.tasksAdd.TabIndex = 2;
+            this.tasksAdd.Text = "Добавить";
+            this.tasksAdd.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.tasksAdd.UseVisualStyleBackColor = true;
+            this.tasksAdd.Click += new System.EventHandler(this.AddTaskButton_Click);
             // 
             // tasksUrl
             // 
@@ -244,7 +378,7 @@
             this.tasksUrl.Location = new System.Drawing.Point(10, 42);
             this.tasksUrl.Margin = new System.Windows.Forms.Padding(13, 3, 13, 3);
             this.tasksUrl.Name = "tasksUrl";
-            this.tasksUrl.Size = new System.Drawing.Size(447, 20);
+            this.tasksUrl.Size = new System.Drawing.Size(406, 20);
             this.tasksUrl.TabIndex = 1;
             // 
             // tasksUrlLabel
@@ -273,10 +407,24 @@
             this.propTab.Location = new System.Drawing.Point(4, 22);
             this.propTab.Name = "propTab";
             this.propTab.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
-            this.propTab.Size = new System.Drawing.Size(601, 468);
+            this.propTab.Size = new System.Drawing.Size(560, 468);
             this.propTab.TabIndex = 4;
             this.propTab.Text = "Параметры задачи";
             this.propTab.UseVisualStyleBackColor = true;
+            // 
+            // propEngineDetect
+            // 
+            this.propEngineDetect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propEngineDetect.Enabled = false;
+            this.propEngineDetect.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
+            this.propEngineDetect.Location = new System.Drawing.Point(195, 191);
+            this.propEngineDetect.Name = "propEngineDetect";
+            this.propEngineDetect.Size = new System.Drawing.Size(99, 25);
+            this.propEngineDetect.TabIndex = 8;
+            this.propEngineDetect.Text = "Определить";
+            this.propEngineDetect.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propEngineDetect.UseVisualStyleBackColor = true;
+            this.propEngineDetect.Click += new System.EventHandler(this.propEngineDetect_Click);
             // 
             // propEngine
             // 
@@ -288,7 +436,7 @@
             this.propEngine.FormattingEnabled = true;
             this.propEngine.Location = new System.Drawing.Point(122, 193);
             this.propEngine.Name = "propEngine";
-            this.propEngine.Size = new System.Drawing.Size(108, 21);
+            this.propEngine.Size = new System.Drawing.Size(67, 21);
             this.propEngine.TabIndex = 7;
             this.propEngine.SelectedIndexChanged += new System.EventHandler(this.propEngine_SelectedIndexChanged);
             // 
@@ -315,10 +463,74 @@
             this.propScriptsGroup.Location = new System.Drawing.Point(23, 222);
             this.propScriptsGroup.Name = "propScriptsGroup";
             this.propScriptsGroup.Padding = new System.Windows.Forms.Padding(10, 3, 10, 5);
-            this.propScriptsGroup.Size = new System.Drawing.Size(312, 223);
+            this.propScriptsGroup.Size = new System.Drawing.Size(271, 223);
             this.propScriptsGroup.TabIndex = 9;
             this.propScriptsGroup.TabStop = false;
             this.propScriptsGroup.Text = "Скрипты предобработки";
+            // 
+            // propScriptsEdit
+            // 
+            this.propScriptsEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsEdit.Enabled = false;
+            this.propScriptsEdit.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
+            this.propScriptsEdit.Location = new System.Drawing.Point(232, 157);
+            this.propScriptsEdit.Name = "propScriptsEdit";
+            this.propScriptsEdit.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsEdit.TabIndex = 6;
+            this.propScriptsEdit.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsEdit.UseVisualStyleBackColor = true;
+            this.propScriptsEdit.Click += new System.EventHandler(this.propScriptsEdit_Click);
+            // 
+            // propScriptsDown
+            // 
+            this.propScriptsDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsDown.Enabled = false;
+            this.propScriptsDown.Image = global::Voron_Poster.Properties.Resources.arrow_Down_16xLG;
+            this.propScriptsDown.Location = new System.Drawing.Point(232, 51);
+            this.propScriptsDown.Name = "propScriptsDown";
+            this.propScriptsDown.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsDown.TabIndex = 5;
+            this.propScriptsDown.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsDown.UseVisualStyleBackColor = true;
+            this.propScriptsDown.Click += new System.EventHandler(this.propScriptsDown_Click);
+            // 
+            // propScriptsUp
+            // 
+            this.propScriptsUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsUp.Enabled = false;
+            this.propScriptsUp.Image = global::Voron_Poster.Properties.Resources.arrow_Up_16xLG;
+            this.propScriptsUp.Location = new System.Drawing.Point(232, 19);
+            this.propScriptsUp.Name = "propScriptsUp";
+            this.propScriptsUp.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsUp.TabIndex = 4;
+            this.propScriptsUp.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsUp.UseVisualStyleBackColor = true;
+            this.propScriptsUp.Click += new System.EventHandler(this.propScriptsUp_Click);
+            // 
+            // propScriptsAdd
+            // 
+            this.propScriptsAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsAdd.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.propScriptsAdd.Location = new System.Drawing.Point(232, 125);
+            this.propScriptsAdd.Name = "propScriptsAdd";
+            this.propScriptsAdd.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsAdd.TabIndex = 0;
+            this.propScriptsAdd.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsAdd.UseVisualStyleBackColor = true;
+            this.propScriptsAdd.Click += new System.EventHandler(this.propScriptsAdd_Click);
+            // 
+            // propScriptsRemove
+            // 
+            this.propScriptsRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propScriptsRemove.Enabled = false;
+            this.propScriptsRemove.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
+            this.propScriptsRemove.Location = new System.Drawing.Point(232, 189);
+            this.propScriptsRemove.Name = "propScriptsRemove";
+            this.propScriptsRemove.Size = new System.Drawing.Size(26, 26);
+            this.propScriptsRemove.TabIndex = 1;
+            this.propScriptsRemove.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propScriptsRemove.UseVisualStyleBackColor = true;
+            this.propScriptsRemove.Click += new System.EventHandler(this.propScriptsRemove_Click);
             // 
             // propScriptsList
             // 
@@ -327,7 +539,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.propScriptsList.Location = new System.Drawing.Point(13, 19);
             this.propScriptsList.Name = "propScriptsList";
-            this.propScriptsList.Size = new System.Drawing.Size(254, 186);
+            this.propScriptsList.Size = new System.Drawing.Size(213, 186);
             this.propScriptsList.TabIndex = 3;
             this.propScriptsList.SelectedIndexChanged += new System.EventHandler(this.propScriptsList_SelectedIndexChanged);
             this.propScriptsList.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.propScriptsList_MouseDoubleClick);
@@ -347,12 +559,38 @@
             this.propAuthGroup.Controls.Add(this.propPassword);
             this.propAuthGroup.Controls.Add(this.propUsernameLabel);
             this.propAuthGroup.Controls.Add(this.propUsername);
-            this.propAuthGroup.Location = new System.Drawing.Point(341, 151);
+            this.propAuthGroup.Location = new System.Drawing.Point(300, 151);
             this.propAuthGroup.Name = "propAuthGroup";
             this.propAuthGroup.Size = new System.Drawing.Size(237, 250);
             this.propAuthGroup.TabIndex = 10;
             this.propAuthGroup.TabStop = false;
             this.propAuthGroup.Text = "Авторизация";
+            // 
+            // propAuthLog
+            // 
+            this.propAuthLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propAuthLog.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG;
+            this.propAuthLog.Location = new System.Drawing.Point(196, 208);
+            this.propAuthLog.Name = "propAuthLog";
+            this.propAuthLog.Size = new System.Drawing.Size(24, 24);
+            this.propAuthLog.TabIndex = 10;
+            this.propAuthLog.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propAuthLog.UseVisualStyleBackColor = true;
+            this.propAuthLog.Click += new System.EventHandler(this.propAuthLog_Click);
+            // 
+            // propAuthTryLogin
+            // 
+            this.propAuthTryLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propAuthTryLogin.Enabled = false;
+            this.propAuthTryLogin.Image = global::Voron_Poster.Properties.Resources.user_16xLG;
+            this.propAuthTryLogin.Location = new System.Drawing.Point(11, 208);
+            this.propAuthTryLogin.Name = "propAuthTryLogin";
+            this.propAuthTryLogin.Size = new System.Drawing.Size(179, 24);
+            this.propAuthTryLogin.TabIndex = 9;
+            this.propAuthTryLogin.Text = "Пробная авторизация";
+            this.propAuthTryLogin.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propAuthTryLogin.UseVisualStyleBackColor = true;
+            this.propAuthTryLogin.Click += new System.EventHandler(this.propAuthTryLogin_Click);
             // 
             // propAuthGlobalLabel
             // 
@@ -465,10 +703,75 @@
             this.propProfilesGroup.Location = new System.Drawing.Point(23, 59);
             this.propProfilesGroup.Name = "propProfilesGroup";
             this.propProfilesGroup.Padding = new System.Windows.Forms.Padding(10, 3, 3, 5);
-            this.propProfilesGroup.Size = new System.Drawing.Size(555, 79);
+            this.propProfilesGroup.Size = new System.Drawing.Size(514, 79);
             this.propProfilesGroup.TabIndex = 2;
             this.propProfilesGroup.TabStop = false;
             this.propProfilesGroup.Text = "Готовые профили";
+            // 
+            // propProfileBrowse
+            // 
+            this.propProfileBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.propProfileBrowse.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
+            this.propProfileBrowse.Location = new System.Drawing.Point(401, 17);
+            this.propProfileBrowse.Name = "propProfileBrowse";
+            this.propProfileBrowse.Size = new System.Drawing.Size(96, 24);
+            this.propProfileBrowse.TabIndex = 5;
+            this.propProfileBrowse.Text = "... Обзор";
+            this.propProfileBrowse.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileBrowse.UseVisualStyleBackColor = true;
+            this.propProfileBrowse.Click += new System.EventHandler(this.propProfileBrowse_Click);
+            // 
+            // propProfileDelete
+            // 
+            this.propProfileDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.propProfileDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.propProfileDelete.Location = new System.Drawing.Point(247, 47);
+            this.propProfileDelete.Name = "propProfileDelete";
+            this.propProfileDelete.Size = new System.Drawing.Size(97, 24);
+            this.propProfileDelete.TabIndex = 2;
+            this.propProfileDelete.Text = "Удалить";
+            this.propProfileDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileDelete.UseVisualStyleBackColor = true;
+            this.propProfileDelete.Click += new System.EventHandler(this.DeleteProfileButton_Click);
+            // 
+            // propProfileNew
+            // 
+            this.propProfileNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.propProfileNew.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.propProfileNew.Location = new System.Drawing.Point(13, 47);
+            this.propProfileNew.Name = "propProfileNew";
+            this.propProfileNew.Size = new System.Drawing.Size(125, 24);
+            this.propProfileNew.TabIndex = 4;
+            this.propProfileNew.Text = "Создать новый";
+            this.propProfileNew.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileNew.UseVisualStyleBackColor = true;
+            this.propProfileNew.Click += new System.EventHandler(this.NewProfileButton_Click);
+            // 
+            // propProfileSave
+            // 
+            this.propProfileSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.propProfileSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.propProfileSave.Location = new System.Drawing.Point(144, 47);
+            this.propProfileSave.Name = "propProfileSave";
+            this.propProfileSave.Size = new System.Drawing.Size(97, 24);
+            this.propProfileSave.TabIndex = 3;
+            this.propProfileSave.Text = "Сохранить";
+            this.propProfileSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileSave.UseVisualStyleBackColor = true;
+            this.propProfileSave.Click += new System.EventHandler(this.SaveProfileButton_Click);
+            // 
+            // propProfileLoad
+            // 
+            this.propProfileLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propProfileLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
+            this.propProfileLoad.Location = new System.Drawing.Point(350, 47);
+            this.propProfileLoad.Name = "propProfileLoad";
+            this.propProfileLoad.Size = new System.Drawing.Size(147, 24);
+            this.propProfileLoad.TabIndex = 1;
+            this.propProfileLoad.Text = "Открыть (Применить)";
+            this.propProfileLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propProfileLoad.UseVisualStyleBackColor = true;
+            this.propProfileLoad.Click += new System.EventHandler(this.LoadProfileButton_Click);
             // 
             // propProfiles
             // 
@@ -479,7 +782,7 @@
             this.propProfiles.FormattingEnabled = true;
             this.propProfiles.Location = new System.Drawing.Point(13, 19);
             this.propProfiles.Name = "propProfiles";
-            this.propProfiles.Size = new System.Drawing.Size(423, 21);
+            this.propProfiles.Size = new System.Drawing.Size(382, 21);
             this.propProfiles.TabIndex = 0;
             this.propProfiles.TextChanged += new System.EventHandler(this.ProfileComboBox_TextChanged);
             this.propProfiles.Enter += new System.EventHandler(this.ProfileComboBox_Enter);
@@ -501,7 +804,7 @@
             this.propMainUrl.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
             this.propMainUrl.Location = new System.Drawing.Point(23, 167);
             this.propMainUrl.Name = "propMainUrl";
-            this.propMainUrl.Size = new System.Drawing.Size(312, 20);
+            this.propMainUrl.Size = new System.Drawing.Size(271, 20);
             this.propMainUrl.TabIndex = 5;
             this.propMainUrl.Text = "http://";
             this.propMainUrl.TextChanged += new System.EventHandler(this.propUrl_TextChanged);
@@ -523,10 +826,39 @@
             this.propTargetUrl.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.AllUrl;
             this.propTargetUrl.Location = new System.Drawing.Point(23, 33);
             this.propTargetUrl.Name = "propTargetUrl";
-            this.propTargetUrl.Size = new System.Drawing.Size(555, 20);
+            this.propTargetUrl.Size = new System.Drawing.Size(514, 20);
             this.propTargetUrl.TabIndex = 1;
             this.propTargetUrl.Text = "http://";
             this.propTargetUrl.TextChanged += new System.EventHandler(this.propUrl_TextChanged);
+            // 
+            // propApply
+            // 
+            this.propApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propApply.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.propApply.Enabled = false;
+            this.propApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.propApply.Location = new System.Drawing.Point(300, 407);
+            this.propApply.Name = "propApply";
+            this.propApply.Size = new System.Drawing.Size(115, 38);
+            this.propApply.TabIndex = 11;
+            this.propApply.Text = "Применить";
+            this.propApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propApply.UseVisualStyleBackColor = true;
+            this.propApply.Click += new System.EventHandler(this.propApply_Click);
+            // 
+            // propCancel
+            // 
+            this.propCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.propCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.propCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.propCancel.Location = new System.Drawing.Point(421, 407);
+            this.propCancel.Name = "propCancel";
+            this.propCancel.Size = new System.Drawing.Size(116, 38);
+            this.propCancel.TabIndex = 12;
+            this.propCancel.Text = "Отмена";
+            this.propCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.propCancel.UseVisualStyleBackColor = true;
+            this.propCancel.Click += new System.EventHandler(this.propClose);
             // 
             // scriptsTab
             // 
@@ -536,7 +868,7 @@
             this.scriptsTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsTab.Name = "scriptsTab";
             this.scriptsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.scriptsTab.Size = new System.Drawing.Size(601, 468);
+            this.scriptsTab.Size = new System.Drawing.Size(560, 468);
             this.scriptsTab.TabIndex = 5;
             this.scriptsTab.Text = "Скрипты";
             this.scriptsTab.UseVisualStyleBackColor = true;
@@ -561,7 +893,7 @@
             this.scriptsTabs.MinimumSize = new System.Drawing.Size(350, 0);
             this.scriptsTabs.Name = "scriptsTabs";
             this.scriptsTabs.SelectedIndex = 0;
-            this.scriptsTabs.Size = new System.Drawing.Size(446, 462);
+            this.scriptsTabs.Size = new System.Drawing.Size(405, 462);
             this.scriptsTabs.TabIndex = 9;
             // 
             // scriptsCodeTab
@@ -573,10 +905,50 @@
             this.scriptsCodeTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsCodeTab.Name = "scriptsCodeTab";
             this.scriptsCodeTab.Padding = new System.Windows.Forms.Padding(3);
-            this.scriptsCodeTab.Size = new System.Drawing.Size(438, 436);
+            this.scriptsCodeTab.Size = new System.Drawing.Size(397, 436);
             this.scriptsCodeTab.TabIndex = 0;
             this.scriptsCodeTab.Text = "Код";
             this.scriptsCodeTab.UseVisualStyleBackColor = true;
+            // 
+            // scriptsDelete
+            // 
+            this.scriptsDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.scriptsDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
+            this.scriptsDelete.Location = new System.Drawing.Point(137, 406);
+            this.scriptsDelete.Name = "scriptsDelete";
+            this.scriptsDelete.Size = new System.Drawing.Size(97, 24);
+            this.scriptsDelete.TabIndex = 7;
+            this.scriptsDelete.Text = "Удалить";
+            this.scriptsDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsDelete.UseVisualStyleBackColor = true;
+            this.scriptsDelete.Click += new System.EventHandler(this.scriptsDelete_Click);
+            // 
+            // scriptsNew
+            // 
+            this.scriptsNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.scriptsNew.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
+            this.scriptsNew.Location = new System.Drawing.Point(6, 406);
+            this.scriptsNew.Name = "scriptsNew";
+            this.scriptsNew.Size = new System.Drawing.Size(125, 24);
+            this.scriptsNew.TabIndex = 6;
+            this.scriptsNew.Text = "Создать новый";
+            this.scriptsNew.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsNew.UseVisualStyleBackColor = true;
+            this.scriptsNew.Click += new System.EventHandler(this.scriptsNew_Click);
+            // 
+            // scriptsSave
+            // 
+            this.scriptsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsSave.Enabled = false;
+            this.scriptsSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
+            this.scriptsSave.Location = new System.Drawing.Point(294, 406);
+            this.scriptsSave.Name = "scriptsSave";
+            this.scriptsSave.Size = new System.Drawing.Size(97, 24);
+            this.scriptsSave.TabIndex = 5;
+            this.scriptsSave.Text = "Сохранить";
+            this.scriptsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsSave.UseVisualStyleBackColor = true;
+            this.scriptsSave.Click += new System.EventHandler(this.scriptsSave_Click);
             // 
             // scriptsCodeBox
             // 
@@ -587,7 +959,7 @@
             this.scriptsCodeBox.Multiline = true;
             this.scriptsCodeBox.Name = "scriptsCodeBox";
             this.scriptsCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.scriptsCodeBox.Size = new System.Drawing.Size(426, 394);
+            this.scriptsCodeBox.Size = new System.Drawing.Size(385, 394);
             this.scriptsCodeBox.TabIndex = 1;
             this.scriptsCodeBox.TextChanged += new System.EventHandler(this.scriptsEditor_TextChanged);
             // 
@@ -602,7 +974,7 @@
             this.scriptsTestTab.Location = new System.Drawing.Point(4, 22);
             this.scriptsTestTab.Name = "scriptsTestTab";
             this.scriptsTestTab.Padding = new System.Windows.Forms.Padding(10);
-            this.scriptsTestTab.Size = new System.Drawing.Size(438, 436);
+            this.scriptsTestTab.Size = new System.Drawing.Size(397, 436);
             this.scriptsTestTab.TabIndex = 1;
             this.scriptsTestTab.Text = "Проверка";
             this.scriptsTestTab.UseVisualStyleBackColor = true;
@@ -614,7 +986,7 @@
             this.scriptsResult.Multiline = true;
             this.scriptsResult.Name = "scriptsResult";
             this.scriptsResult.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-            this.scriptsResult.Size = new System.Drawing.Size(418, 245);
+            this.scriptsResult.Size = new System.Drawing.Size(377, 245);
             this.scriptsResult.TabIndex = 42;
             this.scriptsResult.WordWrap = false;
             // 
@@ -626,7 +998,7 @@
             this.scriptsRunPanel.Location = new System.Drawing.Point(10, 145);
             this.scriptsRunPanel.Name = "scriptsRunPanel";
             this.scriptsRunPanel.Padding = new System.Windows.Forms.Padding(0, 5, 5, 5);
-            this.scriptsRunPanel.Size = new System.Drawing.Size(418, 36);
+            this.scriptsRunPanel.Size = new System.Drawing.Size(377, 36);
             this.scriptsRunPanel.TabIndex = 37;
             // 
             // scriptsStatusLabel
@@ -637,6 +1009,20 @@
             this.scriptsStatusLabel.TabIndex = 33;
             this.scriptsStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // scriptsRun
+            // 
+            this.scriptsRun.Dock = System.Windows.Forms.DockStyle.Left;
+            this.scriptsRun.Image = global::Voron_Poster.Properties.Resources.test_32x_SMcuted;
+            this.scriptsRun.Location = new System.Drawing.Point(0, 5);
+            this.scriptsRun.MaximumSize = new System.Drawing.Size(99, 25);
+            this.scriptsRun.Name = "scriptsRun";
+            this.scriptsRun.Size = new System.Drawing.Size(99, 25);
+            this.scriptsRun.TabIndex = 32;
+            this.scriptsRun.Text = "Тест";
+            this.scriptsRun.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsRun.UseVisualStyleBackColor = true;
+            this.scriptsRun.Click += new System.EventHandler(this.scriptsRun_Click);
+            // 
             // splitter3
             // 
             this.splitter3.Dock = System.Windows.Forms.DockStyle.Top;
@@ -645,7 +1031,7 @@
             this.splitter3.MinSize = 37;
             this.splitter3.Name = "splitter3";
             this.splitter3.Padding = new System.Windows.Forms.Padding(0, 10, 10, 10);
-            this.splitter3.Size = new System.Drawing.Size(418, 3);
+            this.splitter3.Size = new System.Drawing.Size(377, 3);
             this.splitter3.TabIndex = 35;
             this.splitter3.TabStop = false;
             // 
@@ -658,7 +1044,7 @@
             this.scriptsMessage.Multiline = true;
             this.scriptsMessage.Name = "scriptsMessage";
             this.scriptsMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.scriptsMessage.Size = new System.Drawing.Size(418, 102);
+            this.scriptsMessage.Size = new System.Drawing.Size(377, 102);
             this.scriptsMessage.TabIndex = 40;
             this.scriptsMessage.Text = "[b]Тестовое сообщение[b]\r\nСегодня [color=red]хорошая[/color] погода.\r\nМы пойдем [" +
     "color=#12830a]купаться[/color] на речку.";
@@ -684,7 +1070,7 @@
             this.scriptsSubject.ForeColor = System.Drawing.SystemColors.GrayText;
             this.scriptsSubject.Location = new System.Drawing.Point(10, 10);
             this.scriptsSubject.Name = "scriptsSubject";
-            this.scriptsSubject.Size = new System.Drawing.Size(418, 20);
+            this.scriptsSubject.Size = new System.Drawing.Size(377, 20);
             this.scriptsSubject.TabIndex = 33;
             this.scriptsSubject.Text = "Тема сообщения";
             this.scriptsSubject.TextChanged += new System.EventHandler(this.scriptsSubject_TextChanged);
@@ -703,6 +1089,35 @@
             this.scriptsListPanel.Name = "scriptsListPanel";
             this.scriptsListPanel.Size = new System.Drawing.Size(149, 462);
             this.scriptsListPanel.TabIndex = 7;
+            // 
+            // scriptsAccept
+            // 
+            this.scriptsAccept.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.scriptsAccept.Enabled = false;
+            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.scriptsAccept.Location = new System.Drawing.Point(3, 420);
+            this.scriptsAccept.Name = "scriptsAccept";
+            this.scriptsAccept.Size = new System.Drawing.Size(96, 38);
+            this.scriptsAccept.TabIndex = 16;
+            this.scriptsAccept.Text = "Выбрать";
+            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsAccept.UseVisualStyleBackColor = true;
+            this.scriptsAccept.Click += new System.EventHandler(this.scriptsAccept_Click);
+            // 
+            // scriptsCancel
+            // 
+            this.scriptsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.scriptsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.scriptsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.scriptsCancel.Location = new System.Drawing.Point(105, 420);
+            this.scriptsCancel.Name = "scriptsCancel";
+            this.scriptsCancel.Size = new System.Drawing.Size(38, 38);
+            this.scriptsCancel.TabIndex = 14;
+            this.scriptsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.scriptsCancel.UseVisualStyleBackColor = true;
+            this.scriptsCancel.Click += new System.EventHandler(this.scriptsCancel_Click);
             // 
             // scriptsName
             // 
@@ -740,7 +1155,7 @@
             this.settingsTab.Location = new System.Drawing.Point(4, 22);
             this.settingsTab.Name = "settingsTab";
             this.settingsTab.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
-            this.settingsTab.Size = new System.Drawing.Size(601, 468);
+            this.settingsTab.Size = new System.Drawing.Size(560, 468);
             this.settingsTab.TabIndex = 7;
             this.settingsTab.Text = "Настройки";
             this.settingsTab.UseVisualStyleBackColor = true;
@@ -836,6 +1251,35 @@
             this.settingsGAuthUsername.TabIndex = 5;
             this.settingsGAuthUsername.TextChanged += new System.EventHandler(this.settings_Changed);
             // 
+            // settingsSave
+            // 
+            this.settingsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsSave.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.settingsSave.Enabled = false;
+            this.settingsSave.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
+            this.settingsSave.Location = new System.Drawing.Point(300, 407);
+            this.settingsSave.Name = "settingsSave";
+            this.settingsSave.Size = new System.Drawing.Size(115, 38);
+            this.settingsSave.TabIndex = 14;
+            this.settingsSave.Text = "Сохранить";
+            this.settingsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.settingsSave.UseVisualStyleBackColor = true;
+            this.settingsSave.Click += new System.EventHandler(this.settingsSave_Click);
+            // 
+            // settingsCancel
+            // 
+            this.settingsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.settingsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.settingsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
+            this.settingsCancel.Location = new System.Drawing.Point(421, 407);
+            this.settingsCancel.Name = "settingsCancel";
+            this.settingsCancel.Size = new System.Drawing.Size(116, 38);
+            this.settingsCancel.TabIndex = 15;
+            this.settingsCancel.Text = "Отмена";
+            this.settingsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.settingsCancel.UseVisualStyleBackColor = true;
+            this.settingsCancel.Click += new System.EventHandler(this.settingsCancel_Click);
+            // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.label1);
@@ -845,7 +1289,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(601, 468);
+            this.tabPage1.Size = new System.Drawing.Size(560, 468);
             this.tabPage1.TabIndex = 6;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -881,6 +1325,16 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::Voron_Poster.Properties.Resources.YAAvatar__2_;
+            this.pictureBox1.Location = new System.Drawing.Point(6, 19);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(80, 80);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
             // listBox1
             // 
             this.listBox1.FormattingEnabled = true;
@@ -904,381 +1358,29 @@
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
             // 
-            // messageNext
+            // previewWBPanel
             // 
-            this.messageNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.messageNext.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.messageNext.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Play_32xMD_color1;
-            this.messageNext.Location = new System.Drawing.Point(463, 20);
-            this.messageNext.Name = "messageNext";
-            this.messageNext.Size = new System.Drawing.Size(115, 38);
-            this.messageNext.TabIndex = 45;
-            this.messageNext.Text = "Далее";
-            this.messageNext.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.messageNext.UseVisualStyleBackColor = true;
-            this.messageNext.Click += new System.EventHandler(this.messageNext_Click);
-            // 
-            // tasksSave
-            // 
-            this.tasksSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tasksSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.tasksSave.Location = new System.Drawing.Point(372, 13);
-            this.tasksSave.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
-            this.tasksSave.Name = "tasksSave";
-            this.tasksSave.Size = new System.Drawing.Size(86, 24);
-            this.tasksSave.TabIndex = 11;
-            this.tasksSave.Text = "Сохранить";
-            this.tasksSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.tasksSave.UseVisualStyleBackColor = true;
-            this.tasksSave.Click += new System.EventHandler(this.tasksSave_Click);
-            // 
-            // tasksLoad
-            // 
-            this.tasksLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tasksLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.tasksLoad.Location = new System.Drawing.Point(462, 13);
-            this.tasksLoad.Margin = new System.Windows.Forms.Padding(10, 0, 1, 0);
-            this.tasksLoad.Name = "tasksLoad";
-            this.tasksLoad.Size = new System.Drawing.Size(86, 24);
-            this.tasksLoad.TabIndex = 11;
-            this.tasksLoad.Text = "...Открыть";
-            this.tasksLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.tasksLoad.UseVisualStyleBackColor = true;
-            this.tasksLoad.Click += new System.EventHandler(this.tasksLoad_Click);
-            // 
-            // tasksAdd
-            // 
-            this.tasksAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.tasksAdd.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.tasksAdd.Location = new System.Drawing.Point(462, 40);
-            this.tasksAdd.Margin = new System.Windows.Forms.Padding(3, 3, 10, 3);
-            this.tasksAdd.Name = "tasksAdd";
-            this.tasksAdd.Size = new System.Drawing.Size(86, 24);
-            this.tasksAdd.TabIndex = 2;
-            this.tasksAdd.Text = "Добавить";
-            this.tasksAdd.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.tasksAdd.UseVisualStyleBackColor = true;
-            this.tasksAdd.Click += new System.EventHandler(this.AddTaskButton_Click);
-            // 
-            // propEngineDetect
-            // 
-            this.propEngineDetect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propEngineDetect.Enabled = false;
-            this.propEngineDetect.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
-            this.propEngineDetect.Location = new System.Drawing.Point(236, 191);
-            this.propEngineDetect.Name = "propEngineDetect";
-            this.propEngineDetect.Size = new System.Drawing.Size(99, 25);
-            this.propEngineDetect.TabIndex = 8;
-            this.propEngineDetect.Text = "Определить";
-            this.propEngineDetect.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propEngineDetect.UseVisualStyleBackColor = true;
-            this.propEngineDetect.Click += new System.EventHandler(this.propEngineDetect_Click);
-            // 
-            // propScriptsEdit
-            // 
-            this.propScriptsEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propScriptsEdit.Enabled = false;
-            this.propScriptsEdit.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
-            this.propScriptsEdit.Location = new System.Drawing.Point(273, 157);
-            this.propScriptsEdit.Name = "propScriptsEdit";
-            this.propScriptsEdit.Size = new System.Drawing.Size(26, 26);
-            this.propScriptsEdit.TabIndex = 6;
-            this.propScriptsEdit.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propScriptsEdit.UseVisualStyleBackColor = true;
-            this.propScriptsEdit.Click += new System.EventHandler(this.propScriptsEdit_Click);
-            // 
-            // propScriptsDown
-            // 
-            this.propScriptsDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propScriptsDown.Enabled = false;
-            this.propScriptsDown.Image = global::Voron_Poster.Properties.Resources.arrow_Down_16xLG;
-            this.propScriptsDown.Location = new System.Drawing.Point(273, 51);
-            this.propScriptsDown.Name = "propScriptsDown";
-            this.propScriptsDown.Size = new System.Drawing.Size(26, 26);
-            this.propScriptsDown.TabIndex = 5;
-            this.propScriptsDown.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propScriptsDown.UseVisualStyleBackColor = true;
-            this.propScriptsDown.Click += new System.EventHandler(this.propScriptsDown_Click);
-            // 
-            // propScriptsUp
-            // 
-            this.propScriptsUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propScriptsUp.Enabled = false;
-            this.propScriptsUp.Image = global::Voron_Poster.Properties.Resources.arrow_Up_16xLG;
-            this.propScriptsUp.Location = new System.Drawing.Point(273, 19);
-            this.propScriptsUp.Name = "propScriptsUp";
-            this.propScriptsUp.Size = new System.Drawing.Size(26, 26);
-            this.propScriptsUp.TabIndex = 4;
-            this.propScriptsUp.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propScriptsUp.UseVisualStyleBackColor = true;
-            this.propScriptsUp.Click += new System.EventHandler(this.propScriptsUp_Click);
-            // 
-            // propScriptsAdd
-            // 
-            this.propScriptsAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propScriptsAdd.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.propScriptsAdd.Location = new System.Drawing.Point(273, 125);
-            this.propScriptsAdd.Name = "propScriptsAdd";
-            this.propScriptsAdd.Size = new System.Drawing.Size(26, 26);
-            this.propScriptsAdd.TabIndex = 0;
-            this.propScriptsAdd.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propScriptsAdd.UseVisualStyleBackColor = true;
-            this.propScriptsAdd.Click += new System.EventHandler(this.propScriptsAdd_Click);
-            // 
-            // propScriptsRemove
-            // 
-            this.propScriptsRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propScriptsRemove.Enabled = false;
-            this.propScriptsRemove.Image = global::Voron_Poster.Properties.Resources.Remove_16xLG;
-            this.propScriptsRemove.Location = new System.Drawing.Point(273, 189);
-            this.propScriptsRemove.Name = "propScriptsRemove";
-            this.propScriptsRemove.Size = new System.Drawing.Size(26, 26);
-            this.propScriptsRemove.TabIndex = 1;
-            this.propScriptsRemove.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propScriptsRemove.UseVisualStyleBackColor = true;
-            this.propScriptsRemove.Click += new System.EventHandler(this.propScriptsRemove_Click);
-            // 
-            // propAuthLog
-            // 
-            this.propAuthLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propAuthLog.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG;
-            this.propAuthLog.Location = new System.Drawing.Point(196, 208);
-            this.propAuthLog.Name = "propAuthLog";
-            this.propAuthLog.Size = new System.Drawing.Size(24, 24);
-            this.propAuthLog.TabIndex = 10;
-            this.propAuthLog.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propAuthLog.UseVisualStyleBackColor = true;
-            this.propAuthLog.Click += new System.EventHandler(this.propAuthLog_Click);
-            // 
-            // propAuthTryLogin
-            // 
-            this.propAuthTryLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propAuthTryLogin.Enabled = false;
-            this.propAuthTryLogin.Image = global::Voron_Poster.Properties.Resources.user_16xLG;
-            this.propAuthTryLogin.Location = new System.Drawing.Point(11, 208);
-            this.propAuthTryLogin.Name = "propAuthTryLogin";
-            this.propAuthTryLogin.Size = new System.Drawing.Size(179, 24);
-            this.propAuthTryLogin.TabIndex = 9;
-            this.propAuthTryLogin.Text = "Пробная авторизация";
-            this.propAuthTryLogin.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propAuthTryLogin.UseVisualStyleBackColor = true;
-            this.propAuthTryLogin.Click += new System.EventHandler(this.propAuthTryLogin_Click);
-            // 
-            // propProfileBrowse
-            // 
-            this.propProfileBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.propProfileBrowse.Image = global::Voron_Poster.Properties.Resources.folder_Open_16xLG;
-            this.propProfileBrowse.Location = new System.Drawing.Point(442, 17);
-            this.propProfileBrowse.Name = "propProfileBrowse";
-            this.propProfileBrowse.Size = new System.Drawing.Size(96, 24);
-            this.propProfileBrowse.TabIndex = 5;
-            this.propProfileBrowse.Text = "... Обзор";
-            this.propProfileBrowse.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileBrowse.UseVisualStyleBackColor = true;
-            this.propProfileBrowse.Click += new System.EventHandler(this.propProfileBrowse_Click);
-            // 
-            // propProfileDelete
-            // 
-            this.propProfileDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.propProfileDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.propProfileDelete.Location = new System.Drawing.Point(247, 47);
-            this.propProfileDelete.Name = "propProfileDelete";
-            this.propProfileDelete.Size = new System.Drawing.Size(97, 24);
-            this.propProfileDelete.TabIndex = 2;
-            this.propProfileDelete.Text = "Удалить";
-            this.propProfileDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileDelete.UseVisualStyleBackColor = true;
-            this.propProfileDelete.Click += new System.EventHandler(this.DeleteProfileButton_Click);
-            // 
-            // propProfileNew
-            // 
-            this.propProfileNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.propProfileNew.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.propProfileNew.Location = new System.Drawing.Point(13, 47);
-            this.propProfileNew.Name = "propProfileNew";
-            this.propProfileNew.Size = new System.Drawing.Size(125, 24);
-            this.propProfileNew.TabIndex = 4;
-            this.propProfileNew.Text = "Создать новый";
-            this.propProfileNew.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileNew.UseVisualStyleBackColor = true;
-            this.propProfileNew.Click += new System.EventHandler(this.NewProfileButton_Click);
-            // 
-            // propProfileSave
-            // 
-            this.propProfileSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.propProfileSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.propProfileSave.Location = new System.Drawing.Point(144, 47);
-            this.propProfileSave.Name = "propProfileSave";
-            this.propProfileSave.Size = new System.Drawing.Size(97, 24);
-            this.propProfileSave.TabIndex = 3;
-            this.propProfileSave.Text = "Сохранить";
-            this.propProfileSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileSave.UseVisualStyleBackColor = true;
-            this.propProfileSave.Click += new System.EventHandler(this.SaveProfileButton_Click);
-            // 
-            // propProfileLoad
-            // 
-            this.propProfileLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propProfileLoad.Image = global::Voron_Poster.Properties.Resources.Open_6529;
-            this.propProfileLoad.Location = new System.Drawing.Point(391, 47);
-            this.propProfileLoad.Name = "propProfileLoad";
-            this.propProfileLoad.Size = new System.Drawing.Size(147, 24);
-            this.propProfileLoad.TabIndex = 1;
-            this.propProfileLoad.Text = "Открыть (Применить)";
-            this.propProfileLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propProfileLoad.UseVisualStyleBackColor = true;
-            this.propProfileLoad.Click += new System.EventHandler(this.LoadProfileButton_Click);
-            // 
-            // propApply
-            // 
-            this.propApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propApply.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.propApply.Enabled = false;
-            this.propApply.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.propApply.Location = new System.Drawing.Point(341, 407);
-            this.propApply.Name = "propApply";
-            this.propApply.Size = new System.Drawing.Size(115, 38);
-            this.propApply.TabIndex = 11;
-            this.propApply.Text = "Применить";
-            this.propApply.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propApply.UseVisualStyleBackColor = true;
-            this.propApply.Click += new System.EventHandler(this.propApply_Click);
-            // 
-            // propCancel
-            // 
-            this.propCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.propCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.propCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.propCancel.Location = new System.Drawing.Point(462, 407);
-            this.propCancel.Name = "propCancel";
-            this.propCancel.Size = new System.Drawing.Size(116, 38);
-            this.propCancel.TabIndex = 12;
-            this.propCancel.Text = "Отмена";
-            this.propCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.propCancel.UseVisualStyleBackColor = true;
-            this.propCancel.Click += new System.EventHandler(this.propClose);
-            // 
-            // scriptsDelete
-            // 
-            this.scriptsDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.scriptsDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.scriptsDelete.Location = new System.Drawing.Point(137, 406);
-            this.scriptsDelete.Name = "scriptsDelete";
-            this.scriptsDelete.Size = new System.Drawing.Size(97, 24);
-            this.scriptsDelete.TabIndex = 7;
-            this.scriptsDelete.Text = "Удалить";
-            this.scriptsDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsDelete.UseVisualStyleBackColor = true;
-            this.scriptsDelete.Click += new System.EventHandler(this.scriptsDelete_Click);
-            // 
-            // scriptsNew
-            // 
-            this.scriptsNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.scriptsNew.Image = global::Voron_Poster.Properties.Resources.action_add_16xLG;
-            this.scriptsNew.Location = new System.Drawing.Point(6, 406);
-            this.scriptsNew.Name = "scriptsNew";
-            this.scriptsNew.Size = new System.Drawing.Size(125, 24);
-            this.scriptsNew.TabIndex = 6;
-            this.scriptsNew.Text = "Создать новый";
-            this.scriptsNew.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsNew.UseVisualStyleBackColor = true;
-            this.scriptsNew.Click += new System.EventHandler(this.scriptsNew_Click);
-            // 
-            // scriptsSave
-            // 
-            this.scriptsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.scriptsSave.Enabled = false;
-            this.scriptsSave.Image = global::Voron_Poster.Properties.Resources.save_16xLG;
-            this.scriptsSave.Location = new System.Drawing.Point(335, 406);
-            this.scriptsSave.Name = "scriptsSave";
-            this.scriptsSave.Size = new System.Drawing.Size(97, 24);
-            this.scriptsSave.TabIndex = 5;
-            this.scriptsSave.Text = "Сохранить";
-            this.scriptsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsSave.UseVisualStyleBackColor = true;
-            this.scriptsSave.Click += new System.EventHandler(this.scriptsSave_Click);
-            // 
-            // scriptsRun
-            // 
-            this.scriptsRun.Dock = System.Windows.Forms.DockStyle.Left;
-            this.scriptsRun.Image = global::Voron_Poster.Properties.Resources.test_32x_SMcuted;
-            this.scriptsRun.Location = new System.Drawing.Point(0, 5);
-            this.scriptsRun.MaximumSize = new System.Drawing.Size(99, 25);
-            this.scriptsRun.Name = "scriptsRun";
-            this.scriptsRun.Size = new System.Drawing.Size(99, 25);
-            this.scriptsRun.TabIndex = 32;
-            this.scriptsRun.Text = "Тест";
-            this.scriptsRun.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsRun.UseVisualStyleBackColor = true;
-            this.scriptsRun.Click += new System.EventHandler(this.scriptsRun_Click);
-            // 
-            // scriptsAccept
-            // 
-            this.scriptsAccept.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.previewWBPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.scriptsAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.scriptsAccept.Enabled = false;
-            this.scriptsAccept.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.scriptsAccept.Location = new System.Drawing.Point(3, 420);
-            this.scriptsAccept.Name = "scriptsAccept";
-            this.scriptsAccept.Size = new System.Drawing.Size(96, 38);
-            this.scriptsAccept.TabIndex = 16;
-            this.scriptsAccept.Text = "Выбрать";
-            this.scriptsAccept.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsAccept.UseVisualStyleBackColor = true;
-            this.scriptsAccept.Click += new System.EventHandler(this.scriptsAccept_Click);
+            this.previewWBPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.previewWBPanel.Controls.Add(this.previewWB);
+            this.previewWBPanel.Location = new System.Drawing.Point(4, 30);
+            this.previewWBPanel.Margin = new System.Windows.Forms.Padding(4);
+            this.previewWBPanel.Name = "previewWBPanel";
+            this.previewWBPanel.Size = new System.Drawing.Size(512, 394);
+            this.previewWBPanel.TabIndex = 51;
             // 
-            // scriptsCancel
+            // previewWB
             // 
-            this.scriptsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.scriptsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.scriptsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.scriptsCancel.Location = new System.Drawing.Point(105, 420);
-            this.scriptsCancel.Name = "scriptsCancel";
-            this.scriptsCancel.Size = new System.Drawing.Size(38, 38);
-            this.scriptsCancel.TabIndex = 14;
-            this.scriptsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.scriptsCancel.UseVisualStyleBackColor = true;
-            this.scriptsCancel.Click += new System.EventHandler(this.scriptsCancel_Click);
-            // 
-            // settingsSave
-            // 
-            this.settingsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.settingsSave.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.settingsSave.Enabled = false;
-            this.settingsSave.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Complete_and_ok_32xMD_color;
-            this.settingsSave.Location = new System.Drawing.Point(341, 407);
-            this.settingsSave.Name = "settingsSave";
-            this.settingsSave.Size = new System.Drawing.Size(115, 38);
-            this.settingsSave.TabIndex = 14;
-            this.settingsSave.Text = "Сохранить";
-            this.settingsSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.settingsSave.UseVisualStyleBackColor = true;
-            this.settingsSave.Click += new System.EventHandler(this.settingsSave_Click);
-            // 
-            // settingsCancel
-            // 
-            this.settingsCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.settingsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.settingsCancel.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Critical_32xMD_color;
-            this.settingsCancel.Location = new System.Drawing.Point(462, 407);
-            this.settingsCancel.Name = "settingsCancel";
-            this.settingsCancel.Size = new System.Drawing.Size(116, 38);
-            this.settingsCancel.TabIndex = 15;
-            this.settingsCancel.Text = "Отмена";
-            this.settingsCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.settingsCancel.UseVisualStyleBackColor = true;
-            this.settingsCancel.Click += new System.EventHandler(this.settingsCancel_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::Voron_Poster.Properties.Resources.YAAvatar__2_;
-            this.pictureBox1.Location = new System.Drawing.Point(6, 19);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(80, 80);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.previewWB.AllowNavigation = false;
+            this.previewWB.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.previewWB.Location = new System.Drawing.Point(0, 0);
+            this.previewWB.MinimumSize = new System.Drawing.Size(20, 20);
+            this.previewWB.Name = "previewWB";
+            this.previewWB.ScriptErrorsSuppressed = true;
+            this.previewWB.Size = new System.Drawing.Size(510, 392);
+            this.previewWB.TabIndex = 51;
             // 
             // tasksTable
             // 
@@ -1312,7 +1414,7 @@
             this.tasksTable.RowCount = 2;
             this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tasksTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tasksTable.Size = new System.Drawing.Size(555, 339);
+            this.tasksTable.Size = new System.Drawing.Size(514, 339);
             this.tasksTable.TabIndex = 0;
             this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
             this.tasksTable.SizeChanged += new System.EventHandler(this.tasksTable_SizeChanged);
@@ -1327,7 +1429,7 @@
             this.GTName.MinimumSize = new System.Drawing.Size(0, 24);
             this.GTName.Name = "GTName";
             this.GTName.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
-            this.GTName.Size = new System.Drawing.Size(255, 24);
+            this.GTName.Size = new System.Drawing.Size(231, 24);
             this.GTName.TabIndex = 13;
             this.GTName.Text = "Тема/Раздел";
             this.GTName.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -1336,13 +1438,13 @@
             // 
             this.GTStatus.BackColor = System.Drawing.Color.Transparent;
             this.GTStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTStatus.Location = new System.Drawing.Point(282, 1);
+            this.GTStatus.Location = new System.Drawing.Point(258, 1);
             this.GTStatus.Margin = new System.Windows.Forms.Padding(0);
             this.GTStatus.MaximumSize = new System.Drawing.Size(0, 24);
             this.GTStatus.MinimumSize = new System.Drawing.Size(0, 24);
             this.GTStatus.Name = "GTStatus";
             this.GTStatus.Padding = new System.Windows.Forms.Padding(3, 6, 3, 0);
-            this.GTStatus.Size = new System.Drawing.Size(106, 24);
+            this.GTStatus.Size = new System.Drawing.Size(96, 24);
             this.GTStatus.TabIndex = 12;
             this.GTStatus.Text = "Состояние";
             this.GTStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -1353,7 +1455,7 @@
             this.GTStart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStart.Enabled = false;
             this.GTStart.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-            this.GTStart.Location = new System.Drawing.Point(478, 1);
+            this.GTStart.Location = new System.Drawing.Point(438, 1);
             this.GTStart.Margin = new System.Windows.Forms.Padding(0);
             this.GTStart.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStart.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1383,12 +1485,12 @@
             // GTProgress
             // 
             this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.GTProgress.Location = new System.Drawing.Point(417, 4);
+            this.GTProgress.Location = new System.Drawing.Point(383, 4);
             this.GTProgress.Maximum = 765;
             this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.Name = "GTProgress";
-            this.GTProgress.Size = new System.Drawing.Size(57, 18);
+            this.GTProgress.Size = new System.Drawing.Size(51, 18);
             this.GTProgress.TabIndex = 2;
             // 
             // GTStatusIcon
@@ -1396,7 +1498,7 @@
             this.GTStatusIcon.BackColor = System.Drawing.Color.Transparent;
             this.GTStatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStatusIcon.Image = global::Voron_Poster.Properties.Resources.StatusAnnotations_Stop_16xLG;
-            this.GTStatusIcon.Location = new System.Drawing.Point(389, 1);
+            this.GTStatusIcon.Location = new System.Drawing.Point(355, 1);
             this.GTStatusIcon.Margin = new System.Windows.Forms.Padding(0);
             this.GTStatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1412,7 +1514,7 @@
             this.GTStop.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTStop.Enabled = false;
             this.GTStop.Image = global::Voron_Poster.Properties.Resources.Symbols_Stop_16xLG;
-            this.GTStop.Location = new System.Drawing.Point(503, 1);
+            this.GTStop.Location = new System.Drawing.Point(463, 1);
             this.GTStop.Margin = new System.Windows.Forms.Padding(0);
             this.GTStop.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTStop.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1428,7 +1530,7 @@
             this.GTDelete.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTDelete.Enabled = false;
             this.GTDelete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-            this.GTDelete.Location = new System.Drawing.Point(528, 1);
+            this.GTDelete.Location = new System.Drawing.Point(488, 1);
             this.GTDelete.Margin = new System.Windows.Forms.Padding(0);
             this.GTDelete.MaximumSize = new System.Drawing.Size(24, 24);
             this.GTDelete.MinimumSize = new System.Drawing.Size(24, 24);
@@ -1442,7 +1544,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(615, 500);
+            this.ClientSize = new System.Drawing.Size(574, 500);
             this.Controls.Add(this.Tabs);
             this.MinimumSize = new System.Drawing.Size(590, 539);
             this.Name = "MainForm";
@@ -1453,6 +1555,8 @@
             this.Tabs.ResumeLayout(false);
             this.messageTab.ResumeLayout(false);
             this.messageTab.PerformLayout();
+            this.previewTab.ResumeLayout(false);
+            this.previewPanel.ResumeLayout(false);
             this.tasksTab.ResumeLayout(false);
             this.tasksGroup.ResumeLayout(false);
             this.tasksGroup.PerformLayout();
@@ -1479,6 +1583,7 @@
             this.tabPage1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.previewWBPanel.ResumeLayout(false);
             this.tasksTable.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.GTStatusIcon)).EndInit();
             this.ResumeLayout(false);
@@ -1586,7 +1691,14 @@
         private System.Windows.Forms.Button settingsCancel;
         private System.Windows.Forms.CheckBox settingsLoadLastTasklist;
         private System.Windows.Forms.CheckBox settingsApplySuggestedProfile;
+        private System.Windows.Forms.Button messagePreview;
+        private System.Windows.Forms.TabPage previewTab;
+        private System.Windows.Forms.Panel previewPanel;
+        private System.Windows.Forms.Button previewDockUndock;
         private System.Windows.Forms.Button messageNext;
+        private System.Windows.Forms.Button previewNext;
+        private System.Windows.Forms.Panel previewWBPanel;
+        private System.Windows.Forms.WebBrowser previewWB;
 
 
     }

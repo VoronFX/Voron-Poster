@@ -585,9 +585,6 @@ namespace Voron_Poster
             return pos;
         }
 
-
-
-
         protected Bitmap GetCaptchaSnapshot(HtmlElement Captcha)
         {
             Bitmap bitmap = null;
@@ -643,8 +640,8 @@ namespace Voron_Poster
             // Check if logged with right account
             TaskBaseProperties.AccountData CurrentLogged;
             if (DomainLogged.TryGetValue(GetDomain(Properties.ForumMainPage), out CurrentLogged)
-                && CurrentLogged.password != AccountToUse.password
-                && CurrentLogged.username != AccountToUse.username)
+                && (CurrentLogged.password != AccountToUse.password
+                || CurrentLogged.username != AccountToUse.username))
             {
                 // Wait for GlobalCookieReset
                 WaitingForQueue = true;
@@ -752,7 +749,6 @@ namespace Voron_Poster
             }
             return null;
         }
-
 
         public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
         {

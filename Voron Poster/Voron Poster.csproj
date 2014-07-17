@@ -85,6 +85,10 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CodeKicker.BBCode, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\CodeKicker.BBCode.dll</HintPath>
+    </Reference>
     <Reference Include="Common.Logging">
       <HintPath>..\packages\Common.Logging.2.1.2\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
@@ -294,6 +298,9 @@
     <None Include="Resources\Execute_10024.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Libraries\CodeKicker.BBCode.dll" />
+    <Content Include="Libraries\CodeKicker.BBCode.pdb" />
+    <Content Include="Libraries\CodeKicker.BBCode.XML" />
     <Content Include="Libraries\License.txt" />
     <None Include="Resources\save_32xLG.png" />
     <None Include="Resources\folder_Open_32xLG.png" />
@@ -308,6 +315,9 @@
     <None Include="Resources\StatusAnnotations_Play_32xLG_color.png" />
     <None Include="Resources\StatusAnnotations_Play_32xMD_color1.png" />
     <None Include="Resources\Bug_16xLG.png" />
+    <None Include="Resources\eye_16xLG.png" />
+    <None Include="Resources\frame_16xLG.png" />
+    <None Include="Resources\GenericVSProject_9906_16x.png" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

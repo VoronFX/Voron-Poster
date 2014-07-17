@@ -173,6 +173,16 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap eye_16xLG {
+            get {
+                object obj = ResourceManager.GetObject("eye_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap folder_Open_16xLG {
             get {
                 object obj = ResourceManager.GetObject("folder_Open_16xLG", resourceCulture);
@@ -213,9 +223,29 @@ namespace Voron_Poster.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap frame_16xLG {
+            get {
+                object obj = ResourceManager.GetObject("frame_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap gear_16xLG {
             get {
                 object obj = ResourceManager.GetObject("gear_16xLG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap GenericVSProject_9906_16x {
+            get {
+                object obj = ResourceManager.GetObject("GenericVSProject_9906_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -318,6 +318,18 @@
     <None Include="Resources\eye_16xLG.png" />
     <None Include="Resources\frame_16xLG.png" />
     <None Include="Resources\GenericVSProject_9906_16x.png" />
+    <Content Include="Licenses\Codekicker.BBCode.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Licenses\Roslyn.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Licenses\ScintillaNET.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Licenses\Apache2.0.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

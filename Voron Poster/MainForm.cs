@@ -59,9 +59,9 @@ namespace Voron_Poster
             //}
             //catch { }
 
-            //        typeof(TabControl).InvokeMember("DoubleBuffered",
-            //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            //null, Tabs, new object[] { true });
+    //        typeof(TabControl).InvokeMember("DoubleBuffered",
+    //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+    //null, Tabs, new object[] { true });
             scriptsEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             scriptsEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
             scriptsEditor.Location = new System.Drawing.Point(0, 0);
@@ -80,9 +80,12 @@ namespace Voron_Poster
             scriptsCodeTab.Controls.Add(scriptsEditor);
 
             previewWB.Navigate("about:blank");
+            aboutProgramName.Text = "Voron Poster " + Application.ProductVersion;
+
+
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
             try
             {
@@ -91,6 +94,18 @@ namespace Voron_Poster
                 if (settingsLoadLastTasklist.Checked && File.Exists("LastTasklist.xml"))
                     TaskList.Load(Tasks, this, "LastTasklist.xml");
                 settingsCancel_Click(sender, e);
+
+                aboutLicenseList.SelectedIndex = 0;
+
+                try
+                {
+                    using (var HttpClient = new HttpClient())
+                    {
+                        Bitmap Avatar = new Bitmap(await HttpClient.GetStreamAsync("https://s.gravatar.com/avatar/5e5e6428ac1dace0869a413800ec12f6?s=80"));
+                        if (Avatar != null) aboutAuthorAvatar.Image = Avatar;
+                    }
+                }
+                catch { }
             }
             catch (Exception Error)
             {
@@ -146,7 +161,7 @@ namespace Voron_Poster
                 previewTab_Enter(sender, e);
                 previewWBPanel.Enabled = true;
             }
-            else  Tabs.SelectedTab = previewTab;
+            else Tabs.SelectedTab = previewTab;
         }
 
 
@@ -170,8 +185,8 @@ namespace Voron_Poster
                 previewDockUndock.Text = "В главном окне";
                 F.MinimumSize = new System.Drawing.Size(250, 200);
                 previewPanel.MouseEnter += (o2, e2) =>
-                { 
-                    previewWBPanel.Enabled = true; 
+                {
+                    previewWBPanel.Enabled = true;
                 };
                 F.Show();
             }
@@ -188,7 +203,7 @@ namespace Voron_Poster
                 else (previewPanel.Parent as Form).Close();
             }
         }
-       
+
         #endregion
 
         #region Tasks Page
@@ -1560,6 +1575,29 @@ namespace Voron_Poster
             //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
             //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
             //else tasksTable.ColumnStyles[2].Width = 100;
+        }
+
+        private void aboutLicenseList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string Path = @".\Licenses\";
+                switch (aboutLicenseList.SelectedIndex)
+                {
+                    case 0: Path += "Apache2.0.txt"; break;
+                    case 1: Path += "Codekicker.BBCode.txt"; break;
+                    case 2:
+                    case 3: Path += "ScintillaNET.txt"; break;
+                    case 4: Path += "Apache2.0.txt"; break;
+                    case 5: Path += "Roslyn.txt"; break;
+                    case 6: Path += "Apache2.0.txt"; break;
+                }
+                aboutLicenseBox.Text = File.ReadAllText(Path);
+            }
+            catch (Exception Error)
+            {
+                MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
 

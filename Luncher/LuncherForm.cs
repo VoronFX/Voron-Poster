@@ -58,11 +58,11 @@ namespace Luncher
                     pb.BeginInvoke((Action)(() => { pb.Value++; }));
                 };
                 InitData();
-                pb.Invoke((Action)(() => { pb.Maximum = a.Count+100; }));
+                pb.Invoke((Action)(() => { pb.Maximum = a.Count+10; }));
                 x(0);
                 Parallel.For(1, a.Count, d => x(d));
                 while ((int)s.Execute("w") < 17) Thread.Sleep(100);
-                pb.BeginInvoke((Action)(() => { pb.Value+=100; }));
+                pb.BeginInvoke((Action)(() => { pb.Value+=10; }));
                 this.BeginInvoke((Action)(() => { this.Close(); }));
             }).Start();
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,6 +25,10 @@ namespace Voron_Poster
         {
             //InitExpression();
         }
+        static ConcurrentDictionary<string, TaskBaseProperties.AccountData> DomainLogged
+         = new ConcurrentDictionary<string, TaskBaseProperties.AccountData>();
+        static List<Thread> WBThreads = new List<Thread>();
+        ManualResetEvent CookieClearEvent = new ManualResetEvent(false);
         Form a;
         private WebBrowser WB;
         private AutoResetEvent WaitLoad = new AutoResetEvent(true);
@@ -560,6 +565,7 @@ namespace Voron_Poster
             int* optionPtr = &option;
             bool success = InternetSetOption(IntPtr.Zero, 81/*INTERNET_OPTION_SUPPRESS_BEHAVIOR*/,
                 new IntPtr(optionPtr), sizeof(int));
+            CookieClearEvent.Set();
         }
 
         protected Point GetOffset(HtmlElement el)
@@ -608,14 +614,62 @@ namespace Voron_Poster
             return bitmap.Clone(new Rectangle(LeftTop.X, LeftTop.Y, Captcha.ClientRectangle.Width, Captcha.ClientRectangle.Height), bitmap.PixelFormat);
         }
 
+        protected Task<bool> WaitClear()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            Cancel.Token.Register(() => tcs.TrySetResult(false));
+            var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
+
+            // Registering callback to wait till WaitHandle changes its state
+            ThreadPool.RegisterWaitForSingleObject(
+                waitObject: CookieClearEvent,
+                callBack: (o, timeout) =>
+                {
+                    if (timeout)
+                        tcs.TrySetResult(false);
+                    else tcs.TrySetResult(true);
+                },
+                state: null,
+                timeout: Timeout.InfiniteTimeSpan,
+                executeOnlyOnce: true);
+            
+            return tcs.Task;
+        }
+
         public override async Task<Exception> Login()
         {
+            CookieClearEvent.Reset();
+
+            // Check if logged with right account
+            TaskBaseProperties.AccountData CurrentLogged;
+            if (DomainLogged.TryGetValue(GetDomain(Properties.ForumMainPage), out CurrentLogged)
+                && CurrentLogged.password != AccountToUse.password
+                && CurrentLogged.username != AccountToUse.username)
+            {
+                // Wait for GlobalCookieReset
+                WaitingForQueue = true;
+                lock (Log) Log.Add("Жду сброса cookies");
+                lock (WBThreads) WBThreads.Add(WBThread);
+                await WaitClear();
+                WaitingForQueue = false;
+                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            }
+
+
             // Run WebBrowser thread
             WBThread.Start();
             // Dispose browser after task done
             Activity = Activity.ContinueWith<Exception>((PrevTask) =>
             {
                 WB.BeginInvoke((Action)(() => { if (WB != null) { WB.Dispose(); WB = null; } }));
+                lock (WBThreads)
+                {
+                    if (WBThreads.All((Thread T) =>
+                        T.ThreadState != System.Threading.ThreadState.Running || T == WBThread))
+                        ClearCookies();
+                    DomainLogged.Clear();
+                    WBThreads.Remove(WBThread);
+                }
                 try
                 {
                     return PrevTask.Result;

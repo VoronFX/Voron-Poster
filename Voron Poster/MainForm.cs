@@ -22,10 +22,11 @@ using ScintillaNET;
 using Microsoft.Win32;
 using System.Runtime.Serialization;
 using CodeKicker.BBCode;
+using System.Runtime.InteropServices;
 
 namespace Voron_Poster
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IMessageFilter
     {
         public List<TaskGui> Tasks = new List<TaskGui>();
         public TaskGui CurrTask;
@@ -34,6 +35,7 @@ namespace Voron_Poster
         public MainForm()
         {
             InitializeComponent();
+            Application.AddMessageFilter(this); // To capture and process mouse events in way we want
             Forum.CaptchaForm.Owner = this;
             for (int i = 0; i < Tabs.TabPages.Count; i++)
             {
@@ -59,9 +61,9 @@ namespace Voron_Poster
             //}
             //catch { }
 
-    //        typeof(TabControl).InvokeMember("DoubleBuffered",
-    //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-    //null, Tabs, new object[] { true });
+            //        typeof(TabControl).InvokeMember("DoubleBuffered",
+            //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+            //null, Tabs, new object[] { true });
             scriptsEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             scriptsEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
             scriptsEditor.Location = new System.Drawing.Point(0, 0);
@@ -126,6 +128,96 @@ namespace Voron_Poster
             }
         }
 
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Tabs.TabPages.Contains(propTab))
+            {
+                Tabs.SelectedTab = propTab;
+                DialogResult Res;
+                if (propApply.Enabled)
+                    Res = MessageBox.Show("Сохранить изменения задачи?",
+                        "Несохраненные изменения", MessageBoxButtons.YesNoCancel);
+                else if (propCancel.Enabled) Res = MessageBox.Show("Несохранённые изменения будут потеряны! Продолжить?",
+                    "Несохраненные изменения", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                else Res = MessageBox.Show("Необходимо отменить или сохранить изменения.",
+                    "Несохраненные изменения", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                switch (Res)
+                {
+                    case System.Windows.Forms.DialogResult.Yes: propApply_Click(sender, e); break;
+                    case System.Windows.Forms.DialogResult.OK: 
+                        if (propCancel.Enabled)
+                        {
+                            propClose(sender, e); 
+                            if (Tabs.TabPages.Contains(propTab)) return; 
+                            else break;
+                        }
+                        else {e.Cancel = true; return;};
+                    case System.Windows.Forms.DialogResult.Cancel: { e.Cancel = true; return; };
+                }
+            }
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+                if (Tasks[i].Status == TaskGui.InfoIcons.Running || Tasks[i].Status == TaskGui.InfoIcons.Waiting)
+                {
+                    e.Cancel = MessageBox.Show("Все активные будут прерваны! Закрыть всё равно?",
+                "Активные задачи", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel;
+                    break;
+                }
+            }
+        }
+
+        // P/Invoke declarations
+        [DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(Point pt);
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
+        // This sends mouse scroll events to control under cursor istead of focused control
+        //public bool PreFilterMessage(ref Message m)
+        //{
+        //    if (m.Msg == 0x20a)
+        //    {
+        //        // WM_MOUSEWHEEL, find the control at screen position m.LParam
+        //        Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
+        //        IntPtr hWnd = WindowFromPoint(pos);
+        //        if (ActiveForm == this && Tabs.SelectedTab == messageTab)
+        //            SendMessage(messageText.Handle, m.Msg, m.WParam, m.LParam);
+        //        else if (ActiveForm == this && Tabs.SelectedTab == previewTab)
+        //           SendMessage(previewWB.Handle, m.Msg, m.WParam, m.LParam);
+        //        else if (ActiveForm == this && Tabs.SelectedTab == tasksTab)
+        //            SendMessage(tasksTable.Handle, m.Msg, m.WParam, m.LParam);
+        //        else
+        //        {
+        //            //if (Control.FromHandle(hWnd) != null)
+        //            //    Console.WriteLine("Under Cursor: " + hWnd.ToString() + " " + Control.FromHandle(hWnd).Name.ToString());
+        //            //else Console.WriteLine("Under Cursor: " + hWnd.ToString());
+        //            //Console.WriteLine("Focused: " + this.ActiveControl.Handle.ToString() + " " + this.ActiveControl.Name);
+        //            //Console.WriteLine();
+        //            if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
+        //            {
+        //                SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
+        //                return true;
+        //            } return false;
+        //        }
+        //        return false;
+        //    }
+        //    return false;
+        //}
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (m.Msg == 0x20a)
+            {
+                // WM_MOUSEWHEEL, find the control at screen position m.LParam
+                Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
+                IntPtr hWnd = WindowFromPoint(pos);
+                if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
+                {
+                    SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void RenderHtml(string Html)
         {
             Form b = new Form();
@@ -148,6 +240,13 @@ namespace Voron_Poster
             }
         }
 
+        private void messageText_TextChanged(object sender, EventArgs e)
+        {
+            previewWBPanel.Enabled = false;
+            previewWB.Document.Write(BBCode.ToHtml(messageSubject.Text + "\r\n" + messageText.Text).Replace("\n", "<br>"));
+            previewWB.Refresh();
+        }
+
         private void messageNext_Click(object sender, EventArgs e)
         {
             if (previewPanel.Parent != previewTab)
@@ -167,18 +266,16 @@ namespace Voron_Poster
             if (previewPanel.Parent != previewTab)
             {
                 previewPanel.Parent.Show();
-                previewTab_Enter(sender, e);
-                previewWBPanel.Enabled = true;
+                previewWB.Document.Write(BBCode.ToHtml(messageSubject.Text + "\r\n" + messageText.Text).Replace("\n", "<br>"));
+                previewWB.Refresh();
             }
             else Tabs.SelectedTab = previewTab;
+            previewWB.Focus();
         }
-
 
         private void previewTab_Enter(object sender, EventArgs e)
         {
-            previewWBPanel.Enabled = false;
-            previewWB.Document.Write(BBCode.ToHtml(messageSubject.Text + "\r\n" + messageText.Text).Replace("\n", "<br>"));
-            previewWB.Refresh();
+            previewWBPanel.Enabled = true;
         }
 
         private void previewDockUndock_Click(object sender, EventArgs e)
@@ -260,30 +357,30 @@ namespace Voron_Poster
             //  Tabs.TabPages.Remove(TaskPropertiesPage);
         }
 
-        TabPage PreviousTab = null;
+        // TabPage PreviousTab = null;
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            if (PreviousTab == propTab && e.TabPage != scriptsTab)
-            {
-                DialogResult Ask = System.Windows.Forms.DialogResult.No;
-                if (propApply.Enabled)
-                    Ask = MessageBox.Show("Сохранить изменнения?",
-                        this.Text, MessageBoxButtons.YesNoCancel);
-                switch (Ask)
-                {
-                    case System.Windows.Forms.DialogResult.Yes: propApply.PerformClick(); break;
-                    case System.Windows.Forms.DialogResult.No: propCancel.PerformClick(); break;
-                }
-            }
-            if (e.TabPage.Enabled)
-            {
-                PreviousTab = e.TabPage;
-                e.Cancel = false;
-            }
-            else
-                e.Cancel = true;
+            //if (PreviousTab == propTab && e.TabPage != scriptsTab)
+            //{
+            //    DialogResult Ask = System.Windows.Forms.DialogResult.No;
+            //    if (propApply.Enabled)
+            //        Ask = MessageBox.Show("Сохранить изменнения?",
+            //            this.Text, MessageBoxButtons.YesNoCancel);
+            //    switch (Ask)
+            //    {
+            //        case System.Windows.Forms.DialogResult.Yes: propApply.PerformClick(); break;
+            //        case System.Windows.Forms.DialogResult.No: propCancel.PerformClick(); break;
+            //    }
+            //}
+            //if (e.TabPage.Enabled)
+            //{
+            //    PreviousTab = e.TabPage;
+            //    e.Cancel = false;
+            //}
+            //else
+            //    e.Cancel = true;
 
-            TasksUpdater.Enabled = e.TabPage == tasksTab;
+            //TasksUpdater.Enabled = e.TabPage == tasksTab;
         }
 
         private void TasksUpdater_Tick(object sender, EventArgs e)
@@ -485,6 +582,14 @@ namespace Voron_Poster
             tasksLoad.Enabled = true;
         }
 
+        private void tasksTable_SizeChanged(object sender, EventArgs e)
+        {
+            //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
+            //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
+            //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
+            //else tasksTable.ColumnStyles[2].Width = 100;
+        }
+
         #endregion
 
         #region Task Properties Page
@@ -661,6 +766,8 @@ namespace Voron_Poster
             TempForum.Reset();
             TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
+            if (TempForum.Properties.UseLocalAccount) TempForum.AccountToUse = TempForum.Properties.Account;
+            else TempForum.AccountToUse = Settings.Account;
             TempForum.Activity = Task.Run<Exception>(async () => await TempForum.Login());
             Task<Exception> LoginTask = TempForum.Activity;
             PropertiesActivityTask = LoginTask;
@@ -750,6 +857,7 @@ namespace Voron_Poster
                 propMainUrl.ForeColor == Color.Black &&
                 propEngine.SelectedIndex >= 0 &&
                 propScriptsList.Items.Count > 0 &&
+                propScriptsGroup.Enabled &&
                 !PropertiesActivity;
             propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Save);
             //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
@@ -777,8 +885,8 @@ namespace Voron_Poster
             Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(tasksTab) + 1, propTab);
             //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
             Tabs.SelectTab(propTab);
-            for (int i = 0; i < Tabs.TabPages.Count; i++)
-                Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == propTab;
+            //for (int i = 0; i < Tabs.TabPages.Count; i++)
+            //    Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == propTab;
             //  TaskPropertiesPage.Enabled = true;
             // this.ResumeLayout();
             ProfileComboBox_Enter(propProfiles, EventArgs.Empty);
@@ -821,7 +929,6 @@ namespace Voron_Poster
         private async void propClose(object sender, EventArgs e)
         {
             propCancel.Enabled = false;
-            propTab.Enabled = false;
 
             if (PropertiesActivityTask != null && StopProperties != null)
             {
@@ -835,15 +942,32 @@ namespace Voron_Poster
                 }
             }
 
+            // Check if scriptsTab opened
+            if (Tabs.TabPages.Contains(scriptsTab))
+            {
+                Tabs.SelectedTab = scriptsTab;
+                scriptsCancel.PerformClick();
+                propValidate();
+                    propCancel.Enabled = true;
+                if (Tabs.TabPages.Contains(scriptsTab))
+                    return;
+                else propCancel.PerformClick();             
+                return;
+            }
+
             tasksTab.Enabled = true;
-            PreviousTab = null;
+            //PreviousTab = null;
             Tabs.SelectTab(tasksTab);
-            for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
+            //for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
             Tabs.TabPages.Remove(propTab);
+            CurrTask.Ctrls.Properties.Enabled = true;
+            CurrTask.Ctrls.StartStop.Enabled = true;
+            CurrTask.Ctrls.Delete.Enabled = true;
             if (CurrTask.New)
             {
                 CurrTask.Delete(sender, e);
             }
+            CurrTask = null;
             TempForum = null;
             propCancel.Enabled = true;
         }
@@ -880,18 +1004,17 @@ namespace Voron_Poster
 
         private void propScriptsAdd_Click(object sender, EventArgs e)
         {
-            Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(propTab) + 1, scriptsTab);
-            Tabs.SelectedTab = scriptsTab;
-            propTab.Enabled = false;
+            propScriptsGroup.Enabled = false;
+            scriptsShow();
             propValidate();
         }
 
         private void propScriptsEdit_Click(object sender, EventArgs e)
         {
-            scriptsName.Text = (String)propScriptsList.SelectedItem;
-            propScriptsRemove_Click(sender, e);
-            propScriptsAdd_Click(sender, e);
-            scriptsSave.Enabled = false;
+                scriptsName.Text = (String)propScriptsList.SelectedItem;
+                propScriptsRemove_Click(sender, e);
+                propScriptsAdd_Click(sender, e);
+                scriptsSave.Enabled = false;
         }
 
         private void propScriptsList_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -1133,9 +1256,11 @@ namespace Voron_Poster
             return "Script #" + i.ToString();
         }
 
-        private void scriptsTab_Enter(object sender, EventArgs e)
+        private void scriptsShow()
         {
             ignoreEvents = true;
+            Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(propTab) + 1, scriptsTab);
+            Tabs.SelectedTab = scriptsTab;
             scriptsLoadList();
             scriptsSelectInList(scriptsName.Text);
             if (scriptsList.SelectedIndex >= 0)
@@ -1166,7 +1291,7 @@ namespace Voron_Poster
                 if (scriptsList.Items.Contains(SaveName)) Message = "Перезаписать скрипт ";
                 else Message = "Сохранить скрипт ";
             }
-            switch (MessageBox.Show(Message + SaveName + "\"?", "Изменения", MessageBoxButtons.YesNoCancel))
+            switch (MessageBox.Show(Message + SaveName + "\"?", "Несохраненные изменения", MessageBoxButtons.YesNoCancel))
             {
                 case System.Windows.Forms.DialogResult.Yes:
                     scriptsSaveScript(SaveName);
@@ -1209,7 +1334,7 @@ namespace Voron_Poster
 #if !DEBUG
                 if (scriptsEditor.Text.StartsWith("(built in)")) scriptsDelete.Enabled = false;
 #endif
-                //if (!settingsUnsaved)
+                //if (!scriptsUnsaved)
                 //{
                 //    scriptsSelectInList(scriptsName.Text);
                 //        if (scriptsList.SelectedIndex > 0)
@@ -1348,7 +1473,7 @@ namespace Voron_Poster
         private void scriptsCancel_Click(object sender, EventArgs e)
         {
             if (scriptsSave.Enabled && !scriptsAskSave()) return;
-            propTab.Enabled = true;
+            propScriptsGroup.Enabled = true;
             Tabs.TabPages.Remove(scriptsTab);
             Tabs.SelectedTab = propTab;
         }
@@ -1578,13 +1703,7 @@ namespace Voron_Poster
 
         #endregion
 
-        private void tasksTable_SizeChanged(object sender, EventArgs e)
-        {
-            //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
-            //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
-            //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
-            //else tasksTable.ColumnStyles[2].Width = 100;
-        }
+        #region About Page
 
         private void aboutLicenseList_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1611,7 +1730,7 @@ namespace Voron_Poster
 
         private void aboutAuthorEmail_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("mailto:"+(sender as LinkLabel).Text);
+            System.Diagnostics.Process.Start("mailto:" + (sender as LinkLabel).Text);
         }
 
         private void aboutAurhorVK_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1623,6 +1742,10 @@ namespace Voron_Poster
         {
             System.Diagnostics.Process.Start("skype:Voron.exe?chat");
         }
+
+        #endregion
+
+
 
     }
 }

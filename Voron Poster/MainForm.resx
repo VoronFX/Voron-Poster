@@ -117,6 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="messagePreview.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAANdJREFUOE+lkrERgkAQRSmBEqjlqiAhI6AEDCShAGMcuqAASjg7MFETAjUh/dy/
+        4fBwFsfTnXnc8PfvzrJcBOAvRDEEUQxhFeM4JoaD4WzAG9SYS2b7K4wYMzkMA9q2RZ7nUEqtoMYcPXOj
+        2C/WXdchTVM0zRFan/C4Py3VvrLvhDl66GWNbWIePYWy3OF6uS2FdV3bsygKZFm26PTQOzfp2cCO6AwO
+        Frnx/QYO6qzdnIAjs5D4nyRN8HEHjs0deIv87S/4YcTweyDdrhBEMQRRDEEUvwfRBIGr3tLeRVyaAAAA
+        AElFTkSuQmCC
+</value>
+  </data>
   <data name="aboutLicenseLabel.Text" xml:space="preserve">
     <value>Данная программа является программой с открытым исходным кодом и распространяется под лицензией Apache 2.0 текст которой прилагается. Все технологии/компоненты/
 библиотеки/продукты использованные в программе, а также прилагающиеся лицензии перечислены ниже.</value>
@@ -133,17 +144,6 @@
   <metadata name="scriptsTestAbortTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>234, 17</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="messagePreview.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        xAAADsQBlSsOGwAAANdJREFUOE+lkrERgkAQRSmBEqjlqiAhI6AEDCShAGMcuqAASjg7MFETAjUh/dy/
-        4fBwFsfTnXnc8PfvzrJcBOAvRDEEUQxhFeM4JoaD4WzAG9SYS2b7K4wYMzkMA9q2RZ7nUEqtoMYcPXOj
-        2C/WXdchTVM0zRFan/C4Py3VvrLvhDl66GWNbWIePYWy3OF6uS2FdV3bsygKZFm26PTQOzfp2cCO6AwO
-        Frnx/QYO6qzdnIAjs5D4nyRN8HEHjs0deIv87S/4YcTweyDdrhBEMQRRDEEUvwfRBIGr3tLeRVyaAAAA
-        AElFTkSuQmCC
-</value>
-  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>50</value>
   </metadata>

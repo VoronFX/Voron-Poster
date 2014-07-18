@@ -370,6 +370,9 @@ namespace Voron_Poster
 
         public void Properties(object sender, EventArgs e)
         {
+            Ctrls.Properties.Enabled = false;
+            Ctrls.StartStop.Enabled = false;
+            Ctrls.Delete.Enabled = false;
             MainForm.CurrTask = this;
             MainForm.propShow();
         }

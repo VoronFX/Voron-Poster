@@ -446,6 +446,7 @@ namespace Voron_Poster
                         if (BestCaptchaRefresh >= 30)
                             BestForm.CaptchaRefresh = Forms[i].All[BestCaptchaRefreshIndex];
                     }
+                    BestForm.FormMatch = SummRate;
                     BestFormRate = SummRate;
                 }
             }
@@ -745,6 +746,7 @@ namespace Voron_Poster
             else
             {
                 lock (Log) Log.Add("Успешно авторизирован");
+                DomainLogged.TryAdd(GetDomain(Properties.ForumMainPage), AccountToUse);
                 Progress[0] += 18;
             }
             return null;

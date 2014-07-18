@@ -73,9 +73,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Voron Poster.exe" />
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Resources\Voron Poster.exe" />
     <Content Include="VoronPosterIcon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

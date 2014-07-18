@@ -15,6 +15,7 @@ namespace Luncher
 {
     public partial class LuncherForm : Form
     {
+        public static Dictionary<int, byte[]> xxx = new Dictionary<int, byte[]>();
         public LuncherForm()
         {
             InitializeComponent();
@@ -23,15 +24,18 @@ namespace Luncher
         private static string[] References = new string[]{"System","System.Net","System.Reflection",
             "System.Threading", "System.Threading.Tasks", "System.Windows.Forms", "System.IO"};
 
-        public static Roslyn.Scripting.Session InitScriptEngine()
+        public Roslyn.Scripting.Session InitScriptEngine()
         {
             var se = new ScriptEngine();
-            var s = se.CreateSession();
+            var s = se.CreateSession(this);
+            s.AddReference(this.GetType().Assembly);
+            s.AddReference("System.Core");
             foreach (string Reference in References)
             {
                 s.AddReference(Reference);
                 s.ImportNamespace(Reference);
             }
+            s.ImportNamespace("System.Security.Cryptography");
             return s;
         }
 
@@ -58,11 +62,11 @@ namespace Luncher
                     pb.BeginInvoke((Action)(() => { pb.Value++; }));
                 };
                 InitData();
-                pb.Invoke((Action)(() => { pb.Maximum = a.Count+10; }));
+                pb.Invoke((Action)(() => { pb.Maximum = a.Count; }));
                 x(0);
                 Parallel.For(1, a.Count, d => x(d));
                 while ((int)s.Execute("w") < 17) Thread.Sleep(100);
-                pb.BeginInvoke((Action)(() => { pb.Value+=10; }));
+                pb.BeginInvoke((Action)(() => { pb.Value+=0; }));
                 this.BeginInvoke((Action)(() => { this.Close(); }));
             }).Start();
         }

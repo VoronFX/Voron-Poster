@@ -277,7 +277,7 @@ namespace Voron_Poster
         public TaskBaseProperties Properties = new TaskBaseProperties();
         [XmlIgnore]
         public TaskBaseProperties.AccountData AccountToUse;
-        public TimeSpan RequestTimeout = new TimeSpan(0, 0, 10);
+        public TimeSpan RequestTimeout = new TimeSpan(0, 0, 20);
         public List<string> Log;
         public int[] Progress;
         public CancellationTokenSource Cancel;

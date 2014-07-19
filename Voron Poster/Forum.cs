@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 
 namespace Voron_Poster
 {
@@ -86,6 +87,32 @@ namespace Voron_Poster
 
             return mode;
         }
+        /// <summary>
+        /// Checks if string contains any of words. Case ignored.
+        /// </summary>
+        public static bool ContainsAny(this string s, string[] words)
+        {
+            for (int i = 0; i < words.Length; i++)
+			{
+			 if (s.IndexOf(words[i], StringComparison.OrdinalIgnoreCase) >= 0) return true;
+			}
+            return false;
+        }
+
+        /// <summary>
+        /// Returns number of Matches. Case ignored.
+        /// </summary>
+        public static int MatchCount(this string s, string regExprPattern)
+        {
+            return (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
+        }
+        /// <summary>
+        /// Returns number of Matches.
+        /// </summary>
+        public static int MatchCount(this string s, string regExprPattern, RegexOptions options)
+        {
+            return (new Regex(regExprPattern, options)).Matches(s).Count;
+        }
     }
 
     public abstract class Forum
@@ -121,7 +148,7 @@ namespace Voron_Poster
         }
 
         #region Detect Engine
-        public enum Engine { Unknown, SMF, vBulletin, IPB, Universal }
+        public enum Engine { Unknown, SMF, vBulletin, IPB, Universal, AnyForum}
 
         protected struct SearchExpression
         {
@@ -267,7 +294,8 @@ namespace Voron_Poster
                 case Engine.SMF: return new ForumSMF();
                 case Engine.vBulletin: return new ForumvBulletin();
                 case Engine.IPB: return new ForumIPB();
-                case Forum.Engine.Universal: return new ForumUniversal();
+                case Engine.Universal: return new ForumUniversal();
+                case Engine.AnyForum: return new ForumAny();
                 default: return null;
             }
         }
@@ -281,7 +309,7 @@ namespace Voron_Poster
         {
             var tcs = new TaskCompletionSource<bool>();
             Cancel.Token.Register(() => tcs.TrySetResult(false));
-            var CancelCopy = Cancel; // Avoid changing Cancel meawile we are waiting
+            var CancelCopy = Cancel; // Avoid changing Cancel meanwile we are waiting
 
             // Registering callback to wait till WaitHandle changes its state
             ThreadPool.RegisterWaitForSingleObject(

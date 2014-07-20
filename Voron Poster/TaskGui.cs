@@ -152,10 +152,10 @@ namespace Voron_Poster
                         break;
                 }
             }
-            ModifyProgressBarColor.SetState(Ctrls.Progress, 1);
+            ModifyProgressBarColor.SetState(Ctrls.Progress, 1); // Not-green colors sometimes ignores progress changes
             if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
             else
-                Ctrls.Progress.Value = Math.Min(765, Forum.Progress[0] + Forum.Progress[1] + Forum.Progress[2]);
+                Ctrls.Progress.Value = Math.Min(561, Forum.Progress[0] + Forum.Progress[1]/5 + Forum.Progress[2]);
             Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
 
@@ -166,7 +166,6 @@ namespace Voron_Poster
                 default: ModifyProgressBarColor.SetState(Ctrls.Progress, 1); break;
             }
             
-          // Ctrls.Progress.Value = Ctrls.Progress.Value;
             if (Status == InfoIcons.Error)
             {
                 Ctrls.Status.LinkColor = Color.Red;
@@ -283,7 +282,7 @@ namespace Voron_Poster
                 Progress.Size = new System.Drawing.Size(69, 18);
                 Progress.MaximumSize = new System.Drawing.Size(0, 18);
                 Progress.MinimumSize = new System.Drawing.Size(0, 18);
-                Progress.Maximum = 765;
+                Progress.Maximum = 561;
                 Progress.TabIndex = 2;
                 // 
                 // GTStartStop
@@ -422,7 +421,8 @@ namespace Voron_Poster
                 try
                 {
                     Forum.Reset();
-                    Forum.AccountToUse = MainForm.Settings.Account;
+                    var GlobalAccount = MainForm.Settings.Account;
+                    Forum.AccountToUse = GlobalAccount;
                     Forum.Activity =
                         Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
                     SetStatusIcon();

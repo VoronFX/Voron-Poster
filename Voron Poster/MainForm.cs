@@ -380,7 +380,7 @@ namespace Voron_Poster
             //else
             //    e.Cancel = true;
 
-            //TasksUpdater.Enabled = e.TabPage == tasksTab;
+            TasksUpdater.Enabled = e.TabPage == tasksTab;
         }
 
         private void TasksUpdater_Tick(object sender, EventArgs e)

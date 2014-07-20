@@ -1627,7 +1627,7 @@
             // 
             this.GTProgress.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GTProgress.Location = new System.Drawing.Point(383, 4);
-            this.GTProgress.Maximum = 765;
+            this.GTProgress.Maximum = 561;
             this.GTProgress.MaximumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.MinimumSize = new System.Drawing.Size(0, 18);
             this.GTProgress.Name = "GTProgress";

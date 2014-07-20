@@ -14,6 +14,8 @@ using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
+using System.Web;
+using HtmlAgilityPack;
 
 namespace Voron_Poster
 {
@@ -112,6 +114,43 @@ namespace Voron_Poster
         public static int MatchCount(this string s, string regExprPattern, RegexOptions options)
         {
             return (new Regex(regExprPattern, options)).Matches(s).Count;
+        }
+
+        public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name)
+        {
+            return HttpUtility.HtmlDecode(node.GetAttributeValue(name, null));
+        }
+
+        public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name, string defaultValue)
+        {
+            return HttpUtility.HtmlDecode(node.GetAttributeValue(name, defaultValue));
+        }
+
+        public static string ValueDecoded(this HtmlAgilityPack.HtmlAttribute attribute)
+        {
+            return HttpUtility.HtmlDecode(attribute.Value);
+        }
+
+        public static HtmlAgilityPack.HtmlDocument ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
+        {
+            var Bad = doc.DocumentNode.Descendants("script");
+            while (Bad.Count() > 0) Bad.First().Remove();
+            Bad = doc.DocumentNode.Descendants("style");
+            while (Bad.Count() > 0) Bad.First().Remove();
+            Bad = doc.DocumentNode.Descendants("#comment");
+            while (Bad.Count() > 0) Bad.First().Remove();
+            return doc;
+        }
+
+        public static string InnerTextDecoded(this HtmlAgilityPack.HtmlNode node)
+        {
+            return HttpUtility.HtmlDecode(node.InnerText);
+        }
+
+        public static HtmlNodeCollection SelectNodesSafe(this HtmlAgilityPack.HtmlNode node, string xpath)
+        {
+            HtmlNodeCollection Selected = node.SelectNodes(xpath);
+            return Selected == null ? new HtmlNodeCollection(node) : Selected;
         }
     }
 

@@ -1721,6 +1721,7 @@ namespace Voron_Poster
                     case 4: Path += "Apache2.0.txt"; break;
                     case 5: Path += "Roslyn.txt"; break;
                     case 6: Path += "Apache2.0.txt"; break;
+                    case 7: Path += "MicrosoftPublicLicense.txt"; break;
                 }
                 aboutLicenseBox.Text = File.ReadAllText(Path);
             }

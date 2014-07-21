@@ -106,14 +106,16 @@ namespace Voron_Poster
         /// </summary>
         public static int MatchCount(this string s, string regExprPattern)
         {
-            return String.IsNullOrEmpty(regExprPattern) ? 0 : (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
+            return String.IsNullOrEmpty(regExprPattern) || String.IsNullOrEmpty(s)
+                ? 0 : (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
         }
         /// <summary>
         /// Returns number of Matches.
         /// </summary>
         public static int MatchCount(this string s, string regExprPattern, RegexOptions options)
         {
-            return String.IsNullOrEmpty(regExprPattern) ? 0 : (new Regex(regExprPattern, options)).Matches(s).Count;
+            return String.IsNullOrEmpty(regExprPattern) || String.IsNullOrEmpty(s)
+                ? 0 : (new Regex(regExprPattern, options)).Matches(s).Count;
         }
 
         #region HtmlAgilityPackFixes
@@ -133,7 +135,7 @@ namespace Voron_Poster
             return HttpUtility.HtmlDecode(attribute.Value);
         }
 
-        public static HtmlAgilityPack.HtmlDocument ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
+        public static void ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
         {
             var Bad = doc.DocumentNode.Descendants("script");
             while (Bad.Count() > 0) Bad.Last().Remove();
@@ -141,20 +143,33 @@ namespace Voron_Poster
             while (Bad.Count() > 0) Bad.Last().Remove();
             Bad = doc.DocumentNode.Descendants("#comment");
             while (Bad.Count() > 0) Bad.Last().Remove();
-            return doc;
         }
 
-        public static HtmlAgilityPack.HtmlDocument ClearDisplayNone(this HtmlAgilityPack.HtmlDocument doc)
+        public static void ClearDisplayNone(this HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
-                x => x.GetAttributeValueDecoded("style",String.Empty).MatchCount(@"display:\s*none") > 0);
+                x => x.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0);
             while (NoDisplay.Count() > 0) NoDisplay.Last().Remove();
-            return doc;
         }
 
         public static string InnerTextDecoded(this HtmlAgilityPack.HtmlNode node)
         {
             return HttpUtility.HtmlDecode(node.InnerText);
+        }
+
+        /// <summary>
+        /// Checks if node or any parent node has "display: none" style
+        /// </summary>
+        public static bool IsNoDisplay(this HtmlAgilityPack.HtmlNode node)
+        {
+            bool NoDisplay = false;
+            do
+            {
+                NoDisplay = node.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0;
+                node = node.ParentNode;
+            } 
+            while (!NoDisplay && node.ParentNode != null);
+            return NoDisplay;
         }
 
         /// <summary>

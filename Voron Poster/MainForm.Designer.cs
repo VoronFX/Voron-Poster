@@ -1469,12 +1469,12 @@
             this.aboutLicenseBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutLicenseBox.Location = new System.Drawing.Point(23, 326);
+            this.aboutLicenseBox.Location = new System.Drawing.Point(23, 340);
             this.aboutLicenseBox.Multiline = true;
             this.aboutLicenseBox.Name = "aboutLicenseBox";
             this.aboutLicenseBox.ReadOnly = true;
             this.aboutLicenseBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.aboutLicenseBox.Size = new System.Drawing.Size(514, 119);
+            this.aboutLicenseBox.Size = new System.Drawing.Size(514, 105);
             this.aboutLicenseBox.TabIndex = 23;
             // 
             // aboutLicenseList
@@ -1491,10 +1491,11 @@
             "Common.Logging © Copyright Aleksandr Seovic, Mark Pollack, Erich Eichinger, Steph" +
                 "en Bohlen",
             "Roslyn © Copyright Microsoft",
-            "ScryptCs © Copyright 2013, 2014 Glenn Block, Justin Rusbatch, Filip Wojcieszyn"});
+            "ScryptCs © Copyright 2013, 2014 Glenn Block, Justin Rusbatch, Filip Wojcieszyn",
+            "Html Agility Pack © Somin Mourrier, Jeff Klawiter"});
             this.aboutLicenseList.Location = new System.Drawing.Point(23, 228);
             this.aboutLicenseList.Name = "aboutLicenseList";
-            this.aboutLicenseList.Size = new System.Drawing.Size(514, 93);
+            this.aboutLicenseList.Size = new System.Drawing.Size(514, 106);
             this.aboutLicenseList.TabIndex = 22;
             this.aboutLicenseList.SelectedIndexChanged += new System.EventHandler(this.aboutLicenseList_SelectedIndexChanged);
             // 

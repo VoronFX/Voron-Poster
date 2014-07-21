@@ -169,6 +169,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Content Include="Licenses\MicrosoftPublicLicense.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Scripts\BuiltIn\%28built in%29 Опубликовать.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

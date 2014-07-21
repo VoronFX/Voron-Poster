@@ -136,22 +136,19 @@ namespace Voron_Poster
         public static HtmlAgilityPack.HtmlDocument ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
         {
             var Bad = doc.DocumentNode.Descendants("script");
-            while (Bad.Count() > 0) Bad.First().Remove();
+            while (Bad.Count() > 0) Bad.Last().Remove();
             Bad = doc.DocumentNode.Descendants("style");
-            while (Bad.Count() > 0) Bad.First().Remove();
+            while (Bad.Count() > 0) Bad.Last().Remove();
             Bad = doc.DocumentNode.Descendants("#comment");
-            while (Bad.Count() > 0) Bad.First().Remove();
+            while (Bad.Count() > 0) Bad.Last().Remove();
             return doc;
         }
 
         public static HtmlAgilityPack.HtmlDocument ClearDisplayNone(this HtmlAgilityPack.HtmlDocument doc)
         {
-            var Styled = doc.DocumentNode.SelectNodesSafe(@"//*[@style]");
-            for (int i = Styled.Count - 1; i >= 0; i--)
-                if (Styled[i].GetAttributeValueDecoded("style").MatchCount(@"display:\s*none") <= 0)
-                    Styled.RemoveAt(i);
-            foreach (HtmlNode Node in Styled) 
-                Node.Remove();
+            IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
+                x => x.GetAttributeValueDecoded("style",String.Empty).MatchCount(@"display:\s*none") > 0);
+            while (NoDisplay.Count() > 0) NoDisplay.Last().Remove();
             return doc;
         }
 
@@ -160,6 +157,9 @@ namespace Voron_Poster
             return HttpUtility.HtmlDecode(node.InnerText);
         }
 
+        /// <summary>
+        /// Don't use it! Use LINQ instead of XPath because here it's buggy
+        /// </summary>
         public static HtmlNodeCollection SelectNodesSafe(this HtmlAgilityPack.HtmlNode node, string xpath)
         {
             HtmlNodeCollection Selected = node.SelectNodes(xpath);

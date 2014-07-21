@@ -231,7 +231,7 @@ namespace Voron_Poster
             public static int ErrorNodes(HtmlAgilityPack.HtmlDocument doc)
             {
                 int Error = 0;
-                HtmlNodeCollection Nodes = doc.DocumentNode.SelectNodesSafe(@"//*[@*]");
+                IEnumerable<HtmlNode> Nodes = doc.DocumentNode.Descendants().Where(x => x.HasAttributes);
                 foreach (HtmlNode Node in Nodes)
                 {
                     for (int i2 = 0; i2 < Node.Attributes.Count; i2++)
@@ -249,7 +249,8 @@ namespace Voron_Poster
             public static int LoggedInNodes(HtmlAgilityPack.HtmlDocument doc)
             {
                 int LoggedIn = 0;
-                HtmlNodeCollection Links = doc.DocumentNode.SelectNodesSafe(@"//*[@href]");
+                IEnumerable<HtmlNode> Links = doc.DocumentNode.Descendants().Where(
+                    x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
                 foreach (HtmlNode Node in Links)
                 {
                     for (int i2 = 0; i2 < Node.Attributes.Count; i2++)
@@ -290,17 +291,17 @@ namespace Voron_Poster
             protected abstract void FormProcessor(Uri mainPage);
             protected static WebForm Find(HtmlAgilityPack.HtmlDocument doc, Uri mainPage, Func<WebForm> formConstructor)
             {
-                HtmlNodeCollection Forms = doc.DocumentNode.SelectNodesSafe(@"//form");
+                IEnumerable<HtmlNode> Forms = doc.DocumentNode.Descendants("form");
                 WebForm BestForm = null;
                 int BestFormScore = int.MinValue;
-                for (int i = 0; i < Forms.Count; i++)
+                foreach (HtmlNode HtmlForm in Forms)
                 {
-                    HtmlNode TempForm = Forms[i].Clone();
+                    HtmlNode TempForm = HtmlForm.Clone();
 
                     // Remove children forms
-                    HtmlNodeCollection SubForms = TempForm.SelectNodesSafe(@".//form");
-                    for (int i3 = 0; i3 < SubForms.Count; i3++)
-                        SubForms[i3].Remove();
+                    IEnumerable<HtmlNode> SubForms = TempForm.Descendants("form");
+                    foreach (HtmlNode SubForm in SubForms)
+                        SubForm.Remove();
                     WebForm Form = formConstructor();
                     Form.Form = TempForm;
                     Uri ActionUri;
@@ -343,16 +344,17 @@ namespace Voron_Poster
             protected static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri mainPage,
                                                               Func<string, HtmlNode, int> scoreFunction)
             {
-                HtmlNodeCollection AllLinks = doc.DocumentNode.SelectNodesSafe(@"//*[@href]");
+                IEnumerable<HtmlNode> AllLinks = doc.DocumentNode.Descendants().Where(
+                    x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
                 var LoginLinks = new Dictionary<string, int>();
-                for (int i = 0; i < AllLinks.Count; i++)
+                foreach (HtmlNode Link in AllLinks)
                 {
                     Uri Url;
-                    if (Uri.TryCreate(AllLinks[i].GetAttributeValueDecoded("href", ""), UriKind.RelativeOrAbsolute, out Url) &&
+                    if (Uri.TryCreate(Link.GetAttributeValueDecoded("href", ""), UriKind.RelativeOrAbsolute, out Url) &&
                         (!Url.IsAbsoluteUri || ((Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps)
                          && Url.Host.EndsWith(mainPage.Host, StringComparison.OrdinalIgnoreCase))))
                     {
-                        int Score = scoreFunction(Url.OriginalString, AllLinks[i]);
+                        int Score = scoreFunction(Url.OriginalString, Link);
                         if (!Url.IsAbsoluteUri) Url = new Uri(mainPage, Url);
                         if (Score > 0 && !LoginLinks.ContainsKey(Url.AbsoluteUri))
                             LoginLinks.Add(Url.AbsoluteUri, Score);

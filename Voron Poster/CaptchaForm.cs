@@ -43,7 +43,7 @@ namespace Voron_Poster
                 else
                     MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            buttonRefresh.Enabled = true;
+            buttonRefresh.Enabled = RefreshFunction != null;
         }
 
         private void CaptchaForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -61,11 +61,9 @@ namespace Voron_Poster
         private void CaptchaForm_Shown(object sender, EventArgs e)
         {
             Result.Text = "";
-            if (RefreshFunction != null || Picture.Image != null)
-            {
+            buttonRefresh.Enabled = RefreshFunction != null;
+            if (RefreshFunction != null && Picture.Image != null)
                 buttonRefresh_Click(sender, e);
-                buttonRefresh.Enabled = RefreshFunction != null;
-            }
         }
 
 

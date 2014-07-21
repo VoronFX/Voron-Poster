@@ -388,6 +388,7 @@ namespace Voron_Poster
             if (Tabs.SelectedTab != tasksTab) return;
             bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
             bool Checked = false, Unchecked = false;
+            int CheckedCount = 0;
             int ProgressSum = 0;
             lock (Tasks)
             {
@@ -399,6 +400,7 @@ namespace Voron_Poster
                         SelInfo[(int)Tasks[i].Status] = true;
                         SelInfo[(int)Tasks[i].Action] = true;
                         Checked = true;
+                        CheckedCount++;
                     }
                     else Unchecked = true;
                     ProgressSum += Tasks[i].Ctrls.Progress.Value;
@@ -437,7 +439,7 @@ namespace Voron_Poster
 
             if (Tasks.Count == 0 || !Checked) GTProgress.Value = 0;
             else
-                GTProgress.Value = ProgressSum / Tasks.Count;
+                GTProgress.Value = ProgressSum / CheckedCount;
             if ((SelInfo[(int)TaskGui.InfoIcons.Error] || SelInfo[(int)TaskGui.InfoIcons.Cancelled]) &&
                !(SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting]))
                 ModifyProgressBarColor.SetState(GTProgress, 2);

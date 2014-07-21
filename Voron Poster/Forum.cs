@@ -95,9 +95,9 @@ namespace Voron_Poster
         public static bool ContainsAny(this string s, string[] words)
         {
             for (int i = 0; i < words.Length; i++)
-			{
-			 if (s.IndexOf(words[i], StringComparison.OrdinalIgnoreCase) >= 0) return true;
-			}
+            {
+                if (s.IndexOf(words[i], StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            }
             return false;
         }
 
@@ -106,15 +106,17 @@ namespace Voron_Poster
         /// </summary>
         public static int MatchCount(this string s, string regExprPattern)
         {
-            return (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
+            return String.IsNullOrEmpty(regExprPattern) ? 0 : (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
         }
         /// <summary>
         /// Returns number of Matches.
         /// </summary>
         public static int MatchCount(this string s, string regExprPattern, RegexOptions options)
         {
-            return (new Regex(regExprPattern, options)).Matches(s).Count;
+            return String.IsNullOrEmpty(regExprPattern) ? 0 : (new Regex(regExprPattern, options)).Matches(s).Count;
         }
+
+        #region HtmlAgilityPackFixes
 
         public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name)
         {
@@ -142,6 +144,17 @@ namespace Voron_Poster
             return doc;
         }
 
+        public static HtmlAgilityPack.HtmlDocument ClearDisplayNone(this HtmlAgilityPack.HtmlDocument doc)
+        {
+            var Styled = doc.DocumentNode.SelectNodesSafe(@"//*[@style]");
+            for (int i = Styled.Count - 1; i >= 0; i--)
+                if (Styled[i].GetAttributeValueDecoded("style").MatchCount(@"display:\s*none") <= 0)
+                    Styled.RemoveAt(i);
+            foreach (HtmlNode Node in Styled) 
+                Node.Remove();
+            return doc;
+        }
+
         public static string InnerTextDecoded(this HtmlAgilityPack.HtmlNode node)
         {
             return HttpUtility.HtmlDecode(node.InnerText);
@@ -152,6 +165,8 @@ namespace Voron_Poster
             HtmlNodeCollection Selected = node.SelectNodes(xpath);
             return Selected == null ? new HtmlNodeCollection(node) : Selected;
         }
+
+        #endregion
     }
 
     public abstract class Forum
@@ -187,7 +202,7 @@ namespace Voron_Poster
         }
 
         #region Detect Engine
-        public enum Engine { Unknown, SMF, vBulletin, IPB, Universal, AnyForum}
+        public enum Engine { Unknown, SMF, vBulletin, IPB, Universal, AnyForum }
 
         protected struct SearchExpression
         {
@@ -379,6 +394,7 @@ namespace Voron_Poster
         {
             string StringContent = await content.ReadAsStringAsync();
             var Response = await Client.PostAsync(requestUri, content, Cancel.Token);
+            content.Dispose();
             HttpLog.Add(new KeyValuePair<object, string>(Response, StringContent));
             return Response;
         }

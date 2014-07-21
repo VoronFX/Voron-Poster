@@ -180,7 +180,7 @@ namespace Voron_Poster
             string Captcha = null;
             // Check and ask if captcha
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            if (Uri.TryCreate(GetFieldValue(Html, "class", "verification_control", "src").Replace(';', '&'),
+            if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
                 Progress[2] += 10 / Progress[3];

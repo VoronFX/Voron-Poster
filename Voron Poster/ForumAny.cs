@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -243,8 +244,8 @@ namespace Voron_Poster
                         NewTopic = @"(создать|открыть|нов(ая|ую))\s+тем[ау]",
                         Quote = @"цитат(а|ировать)",
                         Poll = @"опрос",
-                        LoggedIn = @"ваш\s+последний\s+визит|"+
-                                   @"(редактировать|мо[йи])(\s+мой)?\s+(кабинет|профиль|закладки)|"+
+                        LoggedIn = @"ваш\s+последний\s+визит|" +
+                                   @"(редактировать|мо[йи])(\s+мой)?\s+(кабинет|профиль|закладки)|" +
                                    @"(личные)\s+сообщения|выход" //(новые|личные)\s+сообщения bad 
                     },
                     #endregion
@@ -265,7 +266,7 @@ namespace Voron_Poster
                                 @"(пожалуйста(\s|\W)+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
                                 @"(такого\s+)?пользователя\s+не\s+существует|" +
                                 @"соо?бщение\s+слишком\s+короткое" //к\s+сож[ае]лению| bad
- 
+
                     },
                     #endregion
 
@@ -373,7 +374,7 @@ namespace Voron_Poster
                 }
 #if DEBUG
                 if (BestForm != null)
-                Console.WriteLine("FormScore: " + BestFormScore + " ActionUrl: " + BestForm.Action);
+                    Console.WriteLine("FormScore: " + BestFormScore + " ActionUrl: " + BestForm.Action);
 #endif
                 return BestForm;
             }
@@ -691,8 +692,26 @@ namespace Voron_Poster
             lock (Log) Log.Add("Авторизация: Загрузка страницы");
             var Response = await GetAndLog(Properties.ForumMainPage);
             Progress[0] = 40;
+
+            // If Windows authetification
+            if (Response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Client.Dispose();
+                var handler = new HttpClientHandler();
+                handler.Credentials = new NetworkCredential(AccountToUse.Username, AccountToUse.Password);
+                Client = new HttpClient(handler);
+                lock (Log) Log.Add("Авторизация: Запрос авторизации");
+                Response = await GetAndLog(Properties.ForumMainPage);
+                Progress[0] = 205;
+                if (Response.IsSuccessStatusCode)
+                {
+                    lock (Log) Log.Add("Авторизация: Успешно");
+                    return null;
+                }
+                else return new Exception("Авторизация не удалась");
+            }
+
             lock (Log) Log.Add("Авторизация: Поиск формы авторизации");
-            string ss = await Response.Content.ReadAsStringAsync();
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
             LoginForm LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
@@ -722,7 +741,7 @@ namespace Voron_Poster
             Progress[0] = 155;
 
 #if DEBUG
-                Console.WriteLine("LoginLink: {0}", LoginUrl);
+            Console.WriteLine("LoginLink: {0}", LoginUrl);
 #endif
 
             // LoginPage preanalyse for future success detection
@@ -731,11 +750,11 @@ namespace Voron_Poster
             //int SuccessScore = +WebForm.ErrorNodes(Html) - WebForm.LoggedInNodes(Html);
 
 #if DEBUG
-                Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
-                Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
-                Text.MatchCount(Expr.Text.Global.Message.Error),
-                WebForm.ErrorNodes(Html),
-                WebForm.LoggedInNodes(Html));
+            Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
+            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
+            Text.MatchCount(Expr.Text.Global.Message.Error),
+            WebForm.ErrorNodes(Html),
+            WebForm.LoggedInNodes(Html));
             //return null;
 #endif
 
@@ -788,7 +807,7 @@ namespace Voron_Poster
             //return null;
 #endif
 #if DEBUG
-            Console.WriteLine("AuthSuccessScore: " + SuccessScore+'\n');
+            Console.WriteLine("AuthSuccessScore: " + SuccessScore + '\n');
 #endif
             if (SuccessScore <= 0) return new Exception("Авторизация не удалась");
             lock (Log) Log.Add("Авторизация: Успешно");
@@ -797,6 +816,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
+            // Delay needed on some sites
             if (targetBoard.Host == "seodor.biz")
             {
                 WaitingForQueue = true;
@@ -823,7 +843,7 @@ namespace Voron_Poster
                 List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl));
 #if DEBUG
                 Console.WriteLine("PostLinks: {0}", PostUrl);
-         //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
+                //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
 #endif
                 Progress[2] += 5 / Progress[3];
                 int i = 0;
@@ -888,7 +908,7 @@ namespace Voron_Poster
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully
-           
+
             //if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5; bad idea
 
             SuccessScore += Text.MatchCount(Expr.Text.Global.Message.PostSuccess)

@@ -345,7 +345,7 @@ namespace Voron_Poster
         {
             TaskGui New = new TaskGui(this);
             New.TargetUrl = tasksUrl.Text;
-            New.Properties(sender, e);
+            New.Properties_Clicked(sender, e);
             propEngine.SelectedIndex = -1;
             Tasks.Add(New);
 
@@ -481,7 +481,7 @@ namespace Voron_Poster
                         && Tasks[i].Ctrls.StartStop.Enabled
                            && Tasks[i].Action == Action)
                         //  Tasks[i].Ctrls.StartStop.PerformClick();
-                        Tasks[i].StartStop(sender, e);
+                        Tasks[i].StartStop_Clicked(sender, e);
                 }
             TasksUpdater.Enabled = true;
         }
@@ -501,7 +501,7 @@ namespace Voron_Poster
                 }
                 foreach (TaskGui Task in Remove)
                 {
-                    Task.Delete(sender, e);
+                    Task.Delete_Clicked(sender, e);
                 }
             }
             Remove.Clear();
@@ -884,6 +884,7 @@ namespace Voron_Poster
 
         public void propShow()
         {
+            tasksAdd.Enabled = false;
             Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(tasksTab) + 1, propTab);
             //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
             Tabs.SelectTab(propTab);
@@ -967,10 +968,11 @@ namespace Voron_Poster
             CurrTask.Ctrls.Delete.Enabled = true;
             if (CurrTask.New)
             {
-                CurrTask.Delete(sender, e);
+                CurrTask.Delete_Clicked(sender, e);
             }
             CurrTask = null;
             TempForum = null;
+            tasksAdd.Enabled = true;
             propCancel.Enabled = true;
         }
 

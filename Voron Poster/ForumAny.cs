@@ -30,16 +30,16 @@ namespace Voron_Poster
             try
             {
                 if (!String.IsNullOrEmpty(response.Content.Headers.ContentType.CharSet))
-                Encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
+                    Encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
             }
             catch { }
             if (Encoding == null)
             {
-                 string Html = await response.Content.ReadAsStringAsync();
-                 Match CharsetMatch = new Regex(@"charset\s*=[\s""']*([^\s""'/>]*)").Match(Html);
+                string Html = await response.Content.ReadAsStringAsync();
+                Match CharsetMatch = new Regex(@"charset\s*=[\s""']*([^\s""'/>]*)").Match(Html);
                 string Charset = null;
                 if (CharsetMatch != null)
-                Charset = new Regex(@"charset\s*=[\s""']*").Replace(CharsetMatch.Value, String.Empty);
+                    Charset = new Regex(@"charset\s*=[\s""']*").Replace(CharsetMatch.Value, String.Empty);
                 try
                 {
                     if (!String.IsNullOrEmpty(Charset))
@@ -47,7 +47,7 @@ namespace Voron_Poster
                 }
                 catch { }
             }
-            if (Encoding == null) Encoding = Encoding.Default;      
+            if (Encoding == null) Encoding = Encoding.Default;
             Stream stream = await response.Content.ReadAsStreamAsync();
             doc.Load(stream, Encoding);
             doc.ClearScriptsStylesComments();
@@ -56,6 +56,9 @@ namespace Voron_Poster
 
         protected static class Expr
         {
+            public static string[] NotSupported = { "www.nulled.cc" };
+
+
             public static class Url
             {
                 public static string Action = @"[&\?]?(act(ion)?|do|mode)=";
@@ -83,6 +86,7 @@ namespace Voron_Poster
                         public string Quote;
                         public string Poll;
                         public string CaptchaImage;
+                        public string LoggedIn;
                         public static LinkText operator +(LinkText a, LinkText b)
                         {
                             if (a == null && b == null) return null;
@@ -96,7 +100,8 @@ namespace Voron_Poster
                                 NewTopic = JoinExpression(a.NewTopic, b.NewTopic),
                                 Quote = JoinExpression(a.Quote, b.Quote),
                                 CaptchaImage = JoinExpression(a.CaptchaImage, b.CaptchaImage),
-                                Poll = JoinExpression(a.Poll, b.Poll)
+                                Poll = JoinExpression(a.Poll, b.Poll),
+                                LoggedIn = JoinExpression(a.LoggedIn, b.LoggedIn)
                             };
                         }
                     }
@@ -198,8 +203,12 @@ namespace Voron_Poster
                     #region Message
                     Message = new LocalText.MessageText
                     {
-                        Error = @"(login|user(name)?|password)\s+incorrect|" +
-                                @"errors?\s+occurred"
+                        Error = @"(login|user(name)?|password)\s+(incorrect|wrong)|" +
+                                @"errors?\s+occurred|please\s+enter\s+a\s+valid\s+message|" +
+                                @"do\s?n['o]t\s+have\s+permission|" +
+                                @"user(\s|\W)+(\w+(\s|\W)+)(could\s?)?n['o]t\s+(be\s+)?found|" +
+                                @"must\s+be\s+logg?ed(-?\s?in)|" +
+                                @"(incorrect|wrong)\s+password|please(\s|\W)+try\s+again"
                     },
                     #endregion
 
@@ -233,19 +242,30 @@ namespace Voron_Poster
                         Reply = @"ответ(ить)",
                         NewTopic = @"(создать|открыть|нов(ая|ую))\s+тем[ау]",
                         Quote = @"цитат(а|ировать)",
-                        Poll = @"опрос"
+                        Poll = @"опрос",
+                        LoggedIn = @"ваш\s+последний\s+визит|"+
+                                   @"(редактировать|мо[йи])(\s+мой)?\s+(кабинет|профиль|закладки)|"+
+                                   @"(личные)\s+сообщения|выход" //(новые|личные)\s+сообщения bad 
                     },
                     #endregion
 
                     #region Message
                     Message = new LocalText.MessageText
                     {
-                        LoginSuccess = @"вы\s+((за|во)шли|авторизировались)\s+как(?!(\s|\W)+(гость|guest))",
+                        PostSuccess = @"спасибо\s+за\s+соо?бщение",
+                        LoginSuccess = @"вы\s+((за|во)шли|авторизировались)\s+как(?!(\s|\W)+(гость|guest))|" +
+                                       @"спасибо,?\s+что\s+зашли",
 
-                        Error = @"((обнаружен[ыа]|(возникл|произошл)[иа])\s+(cледующ(ие|ая))?\s+ошибк[иа])|" +
-                                @"((неверн|неправильн|введите\s+правильн)(ое|ый|ые))\s+(имя|логин|пароль|код|данные)|" +
-                                @"нет\s+доступа|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|" +
-                                @"к\s+сож[ае]лению"
+                        Error = @"(((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])\s+(cледующ(ие|ая))?\s+ошибк[иа])|" +
+                                @"((неверн|неправильн|введите\s+правильн)(ое?|ый|ые))\s+(введен\s+)?(имя|логин|пароль|код|данные)|" +
+                                @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|повторите\s+попытку|" +
+                                @"вы\s+не\s+авторизованы|недостаточно\s+прав|" +
+                                @"вы\s+были\s+заблокированы" +
+                                @"дата\s+снятия\s+блокировки|" +
+                                @"(пожалуйста(\s|\W)+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
+                                @"(такого\s+)?пользователя\s+не\s+существует|" +
+                                @"соо?бщение\s+слишком\s+короткое" //к\s+сож[ае]лению| bad
+ 
                     },
                     #endregion
 
@@ -264,44 +284,6 @@ namespace Voron_Poster
                 public static LocalText[] Localities = { English, Russian };
                 public static LocalText Global = LocalText.Join(Localities);
             }
-
-            public static int ErrorNodes(HtmlAgilityPack.HtmlDocument doc)
-            {
-                int Error = 0;
-                IEnumerable<HtmlNode> Nodes = doc.DocumentNode.Descendants().Where(x => x.HasAttributes);
-                foreach (HtmlNode Node in Nodes)
-                {
-                    for (int i2 = 0; i2 < Node.Attributes.Count; i2++)
-                    {
-                        if (Node.Attributes[i2].ValueDecoded().MatchCount(@"error|warn") > 0)
-                        {
-                            Error++;
-                            break;
-                        }
-                    }
-                }
-                return Error;
-            }
-
-            public static int LoggedInNodes(HtmlAgilityPack.HtmlDocument doc)
-            {
-                int LoggedIn = 0;
-                IEnumerable<HtmlNode> Links = doc.DocumentNode.Descendants().Where(
-                    x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
-                foreach (HtmlNode Node in Links)
-                {
-                    for (int i2 = 0; i2 < Node.Attributes.Count; i2++)
-                    {
-                        if ((Node.Attributes[i2].Name == "href" || Node.Attributes[i2].Name == "onclick") &&
-                            Node.Attributes[i2].ValueDecoded().MatchCount(Expr.Url.LoggedIn) > 0)
-                        {
-                            LoggedIn++;
-                            break;
-                        }
-                    }
-                }
-                return LoggedIn;
-            }
         }
 
         protected abstract class WebForm
@@ -311,6 +293,7 @@ namespace Voron_Poster
             public string Method;
             public string Action;
             public string AcceptCharset;
+            public string BaseUrl;
             public bool IsHidden;
             public Dictionary<string, string> OtherFields = new Dictionary<string, string>();
 
@@ -336,8 +319,22 @@ namespace Voron_Poster
                 }
             }
 
-            protected abstract void FormProcessor(Uri mainPage);
-            protected static WebForm Find(HtmlAgilityPack.HtmlDocument doc, Uri mainPage, Func<WebForm> formConstructor)
+            protected static string GetBase(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
+            {
+                string BaseUrl = defaultMainPage.AbsoluteUri;
+                foreach (HtmlNode Base in doc.DocumentNode.Descendants("base"))
+                {
+                    string Href = Base.GetAttributeValueDecoded("href");
+                    if (!String.IsNullOrEmpty(Href))
+                    {
+                        BaseUrl = Href;
+                    }
+                }
+                return BaseUrl;
+            }
+
+            protected abstract void FormProcessor();
+            protected static WebForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage, Func<WebForm> formConstructor)
             {
                 IEnumerable<HtmlNode> Forms = doc.DocumentNode.Descendants("form");
                 WebForm BestForm = null;
@@ -352,18 +349,19 @@ namespace Voron_Poster
                         SubForm.Remove();
                     WebForm Form = formConstructor();
                     Form.FormNode = TempForm;
+                    Form.BaseUrl = GetBase(doc, defaultMainPage);
                     Uri ActionUri;
                     if (Uri.TryCreate(TempForm.GetAttributeValueDecoded("action", ""), UriKind.RelativeOrAbsolute, out ActionUri) &&
                     (!ActionUri.IsAbsoluteUri || ((ActionUri.Scheme == Uri.UriSchemeHttp || ActionUri.Scheme == Uri.UriSchemeHttps)
-                     && ActionUri.Host.EndsWith(mainPage.Host, StringComparison.OrdinalIgnoreCase))))
+                     && ActionUri.Host.EndsWith(new Uri(Form.BaseUrl).Host, StringComparison.OrdinalIgnoreCase))))
                     {
-                        if (!ActionUri.IsAbsoluteUri) ActionUri = new Uri(mainPage, ActionUri);
+                        if (!ActionUri.IsAbsoluteUri) ActionUri = new Uri(new Uri(Form.BaseUrl), ActionUri);
                         Form.Action = ActionUri.AbsoluteUri;
                     }
                     Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
                     Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
                     Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
-                    Form.FormProcessor(mainPage);
+                    Form.FormProcessor();
                     Form.IsHidden = HtmlForm.IsNoDisplay();
                     int Score = Form.Score();
 
@@ -372,11 +370,34 @@ namespace Voron_Poster
                         BestForm = Form;
                         BestFormScore = Score;
                     }
-#if DEBUG
-                    Console.WriteLine("FormScore: " + Score + " ActionUrl: "+Form.Action); 
-#endif
                 }
+#if DEBUG
+                if (BestForm != null)
+                Console.WriteLine("FormScore: " + BestFormScore + " ActionUrl: " + BestForm.Action);
+#endif
                 return BestForm;
+            }
+
+            public static int ErrorNodes(HtmlAgilityPack.HtmlDocument doc)
+            {
+                IEnumerable<HtmlNode> Nodes =
+                    doc.DocumentNode.Descendants().Where(
+                    x => x.Attributes.Sum(
+                        y => y.ValueDecoded().MatchCount(@"error|warn")) > 0);
+                return Nodes.Count();
+            }
+
+            public static int LoggedInNodes(HtmlAgilityPack.HtmlDocument doc)
+            {
+                int LoggedIn = 0;
+                IEnumerable<HtmlNode> Links = doc.DocumentNode.Descendants().Where(
+                    x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
+                foreach (HtmlNode Node in Links)
+                {
+                    if (MatchLinkNode(String.Empty, Node, Expr.Url.LoggedIn, Expr.Text.Global.Link.LoggedIn) > 0)
+                        LoggedIn++;
+                }
+                return LoggedIn;
             }
 
             protected static int MatchLinkNode(string linkUrl, HtmlNode linkNode,
@@ -390,9 +411,10 @@ namespace Voron_Poster
                 return Score;
             }
 
-            protected static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri mainPage,
+            protected static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage,
                                                               Func<string, HtmlNode, int> scoreFunction)
             {
+                Uri BaseUrl = new Uri(GetBase(doc, defaultMainPage));
                 IEnumerable<HtmlNode> AllLinks = doc.DocumentNode.Descendants().Where(
                     x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
                 var LoginLinks = new Dictionary<string, int>();
@@ -401,10 +423,10 @@ namespace Voron_Poster
                     Uri Url;
                     if (Uri.TryCreate(Link.GetAttributeValueDecoded("href", ""), UriKind.RelativeOrAbsolute, out Url) &&
                         (!Url.IsAbsoluteUri || ((Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps)
-                         && Url.Host.EndsWith(mainPage.Host, StringComparison.OrdinalIgnoreCase))))
+                         && Url.Host.EndsWith(BaseUrl.Host, StringComparison.OrdinalIgnoreCase))))
                     {
                         int Score = scoreFunction(Url.OriginalString, Link);
-                        if (!Url.IsAbsoluteUri) Url = new Uri(mainPage, Url);
+                        if (!Url.IsAbsoluteUri) Url = new Uri(BaseUrl, Url);
                         if (Score > 0 && !LoginLinks.ContainsKey(Url.AbsoluteUri))
                             LoginLinks.Add(Url.AbsoluteUri, Score);
                     }
@@ -419,7 +441,7 @@ namespace Voron_Poster
             public List<string> UsernameFields = new List<string>();
             public List<string> PasswordFields = new List<string>();
 
-            protected override void FormProcessor(Uri mainPage)
+            protected override void FormProcessor()
             {
                 foreach (HtmlNode Input in FormNode.Descendants("input"))
                 {
@@ -442,14 +464,14 @@ namespace Voron_Poster
                 }
             }
 
-            public static LoginForm Find(HtmlAgilityPack.HtmlDocument doc, Uri mainPage)
+            public static LoginForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
-                return Find(doc, mainPage, () => new LoginForm()) as LoginForm;
+                return Find(doc, defaultMainPage, () => new LoginForm()) as LoginForm;
             }
 
-            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri mainPage)
+            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
-                return WebForm.FindLinks(doc, mainPage, (linkUrl, linkNode) =>
+                return WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
                        linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Login, Expr.Text.Global.Link.Login)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Register, Expr.Text.Global.Link.Register)
@@ -503,7 +525,7 @@ namespace Voron_Poster
             public string CaptchaFieldName;
             public string CaptchaPictureUrl;
 
-            protected override void FormProcessor(Uri mainPage)
+            protected override void FormProcessor()
             {
                 int BestSubjectScore = int.MinValue;
                 int BestCaptchaScore = int.MinValue;
@@ -548,7 +570,7 @@ namespace Voron_Poster
                         if (Uri.TryCreate(Image.GetAttributeValueDecoded("src", String.Empty), UriKind.RelativeOrAbsolute, out Src) &&
                             (!Src.IsAbsoluteUri || (Src.Scheme == Uri.UriSchemeHttp || Src.Scheme == Uri.UriSchemeHttps)))
                         {
-                            if (!Src.IsAbsoluteUri) Src = new Uri(mainPage, Src);
+                            if (!Src.IsAbsoluteUri) Src = new Uri(new Uri(BaseUrl), Src);
 
                             int CaptchaImgScore = MatchLinkNode(Src.AbsoluteUri, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
                             if (CaptchaImgScore > BestCaptchaImgScore)
@@ -562,20 +584,20 @@ namespace Voron_Poster
 
             }
 
-            public static PostForm Find(HtmlAgilityPack.HtmlDocument doc, Uri mainPage)
+            public static PostForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
-                return Find(doc, mainPage, () => new PostForm()) as PostForm;
+                return Find(doc, defaultMainPage, () => new PostForm()) as PostForm;
             }
 
-            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri mainPage)
+            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
-                List<KeyValuePair<string, int>> ReplyLinks = WebForm.FindLinks(doc, mainPage, (linkUrl, linkNode) =>
+                List<KeyValuePair<string, int>> ReplyLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
                        linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Reply, Expr.Text.Global.Link.Reply)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Poll, Expr.Text.Global.Link.Poll)
                      ).OrderBy(x => x.Value).ThenByDescending(x => x.Key.Length).ToList();
-                List<KeyValuePair<string, int>> NewTopicLinks = WebForm.FindLinks(doc, mainPage, (linkUrl, linkNode) =>
+                List<KeyValuePair<string, int>> NewTopicLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
                        linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
@@ -652,7 +674,7 @@ namespace Voron_Poster
                 int MessageScore = MessageFieldName.MatchCount(Expr.Text.Global.Fields.Message);
 
                 if (ActionLoginScore <= 0 || MessageScore <= 0 || Method != "post") return 0;
-                else return ActionLoginScore + MessageScore 
+                else return ActionLoginScore + MessageScore
                     + Action.MatchCount(Expr.Url.Action)
                     + SubjectFieldName.MatchCount(Expr.Text.Global.Fields.Subject)
                     + CaptchaFieldName.MatchCount(Expr.Text.Global.Fields.Captcha);
@@ -661,7 +683,10 @@ namespace Voron_Poster
 
         public override async Task<Exception> Login()
         {
-         //   return null;
+            // Check for bad site
+            if (Expr.NotSupported.Contains(new Uri(Properties.ForumMainPage).Host))
+                return new Exception("Сайт не поддерживается");
+
             // Searching LoginForm
             lock (Log) Log.Add("Авторизация: Загрузка страницы");
             var Response = await GetAndLog(Properties.ForumMainPage);
@@ -670,18 +695,14 @@ namespace Voron_Poster
             string ss = await Response.Content.ReadAsStringAsync();
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
-            LoginForm LoginForm = LoginForm.Find(Html, new Uri(Properties.ForumMainPage));
+            LoginForm LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
             Progress[0] = 50;
 
             // Check other pages for LoginForm
             if (LoginForm == null)
             {
                 lock (Log) Log.Add("Авторизация: Поиск страницы авторизации");
-                List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(Properties.ForumMainPage));
-#if DEBUG
-                Console.WriteLine("LoginLinks:");
-                Console.WriteLine(LoginLinks);
-#endif
+                List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl));
                 Progress[0] = 55;
                 int i = 0;
                 while (LoginForm == null && i < LoginLinks.Count)
@@ -692,7 +713,7 @@ namespace Voron_Poster
                     Progress[0] += 80 / LoginLinks.Count;
                     lock (Log) Log.Add("Авторизация: Поиск формы авторизации");
                     Html = await InitHtml(Response);
-                    LoginForm = LoginForm.Find(Html, new Uri(Properties.ForumMainPage));
+                    LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
                     Progress[0] += 20 / LoginLinks.Count;
                     i++;
                 }
@@ -700,11 +721,23 @@ namespace Voron_Poster
             if (LoginForm == null) return new Exception("Форма авторизации не найдена");
             Progress[0] = 155;
 
+#if DEBUG
+                Console.WriteLine("LoginLink: {0}", LoginUrl);
+#endif
+
             // LoginPage preanalyse for future success detection
             Html.ClearDisplayNone();
-            return null;
             string Text = Html.DocumentNode.InnerTextDecoded();
-            int SuccessScore = +Expr.ErrorNodes(Html) - Expr.LoggedInNodes(Html);
+            //int SuccessScore = +WebForm.ErrorNodes(Html) - WebForm.LoggedInNodes(Html);
+
+#if DEBUG
+                Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
+                Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
+                Text.MatchCount(Expr.Text.Global.Message.Error),
+                WebForm.ErrorNodes(Html),
+                WebForm.LoggedInNodes(Html));
+            //return null;
+#endif
 
             // Send authorization request
             lock (Log) Log.Add("Авторизация: Запрос авторизации");
@@ -716,11 +749,19 @@ namespace Voron_Poster
             Html.ClearDisplayNone();
             Text = Html.DocumentNode.InnerTextDecoded();
             Progress[0] = 205;
-
             // Analyze response
-            SuccessScore += Text.MatchCount(Expr.Text.Global.Message.LoginSuccess)
-                          - Text.MatchCount(Expr.Text.Global.Message.Error)
-                          - Expr.ErrorNodes(Html);
+            int SuccessScore = Text.MatchCount(Expr.Text.Global.Message.LoginSuccess)
+                             - Text.MatchCount(Expr.Text.Global.Message.Error)
+                             - WebForm.ErrorNodes(Html);
+
+#if DEBUG
+            Console.WriteLine("Answer: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
+            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
+            Text.MatchCount(Expr.Text.Global.Message.Error),
+            WebForm.ErrorNodes(Html),
+            WebForm.LoggedInNodes(Html));
+            //return null;
+#endif
 
             // Load LoginPage again and analyze it now (after we've tryed to login)
             lock (Log) Log.Add("Авторизация: Загрузка страницы");
@@ -728,16 +769,26 @@ namespace Voron_Poster
             Progress[0] = 245;
             lock (Log) Log.Add("Авторизация: Проверка авторизации");
             Html = await InitHtml(Response);
-            LoginForm AfterLoginForm = LoginForm.Find(Html, new Uri(Properties.ForumMainPage));
+            LoginForm AfterLoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
+
 
             // Summarize analyzies and return conclusion if login was successfull
-            if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 5;
+            if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
+            else if (AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
             Html.ClearDisplayNone();
             Text = Html.DocumentNode.InnerTextDecoded();
-            SuccessScore += Expr.LoggedInNodes(Html);
+            SuccessScore += WebForm.LoggedInNodes(Html);
             Progress[0] = 255;
 #if DEBUG
-            Console.WriteLine("AuthSuccessScore: " + SuccessScore);
+            Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
+            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
+            Text.MatchCount(Expr.Text.Global.Message.Error),
+            WebForm.ErrorNodes(Html),
+            WebForm.LoggedInNodes(Html));
+            //return null;
+#endif
+#if DEBUG
+            Console.WriteLine("AuthSuccessScore: " + SuccessScore+'\n');
 #endif
             if (SuccessScore <= 0) return new Exception("Авторизация не удалась");
             lock (Log) Log.Add("Авторизация: Успешно");
@@ -746,7 +797,14 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-            return null;
+            if (targetBoard.Host == "seodor.biz")
+            {
+                WaitingForQueue = true;
+                lock (Log) Log.Add("Задержка 5 сек");
+                Task.Delay(5000).Wait(Cancel.Token);
+                WaitingForQueue = false;
+            }
+
             // Searching PostForm
             lock (Log) Log.Add("Постинг: Загрузка страницы");
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
@@ -754,7 +812,7 @@ namespace Voron_Poster
             lock (Log) Log.Add("Постинг: Поиск формы постинга");
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
-            PostForm PostForm = PostForm.Find(Html, targetBoard);
+            PostForm PostForm = PostForm.Find(Html, new Uri(PostUrl));
             Progress[2] = +10 / Progress[3];
 
             // Check other pages for PostForm
@@ -762,10 +820,10 @@ namespace Voron_Poster
             if (PostForm == null)
             {
                 lock (Log) Log.Add("Постинг: Поиск страницы постинга");
-                List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, targetBoard);
+                List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl));
 #if DEBUG
-                Console.WriteLine("PostLinks:");
-                Console.WriteLine(PostLinks);
+                Console.WriteLine("PostLinks: {0}", PostUrl);
+         //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
 #endif
                 Progress[2] += 5 / Progress[3];
                 int i = 0;
@@ -777,7 +835,7 @@ namespace Voron_Poster
                     Progress[2] += (80 / Progress[3]) / PostLinks.Count;
                     lock (Log) Log.Add("Постинг: Поиск формы постинга");
                     Html = await InitHtml(Response);
-                    PostForm = PostForm.Find(Html, targetBoard);
+                    PostForm = PostForm.Find(Html, new Uri(PostUrl));
                     Progress[2] += (20 / Progress[3]) / PostLinks.Count;
                     i++;
                 }
@@ -788,7 +846,14 @@ namespace Voron_Poster
             // PostPage preanalyse for future success detection
             Html.ClearDisplayNone();
             string Text = Html.DocumentNode.InnerTextDecoded();
-            int SuccessScore = +Expr.ErrorNodes(Html);
+            int SuccessScore = 0; // +WebForm.ErrorNodes(Html);
+#if DEBUG
+            Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
+            Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
+            Text.MatchCount(Expr.Text.Global.Message.Error),
+            WebForm.ErrorNodes(Html));
+            return null;
+#endif
 
             // Ask user for captcha if one was found
             string Captcha = String.Empty;
@@ -818,18 +883,26 @@ namespace Voron_Poster
                 PostForm.PostData(AccountToUse, PostForm.ChooseEncoding(Html.Encoding), subject, message, Captcha));
             Progress[2] += 40 / Progress[3];
             Html = await InitHtml(Response);
-            PostForm AfterPostForm = PostForm.Find(Html, targetBoard);
+            PostForm AfterPostForm = PostForm.Find(Html, new Uri(PostUrl));
             Html.ClearDisplayNone();
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully
-            if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5;
-            
+           
+            //if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5; bad idea
+
             SuccessScore += Text.MatchCount(Expr.Text.Global.Message.PostSuccess)
                           - Text.MatchCount(Expr.Text.Global.Message.Error)
-                          - Expr.ErrorNodes(Html);
+                          - WebForm.ErrorNodes(Html);
 
             Progress[2] += 10 / Progress[3];
+#if DEBUG
+            Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
+            Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
+            Text.MatchCount(Expr.Text.Global.Message.Error),
+            WebForm.ErrorNodes(Html));
+            //return null;
+#endif
 #if DEBUG
             Console.WriteLine("PostSuccessScore: " + SuccessScore);
 #endif

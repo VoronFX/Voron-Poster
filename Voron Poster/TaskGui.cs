@@ -92,8 +92,8 @@ namespace Voron_Poster
             if (Forum != null)
                 lock (Forum.Log)
                 {
-                     string StatusText = Forum.Log.Last<string>();
-                     Ctrls.Status.Text = StatusText;
+                    string StatusText = Forum.Log.Last<string>();
+                    Ctrls.Status.Text = StatusText;
                     //Ctrls.Status.Text = new string(StatusText.Skip(Math.Max(0, StatusText.IndexOf(":")+1)).ToArray());
                 }
             MainForm.ToolTip.SetToolTip(Ctrls.Status, Ctrls.Status.Text);
@@ -155,7 +155,7 @@ namespace Voron_Poster
             ModifyProgressBarColor.SetState(Ctrls.Progress, 1); // Not-green colors sometimes ignores progress changes
             if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
             else
-                Ctrls.Progress.Value = Math.Min(561, Forum.Progress[0] + Forum.Progress[1]/5 + Forum.Progress[2]);
+                Ctrls.Progress.Value = Math.Min(561, Forum.Progress[0] + Forum.Progress[1] / 5 + Forum.Progress[2]);
             Ctrls.StatusIcon.Image = GetTaggedIcon(Status);
             Ctrls.StartStop.Image = GetTaggedIcon(Action);
 
@@ -165,7 +165,7 @@ namespace Voron_Poster
                 case InfoIcons.Waiting: ModifyProgressBarColor.SetState(Ctrls.Progress, 3); break;
                 default: ModifyProgressBarColor.SetState(Ctrls.Progress, 1); break;
             }
-            
+
             if (Status == InfoIcons.Error)
             {
                 Ctrls.Status.LinkColor = Color.Red;
@@ -354,9 +354,9 @@ namespace Voron_Poster
             Ctrls.InitializeControls();
             MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
             MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
-            Ctrls.StartStop.Click += StartStop;
-            Ctrls.Delete.Click += Delete;
-            Ctrls.Properties.Click += Properties;
+            Ctrls.StartStop.Click += StartStop_Clicked;
+            Ctrls.Delete.Click += Delete_Clicked;
+            Ctrls.Properties.Click += Properties_Clicked;
             Ctrls.Name.LinkClicked += Name_LinkClicked;
             Ctrls.Status.LinkClicked += Status_LinkClicked;
             AddToGuiTable();
@@ -367,7 +367,7 @@ namespace Voron_Poster
         public string TargetUrl;
         public Forum Forum;
 
-        public void Properties(object sender, EventArgs e)
+        public void Properties_Clicked(object sender, EventArgs e)
         {
             Ctrls.Properties.Enabled = false;
             Ctrls.StartStop.Enabled = false;
@@ -387,7 +387,7 @@ namespace Voron_Poster
                 Forum.ShowData(TargetUrl);
         }
 
-        public void Delete(object sender, EventArgs e)
+        public void Delete_Clicked(object sender, EventArgs e)
         {
             for (int c = 0; c < Ctrls.AsArray.Length; c++)
             {
@@ -405,8 +405,8 @@ namespace Voron_Poster
             MainForm.tasksTable.RowCount -= 1;
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
         }
-        
-        public async void StartStop(object sender, EventArgs e)
+
+        public async void StartStop_Clicked(object sender, EventArgs e)
         {
             Ctrls.StartStop.Enabled = false;
             Ctrls.Delete.Enabled = false;
@@ -431,14 +431,17 @@ namespace Voron_Poster
                 }
                 catch (Exception Error)
                 {
-                    if (!(Error is OperationCanceledException))
-                        throw;
                     Forum.Error = Error;
+                    //if (!(Error is OperationCanceledException))
+                    //    throw;
                 }
                 if (Forum.Error != null)
                 {
                     if (Forum.Error is OperationCanceledException)
-                        lock (Forum.Log) Forum.Log.Add("Отменено");
+                        if (Forum.Cancel.IsCancellationRequested)
+                            lock (Forum.Log) Forum.Log.Add("Отменено");
+                        else
+                            lock (Forum.Log) Forum.Log.Add("Ошибка: Время ожидания истекло");
                     else
                         lock (Forum.Log) Forum.Log.Add("Ошибка: " + Forum.Error.Message);
                 }

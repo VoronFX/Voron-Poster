@@ -345,12 +345,13 @@ namespace Voron_Poster
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
+            tasksTable.SuspendLayout();
             TaskGui New = new TaskGui(this);
             New.TargetUrl = tasksUrl.Text;
             New.Properties_Clicked(sender, e);
             propEngine.SelectedIndex = -1;
             Tasks.Add(New);
-
+            tasksTable.ResumeLayout();
 
             //TaskPropertiesPage.Enabled = false;
             // Tabs.TabIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
@@ -410,9 +411,9 @@ namespace Voron_Poster
                     SelInfo[(int)Tasks[i].Action] = true;
                     Checked = true;
                     CheckedCount++;
+                    ProgressSum += Tasks[i].Ctrls.Progress.Value;
                 }
                 else Unchecked = true;
-                ProgressSum += Tasks[i].Ctrls.Progress.Value;
             }
             //stopwatch.Stop();
             //if (stopwatch.ElapsedMilliseconds > 10)
@@ -464,6 +465,7 @@ namespace Voron_Poster
             //stopwatch.Stop();
             //if (stopwatch.ElapsedMilliseconds > 10)
             //    Console.WriteLine("## 3 - {0}", stopwatch.ElapsedMilliseconds);
+            //   tasksUpdateTable();
             Updating = false;
         }
 
@@ -564,6 +566,7 @@ namespace Voron_Poster
             }
             public static void Load(List<TaskGui> tasks, MainForm parent, string path)
             {
+                parent.tasksTable.SuspendLayout();
                 TaskList TaskList;
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
                 using (FileStream F = File.OpenRead(path))
@@ -578,6 +581,7 @@ namespace Voron_Poster
                     NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
                     tasks.Add(NewTask);
                 }
+                parent.tasksTable.ResumeLayout();
             }
         }
 
@@ -613,6 +617,8 @@ namespace Voron_Poster
                 OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     TaskList.Load(Tasks, this, OpenFileDialog.FileName);
+
+                MainForm_ResizeEnd(null, EventArgs.Empty);
             }
             catch (Exception Error)
             {
@@ -622,39 +628,88 @@ namespace Voron_Poster
         }
 
 
-        public void MainForm_ResizeBegin(object sender, EventArgs e)
+        public void tasksUpdateTable()
         {
-            tasksTable.ResumeLayout();
-            tasksTable.PerformLayout();
+            if (TableLayoutSuspended)
+            {
+                tasksTable.ResumeLayout();
+                //TableLayoutSuspended = false;
+                //tasksTable.PerformLayout();
+                // TableLayoutSuspended = true;
+                tasksTable.SuspendLayout();
+            }
         }
 
+        public void tasksTableResume()
+        {
+            tasksTable.Invoke((Action)(() =>
+               {
+                   if (TableLayoutSuspended)
+                   {
+                       tasksTable.ResumeLayout();
+                       TableLayoutSuspended = false;
+                   }
+               }));
+        }
+
+        public void tasksTableSuspend()
+        {
+            tasksTable.Invoke((Action)(() =>
+                  {
+                      if (!TableLayoutSuspended)
+                      {
+                          TableLayoutSuspended = true;
+                          tasksTable.SuspendLayout();
+                      }
+                  }));
+        }
+
+        public void MainForm_ResizeBegin(object sender, EventArgs e)
+        {
+            tasksTable.SuspendLayout();
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+             //   Tasks[i].Ctrls.Name.Dock = DockStyle.Fill;
+                Tasks[i].Ctrls.Status.Dock = DockStyle.Fill;
+            }
+            tasksTable.ResumeLayout();
+        }
+
+        int ResizeTasksCount = 0;
+        bool TableLayoutSuspended;
         public void MainForm_ResizeEnd(object sender, EventArgs e)
         {
-            if (tasksTable.IsHandleCreated) tasksTable.SuspendLayout();
+            //Manually sizing text elements, because Dock = Fill or Anchor auto size causes
+            //tasksTable to invoke thousands redraw events on chenging text
+            tasksTable.SuspendLayout();
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+             //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
+                TaskGui.ResizeEnd(Tasks[i].Ctrls.Status);
+            }
+            tasksTable.ResumeLayout();
         }
 
         public void tasksTable_Resize(object sender, EventArgs e)
         {
-            // Manually sizing text elements, because Dock = Fill or Anchor auto size causes
-            // tasksTable to invoke thousands redraw events on chenging text
-            //for (int col = 1; col < 3; col++)
-            //{
-            //    for (int row = 0; row < tasksTable.RowCount - 1; row++)
-            //    {
-            //    int width = tasksTable.GetColumnWidths()[col];
-            //    int height = tasksTable.GetRowHeights()[row];
-            //        Control c = tasksTable.GetControlFromPosition(col, row);
-            //        if (c != null)
-            //        {
-            //            // 8 and 2 was choosen by testing =)
-            //            c.Size = new Size((int)width-8, (int)height-2);                     
-            //        }
-            //    }
-            //}
+
+        }
+
+        private void tasksTable_Layout(object sender, LayoutEventArgs e)
+        {
+        }
+
+        private void tasksTable_Paint(object sender, PaintEventArgs e)
+        {
+            tasksTable.Paint -= tasksTable_Paint;
+            MainForm_ResizeBegin(sender, e);
+            MainForm_ResizeEnd(sender, e);
         }
 
         private void tasksTable_SizeChanged(object sender, EventArgs e)
         {
+
+
             //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
             //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
             //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
@@ -1818,6 +1873,9 @@ namespace Voron_Poster
         }
 
         #endregion
+
+
+
 
 
 

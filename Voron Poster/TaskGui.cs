@@ -142,6 +142,9 @@ namespace Voron_Poster
                 }));
             }
         }
+        /// <summary>
+        /// Deprecated
+        /// </summary>
         public void SetStatusIcon()
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
@@ -307,8 +310,8 @@ namespace Voron_Poster
                 Name.Location = new System.Drawing.Point(0, 0);
                 Name.Name = "GTName";
                 Name.Size = new System.Drawing.Size(377, 24);
-                Name.MaximumSize = new System.Drawing.Size(0, 24);
-                Name.MinimumSize = new System.Drawing.Size(0, 24);
+               // Name.MaximumSize = new System.Drawing.Size(0, 24);
+            //    Name.MinimumSize = new System.Drawing.Size(0, 24);
                 Name.TabIndex = 3;
                 Name.Text = "Тема/Раздел";
                 Name.Padding = new Padding(3, 6, 3, 0);
@@ -411,7 +414,6 @@ namespace Voron_Poster
 
         private void AddToGuiTable()
         {
-            MainForm.MainForm_ResizeBegin(null, EventArgs.Empty);
             MainForm.tasksTable.RowCount = MainForm.tasksTable.RowCount + 1;
             for (int i = 0; i < Ctrls.AsArray.Length; i++)
             {
@@ -420,8 +422,13 @@ namespace Voron_Poster
                 MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
                 MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             }
-            MainForm.tasksTable_Resize(null, EventArgs.Empty);
-            MainForm.MainForm_ResizeEnd(null, EventArgs.Empty);
+        }
+
+        public static void ResizeEnd(Control control)
+        {
+                Size s = control.ClientSize;
+                control.Dock = DockStyle.None;
+                control.Size = s;
         }
 
         #endregion
@@ -467,7 +474,6 @@ namespace Voron_Poster
             }
             Ctrls.Status.BeginInvoke((Action)(() =>
             {
-                 
                 Ctrls.Status.Text = status;
                 MainForm.ToolTip.SetToolTip(Ctrls.Status, status);
             }));
@@ -500,7 +506,7 @@ namespace Voron_Poster
 
         public void Delete_Clicked(object sender, EventArgs e)
         {
-            MainForm.MainForm_ResizeBegin(sender, e);
+            MainForm.tasksTable.SuspendLayout();
             for (int c = 0; c < Ctrls.AsArray.Length; c++)
             {
                 int r = MainForm.tasksTable.GetRow(Ctrls.AsArray[c]);
@@ -516,7 +522,7 @@ namespace Voron_Poster
             lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
             MainForm.tasksTable.RowCount -= 1;
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
-            MainForm.MainForm_ResizeEnd(sender, e);
+            MainForm.tasksTable.ResumeLayout();
         }
 
         public async void StartStop_Clicked(object sender, EventArgs e)
@@ -530,7 +536,6 @@ namespace Voron_Poster
             {
                 try
                 {
-                    MainForm.tasksTable.SuspendLayout(); 
                     var Settings = MainForm.Settings;
                     var GlobalAccount = Settings.Account;
                     Forum.AccountToUse = GlobalAccount;

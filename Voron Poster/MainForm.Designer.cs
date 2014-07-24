@@ -1561,6 +1561,8 @@
             this.tasksTable.TabIndex = 0;
             this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
             this.tasksTable.SizeChanged += new System.EventHandler(this.tasksTable_Resize);
+            this.tasksTable.Paint += new System.Windows.Forms.PaintEventHandler(this.tasksTable_Paint);
+            this.tasksTable.Layout += new System.Windows.Forms.LayoutEventHandler(this.tasksTable_Layout);
             // 
             // GTName
             // 

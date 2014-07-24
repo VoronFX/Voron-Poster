@@ -673,7 +673,6 @@ namespace Voron_Poster
             return Task.Run<Exception>(
             async () =>
             {
-               // Task.Delay(100).Wait();
                 // Clearing
                 this.Reset();
 

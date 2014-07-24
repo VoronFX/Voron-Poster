@@ -13,5 +13,7 @@ namespace Voron_Poster
         {
             this.DoubleBuffered = true;
         }
+
+        
     }
 }

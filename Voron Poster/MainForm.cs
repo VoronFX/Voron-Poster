@@ -49,7 +49,7 @@ namespace Voron_Poster
             propEngine.Items[propEngine.Items.IndexOf("Universal")] = "Universal (Slow)";
             propEngine.Items.RemoveAt(0);
 
-            GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
+            GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Stopped];
 
             // Use latest installed IE
             //try
@@ -83,8 +83,8 @@ namespace Voron_Poster
 
             previewWB.Navigate("about:blank");
             aboutProgramName.Text = "Voron Poster " + Application.ProductVersion;
-
-
+            Thread thrd = Thread.CurrentThread;
+            thrd.Priority = ThreadPriority.Highest;
         }
 
         private async void MainForm_Load(object sender, EventArgs e)
@@ -144,14 +144,14 @@ namespace Voron_Poster
                 switch (Res)
                 {
                     case System.Windows.Forms.DialogResult.Yes: propApply_Click(sender, e); break;
-                    case System.Windows.Forms.DialogResult.OK: 
+                    case System.Windows.Forms.DialogResult.OK:
                         if (propCancel.Enabled)
                         {
-                            propClose(sender, e); 
-                            if (Tabs.TabPages.Contains(propTab)) return; 
+                            propClose(sender, e);
+                            if (Tabs.TabPages.Contains(propTab)) return;
                             else break;
                         }
-                        else {e.Cancel = true; return;};
+                        else { e.Cancel = true; return; };
                     case System.Windows.Forms.DialogResult.Cancel: { e.Cancel = true; return; };
                 }
             }
@@ -316,10 +316,12 @@ namespace Voron_Poster
 
         private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            Rectangle r = e.CellBounds;
             if (e.Row == 0)
+            {
+                Graphics g = e.Graphics;
+                Rectangle r = e.CellBounds;
                 g.FillRectangle(SystemBrushes.Control, r);
+            }
             //else // Color table rows by status, but I dislike the result
             //{
             //    var Status = (PictureBox)tasksTable.GetControlFromPosition(3, e.Row);
@@ -383,44 +385,59 @@ namespace Voron_Poster
             TasksUpdater.Enabled = e.TabPage == tasksTab;
         }
 
+        bool Updating;
         private void TasksUpdater_Tick(object sender, EventArgs e)
         {
+            if (Updating) return;
+            else Updating = true;
             if (Tabs.SelectedTab != tasksTab) return;
+            //var stopwatch = new System.Diagnostics.Stopwatch();
+            //stopwatch.Start();
+
+
             bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
             bool Checked = false, Unchecked = false;
             int CheckedCount = 0;
             int ProgressSum = 0;
-            lock (Tasks)
+            //lock (Tasks)
+            //{
+            for (int i = 0; i < Tasks.Count; i++)
             {
-                for (int i = 0; i < Tasks.Count; i++)
+                //    Tasks[i].SetStatusIcon();
+                if (Tasks[i].Ctrls.Selected.Checked)
                 {
-                    Tasks[i].SetStatusIcon();
-                    if (Tasks[i].Ctrls.Selected.Checked)
-                    {
-                        SelInfo[(int)Tasks[i].Status] = true;
-                        SelInfo[(int)Tasks[i].Action] = true;
-                        Checked = true;
-                        CheckedCount++;
-                    }
-                    else Unchecked = true;
-                    ProgressSum += Tasks[i].Ctrls.Progress.Value;
+                    SelInfo[(int)Tasks[i].Status] = true;
+                    SelInfo[(int)Tasks[i].Action] = true;
+                    Checked = true;
+                    CheckedCount++;
                 }
+                else Unchecked = true;
+                ProgressSum += Tasks[i].Ctrls.Progress.Value;
             }
+            //stopwatch.Stop();
+            //if (stopwatch.ElapsedMilliseconds > 10)
+            //    Console.WriteLine("## 1 - {0}", stopwatch.ElapsedMilliseconds);
+            // stopwatch = new System.Diagnostics.Stopwatch();
+            //}
             // Set global status icon
             if (SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting])
-                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Running);
+                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Running];
             else if (SelInfo[(int)TaskGui.InfoIcons.Error])
-                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
             else if (SelInfo[(int)TaskGui.InfoIcons.Cancelled])
-                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Cancelled);
+                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Cancelled];
             else if (SelInfo[(int)TaskGui.InfoIcons.Complete])
-                GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
-            else GTStatusIcon.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Stopped);
+                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
+            else GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Stopped];
 
             if (Checked && Unchecked) GTSelected.CheckState = CheckState.Indeterminate;
             else if (Checked) GTSelected.CheckState = CheckState.Checked;
             else GTSelected.CheckState = CheckState.Unchecked;
 
+            //stopwatch.Stop();
+            //if (stopwatch.ElapsedMilliseconds > 10)
+            //    Console.WriteLine("## 2 - {0}", stopwatch.ElapsedMilliseconds);
+            // stopwatch = new System.Diagnostics.Stopwatch();
             // Set global start icon 
             TaskGui.InfoIcons GActionStart, GActionStop;
             GTStart.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Run];
@@ -432,10 +449,10 @@ namespace Voron_Poster
                 SelInfo[(int)TaskGui.InfoIcons.Cancel] || SelInfo[(int)TaskGui.InfoIcons.Cancelled];
             if (SelInfo[(int)TaskGui.InfoIcons.Cancel]) GActionStop = TaskGui.InfoIcons.Cancel;
             else GActionStop = TaskGui.InfoIcons.Clear;
-            GTStart.Image = TaskGui.GetTaggedIcon(GActionStart);
-            GTStop.Image = TaskGui.GetTaggedIcon(GActionStop);
-            ToolTip.SetToolTip(GTStart, TaskGui.GetTooltip(GActionStart));
-            ToolTip.SetToolTip(GTStop, TaskGui.GetTooltip(GActionStop));
+            GTStart.Image = TaskGui.InfoIconsBitmaps[(int)GActionStart];
+            GTStop.Image = TaskGui.InfoIconsBitmaps[(int)GActionStop];
+            ToolTip.SetToolTip(GTStart, TaskGui.InfoIconsTooltips[(int)GActionStart]);
+            ToolTip.SetToolTip(GTStop, TaskGui.InfoIconsTooltips[(int)GActionStop]);
 
             if (Tasks.Count == 0 || !Checked) GTProgress.Value = 0;
             else
@@ -444,6 +461,10 @@ namespace Voron_Poster
                !(SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting]))
                 ModifyProgressBarColor.SetState(GTProgress, 2);
             else ModifyProgressBarColor.SetState(GTProgress, 1);
+            //stopwatch.Stop();
+            //if (stopwatch.ElapsedMilliseconds > 10)
+            //    Console.WriteLine("## 3 - {0}", stopwatch.ElapsedMilliseconds);
+            Updating = false;
         }
 
         private void GTSelected_Click(object sender, EventArgs e)
@@ -461,7 +482,7 @@ namespace Voron_Poster
             GTStop.Enabled = false;
             GTDelete.Enabled = false;
             TasksUpdater.Enabled = false;
-            TaskGui.InfoIcons Action = TaskGui.GetInfo((Bitmap)((sender as Button).Image));
+            TaskGui.InfoIcons Action = (TaskGui.InfoIcons)Enum.Parse(typeof(TaskGui.InfoIcons), (string)(sender as Button).Image.Tag);
             if (Action == TaskGui.InfoIcons.Clear)
                 for (int i = 0; i < Tasks.Count; i++)
                 {
@@ -471,18 +492,34 @@ namespace Voron_Poster
                     Tasks[i].Status == TaskGui.InfoIcons.Error))
                     {
                         Tasks[i].Forum.Reset();
-                        Tasks[i].SetStatusIcon();
+                        Tasks[i].Status = TaskGui.InfoIcons.Stopped;
+                        //  Tasks[i].SetStatusIcon();
                     }
                 }
             else
+            {
+                //Parallel.ForEach(Tasks, (T) =>
+                //{
+                //    this.Invoke((Action)(() =>
+                //    {
+                //        if (T.Ctrls.Selected.Checked
+                //                && T.Ctrls.StartStop.Enabled
+                //                   && T.Action == Action)
+                //              T.Ctrls.StartStop.PerformClick();
+                //         //   T.StartStop_Clicked(sender, e);
+                //    }
+                //         ));
+                //});
                 for (int i = 0; i < Tasks.Count; i++)
                 {
+                    Tasks[i].Ctrls.Progress.Refresh();
                     if (Tasks[i].Ctrls.Selected.Checked
                         && Tasks[i].Ctrls.StartStop.Enabled
                            && Tasks[i].Action == Action)
-                        //  Tasks[i].Ctrls.StartStop.PerformClick();
+                        //   Tasks[i].Ctrls.StartStop.PerformClick();
                         Tasks[i].StartStop_Clicked(sender, e);
                 }
+            }
             TasksUpdater.Enabled = true;
         }
 
@@ -582,6 +619,38 @@ namespace Voron_Poster
                 MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             tasksLoad.Enabled = true;
+        }
+
+
+        public void MainForm_ResizeBegin(object sender, EventArgs e)
+        {
+            tasksTable.ResumeLayout();
+            tasksTable.PerformLayout();
+        }
+
+        public void MainForm_ResizeEnd(object sender, EventArgs e)
+        {
+            if (tasksTable.IsHandleCreated) tasksTable.SuspendLayout();
+        }
+
+        public void tasksTable_Resize(object sender, EventArgs e)
+        {
+            // Manually sizing text elements, because Dock = Fill or Anchor auto size causes
+            // tasksTable to invoke thousands redraw events on chenging text
+            //for (int col = 1; col < 3; col++)
+            //{
+            //    for (int row = 0; row < tasksTable.RowCount - 1; row++)
+            //    {
+            //    int width = tasksTable.GetColumnWidths()[col];
+            //    int height = tasksTable.GetRowHeights()[row];
+            //        Control c = tasksTable.GetControlFromPosition(col, row);
+            //        if (c != null)
+            //        {
+            //            // 8 and 2 was choosen by testing =)
+            //            c.Size = new Size((int)width-8, (int)height-2);                     
+            //        }
+            //    }
+            //}
         }
 
         private void tasksTable_SizeChanged(object sender, EventArgs e)
@@ -718,7 +787,7 @@ namespace Voron_Poster
         {
             PropertiesActivity = true;
             propValidate();
-            propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
+            propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
             Forum.Engine Detected = Forum.Engine.Unknown;
             HttpClient Client = new HttpClient();
             StopProperties = new CancellationTokenSource();
@@ -733,7 +802,7 @@ namespace Voron_Poster
             catch
             {
                 Error = true;
-                propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+                propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
             }
             finally
             {
@@ -742,16 +811,16 @@ namespace Voron_Poster
             if (!Error)
             {
                 if (Detected == Forum.Engine.Unknown)
-                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Question);
+                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Question];
                 else
                 {
                     TempProperties.Engine = Detected;
                     propEngine.SelectedIndex =
                         propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.Engine), Detected).Replace("Universal", "Universal (Slow)"));
-                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
                 }
             }
-            else propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+            else propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
             PropertiesActivity = false;
             propValidate();
         }
@@ -761,7 +830,7 @@ namespace Voron_Poster
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
             propValidate();
-            propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
+            propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
             TempForum = Forum.New(TempProperties.Engine);
             StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
@@ -782,10 +851,10 @@ namespace Voron_Poster
             {
                 Error = CatchedError;
             }
-            if (Error == null) propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+            if (Error == null) propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
             else
             {
-                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+                propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
                 ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
             }
             PropertiesActivity = false;
@@ -805,10 +874,10 @@ namespace Voron_Poster
         {
             if (!PropertiesActivity)
             {
-                propAuthTryLogin.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Login);
+                propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Login];
                 ToolTip.SetToolTip(propAuthTryLogin, String.Empty);
                 if (sender == propMainUrl || sender == propEngine)
-                    propEngineDetect.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Gear);
+                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Gear];
             }
         }
 
@@ -861,7 +930,7 @@ namespace Voron_Poster
                 propScriptsList.Items.Count > 0 &&
                 propScriptsGroup.Enabled &&
                 !PropertiesActivity;
-            propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Save);
+            propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Save];
             //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
             //    TryLoginButton.Enabled;
         }
@@ -951,10 +1020,10 @@ namespace Voron_Poster
                 Tabs.SelectedTab = scriptsTab;
                 scriptsCancel.PerformClick();
                 propValidate();
-                    propCancel.Enabled = true;
+                propCancel.Enabled = true;
                 if (Tabs.TabPages.Contains(scriptsTab))
                     return;
-                else propCancel.PerformClick();             
+                else propCancel.PerformClick();
                 return;
             }
 
@@ -1015,10 +1084,10 @@ namespace Voron_Poster
 
         private void propScriptsEdit_Click(object sender, EventArgs e)
         {
-                scriptsName.Text = (String)propScriptsList.SelectedItem;
-                propScriptsRemove_Click(sender, e);
-                propScriptsAdd_Click(sender, e);
-                scriptsSave.Enabled = false;
+            scriptsName.Text = (String)propScriptsList.SelectedItem;
+            propScriptsRemove_Click(sender, e);
+            propScriptsAdd_Click(sender, e);
+            scriptsSave.Enabled = false;
         }
 
         private void propScriptsList_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -1090,11 +1159,11 @@ namespace Voron_Poster
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
                     Xml.Serialize(F, TempProperties);
                 propValidate();
-                propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+                propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
             }
             catch (Exception Error)
             {
-                propProfileSave.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+                propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
                 MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -1180,7 +1249,7 @@ namespace Voron_Poster
                 }
                 else
                 {
-                    scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
+                    scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Test];
                     scriptsSave.Enabled = true;
                 }
                 scriptsAccept.Enabled = scriptsList.SelectedIndex >= 0 || scriptsSave.Enabled;
@@ -1509,7 +1578,7 @@ namespace Voron_Poster
             scriptsNew.Enabled = false;
             scriptsSubject.TextChanged -= scriptsSubject_TextChanged;
             scriptsMessage.TextChanged -= scriptsSubject_TextChanged;
-            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Activity);
+            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
             var Result = new List<string>();
             Exception Error = null;
             ToolTip.SetToolTip(scriptsStatusLabel, String.Empty);
@@ -1552,7 +1621,7 @@ namespace Voron_Poster
             if (Error != null)
             {
                 scriptsStatusLabel.Text = Error.Message;
-                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Error);
+                scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
                 scriptsStatusLabel.ForeColor = Color.Red;
             }
             else
@@ -1560,7 +1629,7 @@ namespace Voron_Poster
                 scriptsResult.Clear();
                 scriptsResult.Lines = Result.ToArray();
                 scriptsResult.Focus();
-                scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Complete);
+                scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
                 scriptsStatusLabel.ForeColor = Color.Black;
                 scriptsStatusLabel.Text = "Скрипт выполнен";
             }
@@ -1588,7 +1657,7 @@ namespace Voron_Poster
             scriptsTestAbortTimer.Enabled = false;
             scriptsRun.Click -= scriptsRun_Click;
             scriptsRun.Click += scriptsAbort_Click;
-            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Cancelled);
+            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Cancelled];
             scriptsRun.Text = "Прервать";
             scriptsRun.Enabled = true;
             ToolTip.SetToolTip(scriptsRun, "Завершить процесс\n"
@@ -1599,7 +1668,7 @@ namespace Voron_Poster
 
         private void scriptsSubject_TextChanged(object sender, EventArgs e)
         {
-            scriptsRun.Image = TaskGui.GetTaggedIcon(TaskGui.InfoIcons.Test);
+            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Test];
         }
 
         private void scriptsTestBox_Enter(object sender, EventArgs e)
@@ -1749,6 +1818,11 @@ namespace Voron_Poster
         }
 
         #endregion
+
+
+
+
+
 
 
 

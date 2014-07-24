@@ -37,24 +37,24 @@ namespace Voron_Poster
         public override async Task<Exception> Login()
         {
             // Getting loging page
-            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+           StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage + "index.php?action=login");
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 50;
+            progress.Login += 50;
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[0] += 25;
+            progress.Login += 25;
 
             // Search for Id's and calculate hash
-            lock (Log) Log.Add("Авторизация: Поиск переменных");
+           StatusMessage = "Авторизация: Поиск переменных";
             Html = Html.ToLower();
-            Progress[0] += 8;
+            progress.Login += 8;
             CurrSessionID = GetBetweenStrAfterStr(Html, "hashloginpassword", "'", "'");
-            Progress[0] += 8;
+            progress.Login += 8;
             AnotherID = GetBetweenStrAfterStr(Html, "value=\"" + CurrSessionID + "\"", "\"", "\"");
-            Progress[0] += 8;
-            lock (Log) Log.Add("Авторизация: Подготовка данных");
+            progress.Login += 8;
+           StatusMessage = "Авторизация: Подготовка данных";
             string HashPswd = hashLoginPassword(AccountToUse.Username, AccountToUse.Password, CurrSessionID);
-            Progress[0] += 8;
+            progress.Login += 8;
 
             var PostData = new FormUrlEncodedContent(new[]
                     {
@@ -64,28 +64,28 @@ namespace Voron_Poster
                         new KeyValuePair<string, string>("hash_passwrd", HashPswd),   
                         new KeyValuePair<string, string>(AnotherID, CurrSessionID)
                      });
-            Progress[0] += 8;
+            progress.Login += 8;
 
             // Send data to login and wait response
-            lock (Log) Log.Add("Авторизация: Запрос авторизации");
+           StatusMessage = "Авторизация: Запрос авторизации";
             Response = await PostAndLog(Properties.ForumMainPage + "index.php?action=login2", PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 60;
+            progress.Login += 60;
 
-            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+           StatusMessage = "Авторизация: Загрузка страницы";
             Response = await GetAndLog(Properties.ForumMainPage);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 50;
+            progress.Login += 50;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            Progress[0] += 17;
+            progress.Login += 17;
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             if (Html.IndexOf("index.php?action=logout") < 0)
                 return new Exception("Ошибка при авторизации");
             else {
-                lock (Log) Log.Add("Успешно авторизирован");
-                Progress[0] += 13;
+               StatusMessage = "Успешно авторизирован";
+                progress.Login += 13;
                 return null;
             }
         }
@@ -137,7 +137,7 @@ namespace Voron_Poster
 
         private async Task<Bitmap> GetCaptcha()
         {
-            lock (Log) Log.Add("Публикация: Загрузка капчи");
+           StatusMessage = "Публикация: Загрузка капчи";
             var Response = await Client.GetAsync(CaptchaUri, Cancel.Token);
             return new Bitmap(await Response.Content.ReadAsStreamAsync());
             //Random r = new Random();
@@ -157,25 +157,25 @@ namespace Voron_Poster
         {
 
             // Get the post page
-            lock (Log) Log.Add("Публикация: Загрузка страницы");
+           StatusMessage = "Публикация: Загрузка страницы";
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             var Response = await GetAndLog(Properties.ForumMainPage + "index.php" + TargetBoard.Query + "&action=post");
-            Progress[2] += 50 / Progress[3];
+            progress.Post += 50 / progress.PostCount;
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[2] += 20 / Progress[3];
+            progress.Post += 20 / progress.PostCount;
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
           
             // Get post url
-            lock (Log) Log.Add("Публикация: Поиск переменных");
+           StatusMessage = "Публикация: Поиск переменных";
             Html = Html.ToLower();
-            Progress[2] += 11 / Progress[3];
+            progress.Post += 11 / progress.PostCount;
             string Topic = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get("topic");
             if (Topic == null) Topic = "0";
             if (!TryGetPostUrl(Html, out TargetBoard))
                 return new Exception("Не удалось извлечь ссылку для публикации");
-            Progress[2] += 11 / Progress[3];
+            progress.Post += 11 / progress.PostCount;
             string SeqNum = GetFieldValue(Html, "seqnum");
-            Progress[2] += 11 / Progress[3];
+            progress.Post += 11 / progress.PostCount;
 
             string Captcha = null;
             // Check and ask if captcha
@@ -183,24 +183,24 @@ namespace Voron_Poster
             if (Uri.TryCreate(GetBetweenStrAfterStr(Html, "class=\"verification_control\"", "src=\"", "\"").Replace(';', '&'),
                 UriKind.Absolute, out CaptchaUri) && (CaptchaUri.Scheme == Uri.UriSchemeHttp || CaptchaUri.Scheme == Uri.UriSchemeHttps))
             {
-                Progress[2] += 10 / Progress[3];
+                progress.Post += 10 / progress.PostCount;
                 //await Task.Run(() => CaptchaForm.IsFree.WaitOne());
                 WaitingForQueue = true;
-                lock (Log) Log.Add("Публикация: В очереди");
+               StatusMessage = "Публикация: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
-                Progress[2] += 20 / Progress[3];
+                progress.Post += 20 / progress.PostCount;
                 CaptchaForm.RefreshFunction = GetCaptcha;
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 Captcha = CaptchaForm.Result.Text;
                 CaptchaForm.IsFree.Set();
-                Progress[2] += 20 / Progress[3];
+                progress.Post += 20 / progress.PostCount;
             }
-            else Progress[2] += 50 / Progress[3];
+            else progress.Post += 50 / progress.PostCount;
 
             // Form data and post
-            lock (Log) Log.Add("Публикация: Подготовка данных");
+           StatusMessage = "Публикация: Подготовка данных";
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
             using (var FormData = new MultipartFormDataContent())
             {
@@ -220,17 +220,17 @@ namespace Voron_Poster
                 //FormData.Add(new StringContent(""), "sel_size");
                 //FormData.Add(new StringContent(""), "sel_face");
                 //FormData.Add(new StringContent("xx"), "icon");            
-                Progress[2] += 11 / Progress[3];
+                progress.Post += 11 / progress.PostCount;
 
                 // Send post
-                lock (Log) Log.Add("Публикация: Отправка запроса");
+               StatusMessage = "Публикация: Отправка запроса";
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
                 Response =  await PostAndLog(TargetBoard.AbsoluteUri, FormData);
-                Progress[2] += 50 / Progress[3];
+                progress.Post += 50 / progress.PostCount;
                 Html = await Response.Content.ReadAsStringAsync();
-                Progress[2] += 20 / Progress[3];
+                progress.Post += 20 / progress.PostCount;
                 Html = Html.ToLower();
-                Progress[2] += 11 / Progress[3];
+                progress.Post += 11 / progress.PostCount;
 
                 // Check if success
                 if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -238,8 +238,8 @@ namespace Voron_Poster
                     return new Exception("Сайт вернул ошибку");
                 else
                 {
-                    lock (Log) Log.Add("Опубликовано");
-                    Progress[2] += 10 / Progress[3];
+                   StatusMessage = "Опубликовано";
+                    progress.Post += 10 / progress.PostCount;
                     return null;
                 }
             }

@@ -257,7 +257,7 @@ namespace Voron_Poster
                         LoginSuccess = @"вы\s+((за|во)шли|авторизировались)\s+как(?!(\s|\W)+(гость|guest))|" +
                                        @"спасибо,?\s+что\s+зашли",
 
-                        Error = @"(((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])\s+(cледующ(ие|ая))?\s+ошибк[иа])|" +
+                        Error = @"(((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])\s+(следующ(ие|ая)\s+)?ошибк[иа])|" +
                                 @"((неверн|неправильн|введите\s+правильн)(ое?|ый|ые))\s+(введен\s+)?(имя|логин|пароль|код|данные)|" +
                                 @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|повторите\s+попытку|" +
                                 @"вы\s+не\s+авторизованы|недостаточно\s+прав|" +
@@ -372,7 +372,7 @@ namespace Voron_Poster
                         BestFormScore = Score;
                     }
                 }
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
                 if (BestForm != null)
                     Console.WriteLine("FormScore: " + BestFormScore + " ActionUrl: " + BestForm.Action);
 #endif
@@ -689,9 +689,9 @@ namespace Voron_Poster
                 return new Exception("Сайт не поддерживается");
 
             // Searching LoginForm
-            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+           StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage);
-            Progress[0] = 40;
+            progress.Login = 40;
 
             // If Windows authetification
             if (Response.StatusCode == HttpStatusCode.Unauthorized)
@@ -700,47 +700,47 @@ namespace Voron_Poster
                 var handler = new HttpClientHandler();
                 handler.Credentials = new NetworkCredential(AccountToUse.Username, AccountToUse.Password);
                 Client = new HttpClient(handler);
-                lock (Log) Log.Add("Авторизация: Запрос авторизации");
+               StatusMessage = "Авторизация: Запрос авторизации";
                 Response = await GetAndLog(Properties.ForumMainPage);
-                Progress[0] = 205;
+                progress.Login = 205;
                 if (Response.IsSuccessStatusCode)
                 {
-                    lock (Log) Log.Add("Авторизация: Успешно");
+                   StatusMessage = "Авторизация: Успешно";
                     return null;
                 }
                 else return new Exception("Авторизация не удалась");
             }
 
-            lock (Log) Log.Add("Авторизация: Поиск формы авторизации");
+           StatusMessage = "Авторизация: Поиск формы авторизации";
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
             LoginForm LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
-            Progress[0] = 50;
+            progress.Login = 50;
 
             // Check other pages for LoginForm
             if (LoginForm == null)
             {
-                lock (Log) Log.Add("Авторизация: Поиск страницы авторизации");
+               StatusMessage = "Авторизация: Поиск страницы авторизации";
                 List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl));
-                Progress[0] = 55;
+                progress.Login = 55;
                 int i = 0;
                 while (LoginForm == null && i < LoginLinks.Count)
                 {
                     LoginUrl = LoginLinks[i].Key;
-                    lock (Log) Log.Add("Авторизация: Загрузка страницы");
+                   StatusMessage = "Авторизация: Загрузка страницы";
                     Response = await GetAndLog(LoginUrl);
-                    Progress[0] += 80 / LoginLinks.Count;
-                    lock (Log) Log.Add("Авторизация: Поиск формы авторизации");
+                    progress.Login += 80 / LoginLinks.Count;
+                   StatusMessage = "Авторизация: Поиск формы авторизации";
                     Html = await InitHtml(Response);
                     LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
-                    Progress[0] += 20 / LoginLinks.Count;
+                    progress.Login += 20 / LoginLinks.Count;
                     i++;
                 }
             }
             if (LoginForm == null) return new Exception("Форма авторизации не найдена");
-            Progress[0] = 155;
+            progress.Login = 155;
 
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("LoginLink: {0}", LoginUrl);
 #endif
 
@@ -749,7 +749,7 @@ namespace Voron_Poster
             string Text = Html.DocumentNode.InnerTextDecoded();
             //int SuccessScore = +WebForm.ErrorNodes(Html) - WebForm.LoggedInNodes(Html);
 
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
             Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
             Text.MatchCount(Expr.Text.Global.Message.Error),
@@ -759,21 +759,21 @@ namespace Voron_Poster
 #endif
 
             // Send authorization request
-            lock (Log) Log.Add("Авторизация: Запрос авторизации");
+           StatusMessage = "Авторизация: Запрос авторизации";
 
             Response = await PostAndLog(LoginForm.Action,
                 LoginForm.PostData(AccountToUse, LoginForm.ChooseEncoding(Html.Encoding)));
-            Progress[0] = 195;
+            progress.Login = 195;
             Html = await InitHtml(Response);
             Html.ClearDisplayNone();
             Text = Html.DocumentNode.InnerTextDecoded();
-            Progress[0] = 205;
+            progress.Login = 205;
             // Analyze response
             int SuccessScore = Text.MatchCount(Expr.Text.Global.Message.LoginSuccess)
                              - Text.MatchCount(Expr.Text.Global.Message.Error)
                              - WebForm.ErrorNodes(Html);
 
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Answer: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
             Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
             Text.MatchCount(Expr.Text.Global.Message.Error),
@@ -783,10 +783,10 @@ namespace Voron_Poster
 #endif
 
             // Load LoginPage again and analyze it now (after we've tryed to login)
-            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+           StatusMessage = "Авторизация: Загрузка страницы";
             Response = await GetAndLog(LoginUrl);
-            Progress[0] = 245;
-            lock (Log) Log.Add("Авторизация: Проверка авторизации");
+            progress.Login = 245;
+           StatusMessage = "Авторизация: Проверка авторизации";
             Html = await InitHtml(Response);
             LoginForm AfterLoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
 
@@ -797,8 +797,8 @@ namespace Voron_Poster
             Html.ClearDisplayNone();
             Text = Html.DocumentNode.InnerTextDecoded();
             SuccessScore += WebForm.LoggedInNodes(Html);
-            Progress[0] = 255;
-#if DEBUG
+            progress.Login = 255;
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
             Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
             Text.MatchCount(Expr.Text.Global.Message.Error),
@@ -806,73 +806,74 @@ namespace Voron_Poster
             WebForm.LoggedInNodes(Html));
             //return null;
 #endif
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("AuthSuccessScore: " + SuccessScore + '\n');
 #endif
             if (SuccessScore <= 0) return new Exception("Авторизация не удалась");
-            lock (Log) Log.Add("Авторизация: Успешно");
+           StatusMessage = "Авторизация: Успешно";
             return null;
         }
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
+            return null;
             // Delay needed on some sites
             if (targetBoard.Host == "seodor.biz")
             {
                 WaitingForQueue = true;
-                lock (Log) Log.Add("Задержка 5 сек");
+               StatusMessage = "Задержка 5 сек";
                 Task.Delay(5000).Wait(Cancel.Token);
                 WaitingForQueue = false;
             }
 
             // Searching PostForm
-            lock (Log) Log.Add("Постинг: Загрузка страницы");
+           StatusMessage = "Постинг: Загрузка страницы";
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
-            Progress[2] += 40 / Progress[3];
-            lock (Log) Log.Add("Постинг: Поиск формы постинга");
+            progress.Post += 40 / progress.PostCount;
+           StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
             PostForm PostForm = PostForm.Find(Html, new Uri(PostUrl));
-            Progress[2] = +10 / Progress[3];
+            progress.Post = +10 / progress.PostCount;
 
             // Check other pages for PostForm
-            int TempProgress = Progress[2];
+            int TempProgress = progress.Post;
             if (PostForm == null)
             {
-                lock (Log) Log.Add("Постинг: Поиск страницы постинга");
+               StatusMessage = "Постинг: Поиск страницы постинга";
                 List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl));
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
                 Console.WriteLine("PostLinks: {0}", PostUrl);
                 //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
 #endif
-                Progress[2] += 5 / Progress[3];
+                progress.Post += 5 / progress.PostCount;
                 int i = 0;
                 while (PostForm == null && i < PostLinks.Count)
                 {
                     PostUrl = PostLinks[i].Key;
-                    lock (Log) Log.Add("Постинг: Загрузка страницы");
+                   StatusMessage = "Постинг: Загрузка страницы";
                     Response = await GetAndLog(PostUrl);
-                    Progress[2] += (80 / Progress[3]) / PostLinks.Count;
-                    lock (Log) Log.Add("Постинг: Поиск формы постинга");
+                    progress.Post += (80 / progress.PostCount) / PostLinks.Count;
+                   StatusMessage = "Постинг: Поиск формы постинга";
                     Html = await InitHtml(Response);
                     PostForm = PostForm.Find(Html, new Uri(PostUrl));
-                    Progress[2] += (20 / Progress[3]) / PostLinks.Count;
+                    progress.Post += (20 / progress.PostCount) / PostLinks.Count;
                     i++;
                 }
             }
             if (PostForm == null) return new Exception("Форма постинга не найдена");
-            Progress[2] = TempProgress + (100 / Progress[3]);
+            progress.Post = TempProgress + (100 / progress.PostCount);
 
             // PostPage preanalyse for future success detection
             Html.ClearDisplayNone();
             string Text = Html.DocumentNode.InnerTextDecoded();
             int SuccessScore = 0; // +WebForm.ErrorNodes(Html);
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
             Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
             Text.MatchCount(Expr.Text.Global.Message.Error),
             WebForm.ErrorNodes(Html));
-            return null;
+            //     return null;
 #endif
 
             // Ask user for captcha if one was found
@@ -881,27 +882,27 @@ namespace Voron_Poster
                 !String.IsNullOrEmpty(PostForm.CaptchaPictureUrl))
             {
                 WaitingForQueue = true;
-                lock (Log) Log.Add("Постинг: В очереди");
+               StatusMessage = "Постинг: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
-                Progress[2] += 10 / Progress[3];
-                lock (Log) Log.Add("Постинг: Загрузка капчи");
+                progress.Post += 10 / progress.PostCount;
+               StatusMessage = "Постинг: Загрузка капчи";
                 Response = await Client.GetAsync(PostForm.CaptchaPictureUrl, Cancel.Token);
-                Progress[2] += 20 / Progress[3];
+                progress.Post += 20 / progress.PostCount;
                 CaptchaForm.Picture.Image = new Bitmap(await Response.Content.ReadAsStreamAsync());
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
-                lock (Log) Log.Add("Постинг: Ожидание ввода капчи");
+               StatusMessage = "Постинг: Ожидание ввода капчи";
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 Captcha = CaptchaForm.Result.Text;
                 CaptchaForm.IsFree.Set();
-                Progress[2] += 20 / Progress[3];
+                progress.Post += 20 / progress.PostCount;
             }
-            else Progress[2] += 50 / Progress[3];
+            else progress.Post += 50 / progress.PostCount;
 
             // Send post message request
-            lock (Log) Log.Add("Постинг: Отправка сообщения");
+           StatusMessage = "Постинг: Отправка сообщения";
             Response = await PostAndLog(PostForm.Action,
                 PostForm.PostData(AccountToUse, PostForm.ChooseEncoding(Html.Encoding), subject, message, Captcha));
-            Progress[2] += 40 / Progress[3];
+            progress.Post += 40 / progress.PostCount;
             Html = await InitHtml(Response);
             PostForm AfterPostForm = PostForm.Find(Html, new Uri(PostUrl));
             Html.ClearDisplayNone();
@@ -915,19 +916,19 @@ namespace Voron_Poster
                           - Text.MatchCount(Expr.Text.Global.Message.Error)
                           - WebForm.ErrorNodes(Html);
 
-            Progress[2] += 10 / Progress[3];
-#if DEBUG
+            progress.Post += 10 / progress.PostCount;
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
             Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
             Text.MatchCount(Expr.Text.Global.Message.Error),
             WebForm.ErrorNodes(Html));
             //return null;
 #endif
-#if DEBUG
+#if DEBUG && DEBUGANYFORUM
             Console.WriteLine("PostSuccessScore: " + SuccessScore);
 #endif
             if (SuccessScore < 0) return new Exception("Постинг не удался");
-            lock (Log) Log.Add("Успешно опубликовано");
+           StatusMessage = "Успешно Опубликовано";
             return null;
         }
     }

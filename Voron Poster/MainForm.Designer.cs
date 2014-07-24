@@ -1511,6 +1511,7 @@
             // 
             // TasksUpdater
             // 
+            this.TasksUpdater.Interval = 300;
             this.TasksUpdater.Tick += new System.EventHandler(this.TasksUpdater_Tick);
             // 
             // ToolTip
@@ -1559,7 +1560,7 @@
             this.tasksTable.Size = new System.Drawing.Size(816, 492);
             this.tasksTable.TabIndex = 0;
             this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
-            this.tasksTable.SizeChanged += new System.EventHandler(this.tasksTable_SizeChanged);
+            this.tasksTable.SizeChanged += new System.EventHandler(this.tasksTable_Resize);
             // 
             // GTName
             // 
@@ -1697,6 +1698,8 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.ResizeBegin += new System.EventHandler(this.MainForm_ResizeBegin);
+            this.ResizeEnd += new System.EventHandler(this.MainForm_ResizeEnd);
             this.Tabs.ResumeLayout(false);
             this.messageTab.ResumeLayout(false);
             this.messageTab.PerformLayout();
@@ -1789,7 +1792,6 @@
         private System.Windows.Forms.Button GTStop;
         private System.Windows.Forms.Label tasksUrlLabel;
         private System.Windows.Forms.Timer TasksUpdater;
-        public DBTableLayoutPanel tasksTable;
         public System.Windows.Forms.ToolTip ToolTip;
         private System.Windows.Forms.TabPage scriptsTab;
         private System.Windows.Forms.Splitter splitter1;
@@ -1856,6 +1858,7 @@
         private System.Windows.Forms.Label messageTextLabel;
         private System.Windows.Forms.Label messageSubjectLabel;
         private System.Windows.Forms.LinkLabel aboutAuthorSkype;
+        public DBTableLayoutPanel tasksTable;
 
 
     }

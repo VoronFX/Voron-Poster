@@ -33,23 +33,23 @@ namespace Voron_Poster
         public override async Task<Exception> Login()
         {
             // Getting loging page
-            lock (Log) Log.Add("Авторизация: Загрузка страницы");
+           StatusMessage = "Авторизация: Загрузка страницы";
             var Response =  await GetAndLog(Properties.ForumMainPage);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 66;
+            progress.Login += 66;
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[0] += 30;
+            progress.Login += 30;
 
             // Search for Id's and calculate hash
-            lock (Log) Log.Add("Авторизация: Поиск переменных");
+           StatusMessage = "Авторизация: Поиск переменных";
             Html = Html.ToLower();
-            Progress[0] += 13;
+            progress.Login += 13;
             SecurityToken = GetFieldValue(Html, "securitytoken");
-            Progress[0] += 12;
-            lock (Log) Log.Add("Авторизация: Подготовка данных");
+            progress.Login += 12;
+           StatusMessage = "Авторизация: Подготовка данных";
             string HashPswd = MD5HashStringForUTF8String(str_to_ent(AccountToUse.Password.Trim()));
             string HashPswdUtf = MD5HashStringForUTF8String(AccountToUse.Password.Trim());
-            Progress[0] += 13;
+            progress.Login += 13;
             var PostData =
                 new FormUrlEncodedContent(new[]
                     {
@@ -58,15 +58,15 @@ namespace Voron_Poster
                         new KeyValuePair<string, string>("vb_login_md5password", HashPswd),        
                         new KeyValuePair<string, string>("vb_login_md5password_utf", HashPswdUtf), 
                      });
-            Progress[0] += 12;
+            progress.Login += 12;
 
             // Send data to login and wait response
-            lock (Log) Log.Add("Авторизация: Запрос авторизации");
+           StatusMessage = "Авторизация: Запрос авторизации";
             Response = await PostAndLog(Properties.ForumMainPage + "login.php?do=login", PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 66;
+            progress.Login += 66;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            Progress[0] += 30;
+            progress.Login += 30;
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -74,8 +74,8 @@ namespace Voron_Poster
                 return new Exception("Ошибка при авторизации");
             else
             {
-                lock (Log) Log.Add("Успешно авторизирован");
-                Progress[0] += 13;
+               StatusMessage = "Успешно авторизирован";
+                progress.Login += 13;
                 return null;
             }
         }
@@ -119,7 +119,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
         {
-            lock (Log) Log.Add("Публикация: Подготовка данных");
+           StatusMessage = "Публикация: Подготовка данных";
             string PostUrl;
             string TargetParameter = "t";
             string Target = "reply";
@@ -130,26 +130,26 @@ namespace Voron_Poster
             }
             string TargetValue = HttpUtility.ParseQueryString(TargetBoard.Query.Replace(';', '&')).Get(TargetParameter);
             PostUrl = Properties.ForumMainPage + @"new" + Target + ".php";
-            Progress[2] += 7 / Progress[3];
+            progress.Post += 7 / progress.PostCount;
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
             // Get the post page
-            lock (Log) Log.Add("Публикация: Загрузка страницы");
+           StatusMessage = "Публикация: Загрузка страницы";
             var Response = await GetAndLog(PostUrl + "?do=new" + Target + "&" + TargetParameter + "=" + TargetValue);
-            Progress[2] += 60 / Progress[3];
+            progress.Post += 60 / progress.PostCount;
             string Html = await Response.Content.ReadAsStringAsync();
-            Progress[2] += 30 / Progress[3];
+            progress.Post += 30 / progress.PostCount;
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
 
-            lock (Log) Log.Add("Публикация: Поиск переменных");
+           StatusMessage = "Публикация: Поиск переменных";
             string posthash = GetFieldValue(Html, "posthash");
-            Progress[2] += 10 / Progress[3];
+            progress.Post += 10 / progress.PostCount;
             string poststarttime = GetFieldValue(Html, "poststarttime");
-            Progress[2] += 10 / Progress[3];
+            progress.Post += 10 / progress.PostCount;
             string loggedinuser = GetFieldValue(Html, "loggedinuser");
-            Progress[2] += 10 / Progress[3];
+            progress.Post += 10 / progress.PostCount;
             SecurityToken = GetFieldValue(Html, "securitytoken");
-            Progress[2] += 10 / Progress[3];
+            progress.Post += 10 / progress.PostCount;
 
             // Not working by unkknown encoding problem 
             // PostData = new FormUrlEncodedContent(new[]
@@ -163,7 +163,7 @@ namespace Voron_Poster
             //        new KeyValuePair<string, string>(TargetParameter, TargetValue),  
             //        new KeyValuePair<string, string>("do", "post"+Target)
             //    });
-            lock (Log) Log.Add("Публикация: Подготовка данных");
+           StatusMessage = "Публикация: Подготовка данных";
             StringContent PostData = new StringContent("subject="+Subject
                         + "&message="+Message
                         + "&securitytoken=" + SecurityToken
@@ -174,15 +174,15 @@ namespace Voron_Poster
                         + "&do=" + "post" + Target, UTF8Encoding.Default,
                         "application/x-www-form-urlencoded");
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[2] += 7 / Progress[3];
+            progress.Post += 7 / progress.PostCount;
 
             // Send data
-            lock (Log) Log.Add("Публикация: Отправка запроса");
+           StatusMessage = "Публикация: Отправка запроса";
             Response = await PostAndLog(PostUrl, PostData);
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-            Progress[0] += 60;
+            progress.Login += 60;
             Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            Progress[0] += 30;
+            progress.Login += 30;
 
             // Check if login successfull
             if (Cancel.IsCancellationRequested) return new OperationCanceledException();
@@ -191,8 +191,8 @@ namespace Voron_Poster
                 return new Exception("Сайт вернул ошибку");
             else
             {
-                lock (Log) Log.Add("Опубликовано");
-                Progress[2] += 21 / Progress[3];
+               StatusMessage = "Опубликовано";
+                progress.Post += 21 / progress.PostCount;
                 return null;
             }
         }

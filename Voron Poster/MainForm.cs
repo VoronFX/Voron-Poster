@@ -538,10 +538,12 @@ namespace Voron_Poster
                         Remove.Add(Tasks[i]);
                     }
                 }
+                tasksTable.SuspendLayout();
                 foreach (TaskGui Task in Remove)
                 {
                     Task.Delete_Clicked(sender, e);
                 }
+                tasksTable.ResumeLayout();
             }
             Remove.Clear();
         }
@@ -1873,6 +1875,7 @@ namespace Voron_Poster
         }
 
         #endregion
+
 
 
 

@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿#define DEBUGANYFORUM
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +14,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
-
 namespace Voron_Poster
 {
     public class ForumAny : Forum
@@ -264,7 +264,7 @@ namespace Voron_Poster
                                 @"вы\s+были\s+заблокированы" +
                                 @"дата\s+снятия\s+блокировки|" +
                                 @"(пожалуйста(\s|\W)+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
-                                @"(такого\s+)?пользователя\s+не\s+существует|" +
+                                @"(такого\s+)?пользовател[яь]\s+((\W|\w)*\s+)?не\s+(существует|найден)|" +
                                 @"соо?бщение\s+слишком\s+короткое" //к\s+сож[ае]лению| bad
 
                     },
@@ -455,7 +455,7 @@ namespace Voron_Poster
                         else if (Input.GetAttributeValueDecoded("type") == "password")
                             PasswordFields.Add(Input.GetAttributeValueDecoded("name", String.Empty));
 
-                        else if (//Input.Attribute("type", String.Empty) != "submit" &&
+                        else if (Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
                             (Input.GetAttributeValueDecoded("type") != "radio" ||
                             Input.GetAttributeValueDecoded("checked") == "checked") &&
                             !OtherFields.ContainsKey(Input.GetAttributeValueDecoded("name", String.Empty)))
@@ -515,7 +515,8 @@ namespace Voron_Poster
                     PasswordFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.RepeatPassword)) > 0
                     || Method != "post") return 0;
                 else return ActionLoginScore + UsernameScore + PasswordScore
-                    - Action.MatchCount(Expr.Url.Register) + Action.MatchCount(Expr.Url.Action);
+                    - Action.MatchCount(Expr.Url.Register) + Action.MatchCount(Expr.Url.Action)
+                    + MatchLinkNode(String.Empty, FormNode, Expr.Url.Login, Expr.Text.Global.Link.Login);
             }
         }
 
@@ -546,7 +547,7 @@ namespace Voron_Poster
                             SelectBest(ref BestCaptchaScore, ref CaptchaFieldName, name, Expr.Text.Global.Fields.Captcha);
 
                         }
-                        else if (//Input.Attribute("type", String.Empty) != "submit" &&
+                        else if (Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
                             (Input.GetAttributeValueDecoded("type") != "radio" ||
                             Input.GetAttributeValueDecoded("checked") == "checked") &&
                             !OtherFields.ContainsKey(Input.GetAttributeValueDecoded("name", String.Empty)))
@@ -678,7 +679,9 @@ namespace Voron_Poster
                 else return ActionLoginScore + MessageScore
                     + Action.MatchCount(Expr.Url.Action)
                     + SubjectFieldName.MatchCount(Expr.Text.Global.Fields.Subject)
-                    + CaptchaFieldName.MatchCount(Expr.Text.Global.Fields.Captcha);
+                    + CaptchaFieldName.MatchCount(Expr.Text.Global.Fields.Captcha)
+                    + MatchLinkNode(String.Empty, FormNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
+                    + MatchLinkNode(String.Empty, FormNode, Expr.Url.Reply, Expr.Text.Global.Link.Reply);
             }
         }
 
@@ -816,7 +819,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-            return null;
+            //return null;
             // Delay needed on some sites
             if (targetBoard.Host == "seodor.biz")
             {

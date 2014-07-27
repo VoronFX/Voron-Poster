@@ -57,8 +57,11 @@ namespace Voron_Poster
 
         protected static class Expr
         {
-            public static string[] NotSupported = { "www.nulled.cc" };
-
+            public static string[] NotSupported = {   "www.nulled.cc", // ip ban after post request 
+                                                      "www.maultalk.com", // hard captcha request
+                                                      "www.master-x.com" // "not found" on login post request 
+                                                  };
+            //     public static string[] EasySkipCaptcha = { "www.maultalk.com" }; // not working
 
             public static class Url
             {
@@ -220,7 +223,7 @@ namespace Voron_Poster
                         Password = @"pass(wr?d|word)?",
                         RepeatPassword = @"match|repeat",
                         Subject = @"subject|title",
-                        Message = @"message|editor|text",
+                        Message = @"post|reply|message|editor|text",
                         Captcha = @"capt?cha|code",
                         Preview = @"preview"
                     }
@@ -234,19 +237,19 @@ namespace Voron_Poster
                     #region Link
                     Link = new LocalText.LinkText
                     {
-                        Login = @"вход|войти|авториз(ация|ироваться)|запомнить|логин",
+                        Login = @"(вход|войти|авториз(ация|ироваться)|запомнить|логин)\b",
 
                         Register = @"(за)?регистр(ир(овать|уйтесь)|ация)|" +
                                          @"(нов(ый|ого)|создать)\s+(пользовател(ь|я)|акк?аунт)|" +
                                          @"первый\s+раз|нет\s+акк?аунта",
 
-                        Reply = @"ответ(ить)",
+                        Reply = @"ответ(ить)?\b",
                         NewTopic = @"(создать|открыть|нов(ая|ую))\s+тем[ау]",
                         Quote = @"цитат(а|ировать)",
-                        Poll = @"опрос",
+                        Poll = @"опрос\b",
                         LoggedIn = @"ваш\s+последний\s+визит|" +
                                    @"(редактировать|мо[йи])(\s+мой)?\s+(кабинет|профиль|закладки)|" +
-                                   @"(личные)\s+сообщения|выход" //(новые|личные)\s+сообщения bad 
+                                   @"(личные)\s+сообщения|выход\b" //(новые|личные)\s+сообщения bad 
                     },
                     #endregion
 
@@ -255,11 +258,13 @@ namespace Voron_Poster
                     {
                         PostSuccess = @"спасибо\s+за\s+соо?бщение",
                         LoginSuccess = @"вы\s+((за|во)шли|авторизировались)\s+как(?!(\s|\W)+(гость|guest))|" +
+                                       @"благодарим\s+за\s+визит|" +
                                        @"спасибо,?\s+что\s+зашли",
 
                         Error = @"(((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])\s+(следующ(ие|ая)\s+)?ошибк[иа])|" +
                                 @"((неверн|неправильн|введите\s+правильн)(ое?|ый|ые))\s+(введен\s+)?(имя|логин|пароль|код|данные)|" +
                                 @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|повторите\s+попытку|" +
+                                @"логин\s+или\s+пароль\s+неверны|" +
                                 @"вы\s+не\s+авторизованы|недостаточно\s+прав|" +
                                 @"вы\s+были\s+заблокированы" +
                                 @"дата\s+снятия\s+блокировки|" +
@@ -295,6 +300,8 @@ namespace Voron_Poster
             public string Action;
             public string AcceptCharset;
             public string BaseUrl;
+            public string CaptchaFieldName;
+            public string CaptchaPictureUrl;
             public bool IsHidden;
             public Dictionary<string, string> OtherFields = new Dictionary<string, string>();
 
@@ -313,7 +320,7 @@ namespace Voron_Poster
             protected static void SelectBest(ref int bestScore, ref string bestText, string thisText, string matchPattern)
             {
                 int Score = thisText.MatchCount(matchPattern);
-                if (Score > bestScore)
+                if (Score > 0 && Score > bestScore)
                 {
                     bestScore = Score;
                     bestText = thisText;
@@ -362,6 +369,39 @@ namespace Voron_Poster
                     Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
                     Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
                     Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
+
+                    int BestCaptchaScore = int.MinValue;
+                    foreach (HtmlNode Input in Form.FormNode.Descendants("input"))
+                    {
+                        if (Input.GetAttributeValueDecoded("type") == "text")
+                        {
+                            SelectBest(ref BestCaptchaScore, ref Form.CaptchaFieldName,
+                                Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Captcha);
+                        }
+                    }
+
+                    // Search for captcha image
+                    if (!String.IsNullOrEmpty(Form.CaptchaFieldName))
+                    {
+                        int BestCaptchaImgScore = int.MinValue;
+                        foreach (HtmlNode Image in Form.FormNode.Descendants("img"))
+                        {
+                            Uri Src;
+                            if (Uri.TryCreate(Image.GetAttributeValueDecoded("src", String.Empty), UriKind.RelativeOrAbsolute, out Src) &&
+                                (!Src.IsAbsoluteUri || (Src.Scheme == Uri.UriSchemeHttp || Src.Scheme == Uri.UriSchemeHttps)))
+                            {
+                                if (!Src.IsAbsoluteUri) Src = new Uri(new Uri(Form.BaseUrl), Src);
+
+                                int CaptchaImgScore = MatchLinkNode(Src.AbsoluteUri, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
+                                if (CaptchaImgScore > BestCaptchaImgScore)
+                                {
+                                    Form.CaptchaPictureUrl = Src.AbsoluteUri;
+                                    BestCaptchaImgScore = CaptchaImgScore;
+                                }
+                            }
+                        }
+                    }
+
                     Form.FormProcessor();
                     Form.IsHidden = HtmlForm.IsNoDisplay();
                     int Score = Form.Score();
@@ -384,7 +424,8 @@ namespace Voron_Poster
                 IEnumerable<HtmlNode> Nodes =
                     doc.DocumentNode.Descendants().Where(
                     x => x.Attributes.Sum(
-                        y => y.ValueDecoded().MatchCount(@"error|warn")) > 0);
+                        y => y.ValueDecoded().MatchCount(@"error|warn")) > 0
+                        && x.InnerText.MatchCount(@"отключен\s+javascript") == 0);
                 return Nodes.Count();
             }
 
@@ -439,19 +480,20 @@ namespace Voron_Poster
         protected class LoginForm : WebForm
         {
 
-            public List<string> UsernameFields = new List<string>();
+            public string UsernameFieldName;
             public List<string> PasswordFields = new List<string>();
 
             protected override void FormProcessor()
             {
+                int BestUsernameScore = int.MinValue;
                 foreach (HtmlNode Input in FormNode.Descendants("input"))
                 {
                     if (!String.IsNullOrEmpty(Input.GetAttributeValueDecoded("name")) &&
                         !String.IsNullOrEmpty(Input.GetAttributeValueDecoded("type")))
                     {
                         if (Input.GetAttributeValueDecoded("type") == "text")
-                            UsernameFields.Add(Input.GetAttributeValueDecoded("name", String.Empty));
-
+                            SelectBest(ref BestUsernameScore, ref UsernameFieldName,
+                                  Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Username);
                         else if (Input.GetAttributeValueDecoded("type") == "password")
                             PasswordFields.Add(Input.GetAttributeValueDecoded("name", String.Empty));
 
@@ -463,6 +505,14 @@ namespace Voron_Poster
                                Input.GetAttributeValueDecoded("value", String.Empty));
                     }
                 }
+
+                //// Easy skip captcha on stupid sites
+                //if (Expr.EasySkipCaptcha.Contains(new Uri(BaseUrl).Host))
+                //{
+                //    if (OtherFields.ContainsKey("recaptcha_response_field"))
+                //    OtherFields.Remove("recaptcha_response_field");
+                //}
+
             }
 
             public static LoginForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
@@ -479,27 +529,29 @@ namespace Voron_Poster
                     );
             }
 
-            public HttpContent PostData(TaskBaseProperties.AccountData account, Encoding encoding)
+            public HttpContent PostData(TaskBaseProperties.AccountData account, string captcha, Encoding encoding)
             {
                 var PostString = new StringBuilder();
-                string Username = account.Username.ToLower();
-                for (int i = 0; i < UsernameFields.Count; i++)
-                {
-                    PostString.Append("&" + UsernameFields[i] + "=");
-                    PostString.Append(HttpUtility.UrlEncode(Username, encoding));
-                }
+                PostString.Append("&" + UsernameFieldName + "=");
+                PostString.Append(HttpUtility.UrlEncode(account.Username.ToLower(), encoding));
                 string Password = account.Password;
                 for (int i = 0; i < PasswordFields.Count; i++)
                 {
                     PostString.Append("&" + PasswordFields[i] + "=");
                     PostString.Append(HttpUtility.UrlEncode(Password, encoding));
                 }
+                
+                if (!String.IsNullOrEmpty(CaptchaFieldName))
+                    PostString.Append("&" + CaptchaFieldName + "=");
+                
+                PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
                 List<KeyValuePair<string, string>> OtherFieldsList = OtherFields.ToList();
                 for (int i = 0; i < OtherFieldsList.Count; i++)
                 {
                     PostString.Append("&" + OtherFieldsList[i].Key + "=");
                     PostString.Append(HttpUtility.UrlEncode(OtherFieldsList[i].Value, encoding));
                 }
+
                 PostString.Remove(0, 1);
                 return new StringContent(PostString.ToString(), encoding,
                             "application/x-www-form-urlencoded");
@@ -507,15 +559,16 @@ namespace Voron_Poster
 
             public override int Score()
             {
-                int ActionLoginScore = Action.MatchCount(Expr.Url.Login);
-                int UsernameScore = UsernameFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.Username));
+                int UsernameScore = UsernameFieldName.MatchCount(Expr.Text.Global.Fields.Username);
                 int PasswordScore = PasswordFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.Password));
 
-                if (ActionLoginScore <= 0 || UsernameScore <= 0 || PasswordScore <= 0 ||
+                if (UsernameScore <= 0 || PasswordScore <= 0 ||
                     PasswordFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.RepeatPassword)) > 0
                     || Method != "post") return 0;
-                else return ActionLoginScore + UsernameScore + PasswordScore
-                    - Action.MatchCount(Expr.Url.Register) + Action.MatchCount(Expr.Url.Action)
+                else return UsernameScore + PasswordScore
+                    + Action.MatchCount(Expr.Url.Action)
+                    + Action.MatchCount(Expr.Url.Login)
+                    - Action.MatchCount(Expr.Url.Register)
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.Login, Expr.Text.Global.Link.Login);
             }
         }
@@ -524,13 +577,10 @@ namespace Voron_Poster
         {
             public string SubjectFieldName;
             public string MessageFieldName;
-            public string CaptchaFieldName;
-            public string CaptchaPictureUrl;
 
             protected override void FormProcessor()
             {
                 int BestSubjectScore = int.MinValue;
-                int BestCaptchaScore = int.MinValue;
                 int BestMessageScore = int.MinValue;
 
                 foreach (HtmlNode Input in FormNode.Descendants("input"))
@@ -540,12 +590,8 @@ namespace Voron_Poster
                     {
                         if (Input.GetAttributeValueDecoded("type") == "text")
                         {
-                            string name = Input.GetAttributeValueDecoded("name", String.Empty);
-
-                            SelectBest(ref BestSubjectScore, ref SubjectFieldName, name, Expr.Text.Global.Fields.Subject);
-
-                            SelectBest(ref BestCaptchaScore, ref CaptchaFieldName, name, Expr.Text.Global.Fields.Captcha);
-
+                            SelectBest(ref BestSubjectScore, ref SubjectFieldName,
+                                Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Subject);
                         }
                         else if (Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
                             (Input.GetAttributeValueDecoded("type") != "radio" ||
@@ -560,28 +606,6 @@ namespace Voron_Poster
                 {
                     SelectBest(ref BestMessageScore, ref MessageFieldName,
                         TextArea.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Message);
-                }
-
-                // Search for captcha image
-                if (!String.IsNullOrEmpty(CaptchaFieldName))
-                {
-                    int BestCaptchaImgScore = int.MinValue;
-                    foreach (HtmlNode Image in FormNode.Descendants("img"))
-                    {
-                        Uri Src;
-                        if (Uri.TryCreate(Image.GetAttributeValueDecoded("src", String.Empty), UriKind.RelativeOrAbsolute, out Src) &&
-                            (!Src.IsAbsoluteUri || (Src.Scheme == Uri.UriSchemeHttp || Src.Scheme == Uri.UriSchemeHttps)))
-                        {
-                            if (!Src.IsAbsoluteUri) Src = new Uri(new Uri(BaseUrl), Src);
-
-                            int CaptchaImgScore = MatchLinkNode(Src.AbsoluteUri, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
-                            if (CaptchaImgScore > BestCaptchaImgScore)
-                            {
-                                CaptchaPictureUrl = Src.AbsoluteUri;
-                                BestCaptchaImgScore = CaptchaImgScore;
-                            }
-                        }
-                    }
                 }
 
             }
@@ -672,12 +696,12 @@ namespace Voron_Poster
 
             public override int Score()
             {
-                int ActionLoginScore = Action.MatchCount(Expr.Url.NewTopic) + Action.MatchCount(Expr.Url.Reply);
                 int MessageScore = MessageFieldName.MatchCount(Expr.Text.Global.Fields.Message);
 
-                if (ActionLoginScore <= 0 || MessageScore <= 0 || Method != "post") return 0;
-                else return ActionLoginScore + MessageScore
-                    + Action.MatchCount(Expr.Url.Action)
+                if (MessageScore <= 0 || Method != "post") return 0;
+                else return MessageScore +
+                    +Action.MatchCount(Expr.Url.Action)
+                    + Action.MatchCount(Expr.Url.NewTopic) + Action.MatchCount(Expr.Url.Reply)
                     + SubjectFieldName.MatchCount(Expr.Text.Global.Fields.Subject)
                     + CaptchaFieldName.MatchCount(Expr.Text.Global.Fields.Captcha)
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
@@ -692,7 +716,7 @@ namespace Voron_Poster
                 return new Exception("Сайт не поддерживается");
 
             // Searching LoginForm
-           StatusMessage = "Авторизация: Загрузка страницы";
+            StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage);
             progress.Login = 40;
 
@@ -703,18 +727,18 @@ namespace Voron_Poster
                 var handler = new HttpClientHandler();
                 handler.Credentials = new NetworkCredential(AccountToUse.Username, AccountToUse.Password);
                 Client = new HttpClient(handler);
-               StatusMessage = "Авторизация: Запрос авторизации";
+                StatusMessage = "Авторизация: Запрос авторизации";
                 Response = await GetAndLog(Properties.ForumMainPage);
                 progress.Login = 205;
                 if (Response.IsSuccessStatusCode)
                 {
-                   StatusMessage = "Авторизация: Успешно";
+                    StatusMessage = "Авторизация: Успешно";
                     return null;
                 }
                 else return new Exception("Авторизация не удалась");
             }
 
-           StatusMessage = "Авторизация: Поиск формы авторизации";
+            StatusMessage = "Авторизация: Поиск формы авторизации";
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
             LoginForm LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
@@ -723,20 +747,20 @@ namespace Voron_Poster
             // Check other pages for LoginForm
             if (LoginForm == null)
             {
-               StatusMessage = "Авторизация: Поиск страницы авторизации";
+                StatusMessage = "Авторизация: Поиск страницы авторизации";
                 List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl));
                 progress.Login = 55;
                 int i = 0;
                 while (LoginForm == null && i < LoginLinks.Count)
                 {
                     LoginUrl = LoginLinks[i].Key;
-                   StatusMessage = "Авторизация: Загрузка страницы";
+                    StatusMessage = "Авторизация: Загрузка страницы";
                     Response = await GetAndLog(LoginUrl);
-                    progress.Login += 80 / LoginLinks.Count;
-                   StatusMessage = "Авторизация: Поиск формы авторизации";
+                    progress.Login += 50 / LoginLinks.Count;
+                    StatusMessage = "Авторизация: Поиск формы авторизации";
                     Html = await InitHtml(Response);
                     LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
-                    progress.Login += 20 / LoginLinks.Count;
+                    progress.Login += 10 / LoginLinks.Count;
                     i++;
                 }
             }
@@ -748,9 +772,10 @@ namespace Voron_Poster
 #endif
 
             // LoginPage preanalyse for future success detection
-            Html.ClearDisplayNone();
+            Html.ClearHidden();
             string Text = Html.DocumentNode.InnerTextDecoded();
-            //int SuccessScore = +WebForm.ErrorNodes(Html) - WebForm.LoggedInNodes(Html);
+            bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
+            bool LoggedInNodesValid = WebForm.LoggedInNodes(Html) == 0;
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
@@ -760,21 +785,44 @@ namespace Voron_Poster
             WebForm.LoggedInNodes(Html));
             //return null;
 #endif
+            // Ask user for captcha if one was found
+            string Captcha = String.Empty;
+            if (!String.IsNullOrEmpty(LoginForm.CaptchaFieldName) &&
+                !String.IsNullOrEmpty(LoginForm.CaptchaPictureUrl))
+            {
+                WaitingForQueue = true;
+                StatusMessage = "Авторизация: В очереди";
+                await WaitFor(CaptchaForm.IsFree);
+                progress.Login += 10;
+                StatusMessage = "Авторизация: Загрузка капчи";
+                Response = await Client.GetAsync(LoginForm.CaptchaPictureUrl, Cancel.Token);
+                progress.Login += 15;
+                CaptchaForm.Picture.Image = new Bitmap(await Response.Content.ReadAsStreamAsync());
+                CaptchaForm.CancelFunction = () => Cancel.Cancel();
+                StatusMessage = "Авторизация: Ожидание ввода капчи";
+                Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
+                Captcha = CaptchaForm.Result.Text;
+                CaptchaForm.IsFree.Set();
+                progress.Login += 15;
+            }
+            else progress.Login += 40;
+
 
             // Send authorization request
-           StatusMessage = "Авторизация: Запрос авторизации";
+            StatusMessage = "Авторизация: Запрос авторизации";
 
             Response = await PostAndLog(LoginForm.Action,
-                LoginForm.PostData(AccountToUse, LoginForm.ChooseEncoding(Html.Encoding)));
+                LoginForm.PostData(AccountToUse, Captcha, LoginForm.ChooseEncoding(Html.Encoding)));
             progress.Login = 195;
             Html = await InitHtml(Response);
-            Html.ClearDisplayNone();
+            Html.ClearHidden();
             Text = Html.DocumentNode.InnerTextDecoded();
             progress.Login = 205;
             // Analyze response
             int SuccessScore = Text.MatchCount(Expr.Text.Global.Message.LoginSuccess)
-                             - Text.MatchCount(Expr.Text.Global.Message.Error)
-                             - WebForm.ErrorNodes(Html);
+                             - Text.MatchCount(Expr.Text.Global.Message.Error);
+            if (ErrorNodesValid)
+                SuccessScore -= WebForm.ErrorNodes(Html);
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Answer: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
@@ -786,20 +834,26 @@ namespace Voron_Poster
 #endif
 
             // Load LoginPage again and analyze it now (after we've tryed to login)
-           StatusMessage = "Авторизация: Загрузка страницы";
+            StatusMessage = "Авторизация: Загрузка страницы";
             Response = await GetAndLog(LoginUrl);
             progress.Login = 245;
-           StatusMessage = "Авторизация: Проверка авторизации";
+            StatusMessage = "Авторизация: Проверка авторизации";
             Html = await InitHtml(Response);
             LoginForm AfterLoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
 
 
             // Summarize analyzies and return conclusion if login was successfull
-            if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
-            else if (AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
-            Html.ClearDisplayNone();
+            Html.ClearHidden();
             Text = Html.DocumentNode.InnerTextDecoded();
-            SuccessScore += WebForm.LoggedInNodes(Html);
+            int LoggedInScore = 0;
+            if (LoggedInNodesValid)
+            {
+                LoggedInScore = WebForm.LoggedInNodes(Html);
+                SuccessScore += LoggedInScore;
+            }
+            if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
+            else if (LoggedInScore == 0 && AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
+     
             progress.Login = 255;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
@@ -812,28 +866,28 @@ namespace Voron_Poster
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("AuthSuccessScore: " + SuccessScore + '\n');
 #endif
-            if (SuccessScore <= 0) return new Exception("Авторизация не удалась");
-           StatusMessage = "Авторизация: Успешно";
+            if (SuccessScore < 0) return new Exception("Авторизация не удалась");
+            StatusMessage = "Авторизация: Успешно";
             return null;
         }
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-            //return null;
+            // return null;
             // Delay needed on some sites
             if (targetBoard.Host == "seodor.biz")
             {
                 WaitingForQueue = true;
-               StatusMessage = "Задержка 5 сек";
+                StatusMessage = "Задержка 5 сек";
                 Task.Delay(5000).Wait(Cancel.Token);
                 WaitingForQueue = false;
             }
 
             // Searching PostForm
-           StatusMessage = "Постинг: Загрузка страницы";
+            StatusMessage = "Постинг: Загрузка страницы";
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
             progress.Post += 40 / progress.PostCount;
-           StatusMessage = "Постинг: Поиск формы постинга";
+            StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
             PostForm PostForm = PostForm.Find(Html, new Uri(PostUrl));
@@ -843,7 +897,7 @@ namespace Voron_Poster
             int TempProgress = progress.Post;
             if (PostForm == null)
             {
-               StatusMessage = "Постинг: Поиск страницы постинга";
+                StatusMessage = "Постинг: Поиск страницы постинга";
                 List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl));
 #if DEBUG && DEBUGANYFORUM
                 Console.WriteLine("PostLinks: {0}", PostUrl);
@@ -854,10 +908,10 @@ namespace Voron_Poster
                 while (PostForm == null && i < PostLinks.Count)
                 {
                     PostUrl = PostLinks[i].Key;
-                   StatusMessage = "Постинг: Загрузка страницы";
+                    StatusMessage = "Постинг: Загрузка страницы";
                     Response = await GetAndLog(PostUrl);
                     progress.Post += (80 / progress.PostCount) / PostLinks.Count;
-                   StatusMessage = "Постинг: Поиск формы постинга";
+                    StatusMessage = "Постинг: Поиск формы постинга";
                     Html = await InitHtml(Response);
                     PostForm = PostForm.Find(Html, new Uri(PostUrl));
                     progress.Post += (20 / progress.PostCount) / PostLinks.Count;
@@ -868,9 +922,12 @@ namespace Voron_Poster
             progress.Post = TempProgress + (100 / progress.PostCount);
 
             // PostPage preanalyse for future success detection
-            Html.ClearDisplayNone();
+            Html.ClearHidden();
             string Text = Html.DocumentNode.InnerTextDecoded();
-            int SuccessScore = 0; // +WebForm.ErrorNodes(Html);
+            int SuccessScore = 0;
+            bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
+            bool ErrorValid = Text.MatchCount(Expr.Text.Global.Message.Error) == 0;
+
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
             Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
@@ -885,15 +942,15 @@ namespace Voron_Poster
                 !String.IsNullOrEmpty(PostForm.CaptchaPictureUrl))
             {
                 WaitingForQueue = true;
-               StatusMessage = "Постинг: В очереди";
+                StatusMessage = "Постинг: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
                 progress.Post += 10 / progress.PostCount;
-               StatusMessage = "Постинг: Загрузка капчи";
+                StatusMessage = "Постинг: Загрузка капчи";
                 Response = await Client.GetAsync(PostForm.CaptchaPictureUrl, Cancel.Token);
                 progress.Post += 20 / progress.PostCount;
                 CaptchaForm.Picture.Image = new Bitmap(await Response.Content.ReadAsStreamAsync());
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
-               StatusMessage = "Постинг: Ожидание ввода капчи";
+                StatusMessage = "Постинг: Ожидание ввода капчи";
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 Captcha = CaptchaForm.Result.Text;
                 CaptchaForm.IsFree.Set();
@@ -902,22 +959,24 @@ namespace Voron_Poster
             else progress.Post += 50 / progress.PostCount;
 
             // Send post message request
-           StatusMessage = "Постинг: Отправка сообщения";
+            StatusMessage = "Постинг: Отправка сообщения";
             Response = await PostAndLog(PostForm.Action,
                 PostForm.PostData(AccountToUse, PostForm.ChooseEncoding(Html.Encoding), subject, message, Captcha));
             progress.Post += 40 / progress.PostCount;
             Html = await InitHtml(Response);
             PostForm AfterPostForm = PostForm.Find(Html, new Uri(PostUrl));
-            Html.ClearDisplayNone();
+            Html.ClearHidden();
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully
 
             //if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5; bad idea
 
-            SuccessScore += Text.MatchCount(Expr.Text.Global.Message.PostSuccess)
-                          - Text.MatchCount(Expr.Text.Global.Message.Error)
-                          - WebForm.ErrorNodes(Html);
+            SuccessScore += Text.MatchCount(Expr.Text.Global.Message.PostSuccess);
+            if (ErrorValid)
+                SuccessScore -= Text.MatchCount(Expr.Text.Global.Message.Error);
+            if (ErrorNodesValid)
+                SuccessScore -= WebForm.ErrorNodes(Html);
 
             progress.Post += 10 / progress.PostCount;
 #if DEBUG && DEBUGANYFORUM
@@ -931,7 +990,7 @@ namespace Voron_Poster
             Console.WriteLine("PostSuccessScore: " + SuccessScore);
 #endif
             if (SuccessScore < 0) return new Exception("Постинг не удался");
-           StatusMessage = "Успешно Опубликовано";
+            StatusMessage = "Успешно Опубликовано";
             return null;
         }
     }

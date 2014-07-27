@@ -28,8 +28,8 @@ namespace Voron_Poster
 {
     public partial class MainForm : Form, IMessageFilter
     {
-        public List<TaskGui> Tasks = new List<TaskGui>();
-        public TaskGui CurrTask;
+        public List<PostTask> Tasks = new List<PostTask>();
+        public PostTask CurrTask;
         public Scintilla scriptsEditor = new Scintilla();
 
         public MainForm()
@@ -49,7 +49,7 @@ namespace Voron_Poster
             propEngine.Items[propEngine.Items.IndexOf("Universal")] = "Universal (Slow)";
             propEngine.Items.RemoveAt(0);
 
-            GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Stopped];
+            GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Stopped];
 
             // Use latest installed IE
             //try
@@ -157,7 +157,7 @@ namespace Voron_Poster
             }
             for (int i = 0; i < Tasks.Count; i++)
             {
-                if (Tasks[i].Status == TaskGui.InfoIcons.Running || Tasks[i].Status == TaskGui.InfoIcons.Waiting)
+                if (Tasks[i].Status == PostTask.InfoIcons.Running || Tasks[i].Status == PostTask.InfoIcons.Waiting)
                 {
                     e.Cancel = MessageBox.Show("Все активные будут прерваны! Закрыть всё равно?",
                 "Активные задачи", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel;
@@ -346,10 +346,10 @@ namespace Voron_Poster
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
             tasksTable.SuspendLayout();
-            TaskGui New = new TaskGui(this);
+            PostTask New = new PostTask(this);
             New.TargetUrl = tasksUrl.Text;
             New.Properties_Clicked(sender, e);
-            propEngine.SelectedIndex = -1;
+            propEngine.SelectedIndex = 4;
             Tasks.Add(New);
             tasksTable.ResumeLayout();
 
@@ -396,7 +396,7 @@ namespace Voron_Poster
             //stopwatch.Start();
 
 
-            bool[] SelInfo = new bool[Enum.GetNames(typeof(TaskGui.InfoIcons)).Length];
+            bool[] SelInfo = new bool[Enum.GetNames(typeof(PostTask.InfoIcons)).Length];
             bool Checked = false, Unchecked = false;
             int CheckedCount = 0;
             int ProgressSum = 0;
@@ -421,15 +421,15 @@ namespace Voron_Poster
             // stopwatch = new System.Diagnostics.Stopwatch();
             //}
             // Set global status icon
-            if (SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting])
-                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Running];
-            else if (SelInfo[(int)TaskGui.InfoIcons.Error])
-                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
-            else if (SelInfo[(int)TaskGui.InfoIcons.Cancelled])
-                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Cancelled];
-            else if (SelInfo[(int)TaskGui.InfoIcons.Complete])
-                GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
-            else GTStatusIcon.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Stopped];
+            if (SelInfo[(int)PostTask.InfoIcons.Running] || SelInfo[(int)PostTask.InfoIcons.Waiting])
+                GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Running];
+            else if (SelInfo[(int)PostTask.InfoIcons.Error])
+                GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
+            else if (SelInfo[(int)PostTask.InfoIcons.Cancelled])
+                GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Cancelled];
+            else if (SelInfo[(int)PostTask.InfoIcons.Complete])
+                GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
+            else GTStatusIcon.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Stopped];
 
             if (Checked && Unchecked) GTSelected.CheckState = CheckState.Indeterminate;
             else if (Checked) GTSelected.CheckState = CheckState.Checked;
@@ -440,26 +440,26 @@ namespace Voron_Poster
             //    Console.WriteLine("## 2 - {0}", stopwatch.ElapsedMilliseconds);
             // stopwatch = new System.Diagnostics.Stopwatch();
             // Set global start icon 
-            TaskGui.InfoIcons GActionStart, GActionStop;
-            GTStart.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] || SelInfo[(int)TaskGui.InfoIcons.Run];
+            PostTask.InfoIcons GActionStart, GActionStop;
+            GTStart.Enabled = SelInfo[(int)PostTask.InfoIcons.Restart] || SelInfo[(int)PostTask.InfoIcons.Run];
             GTDelete.Enabled = GTStart.Enabled;
-            if (SelInfo[(int)TaskGui.InfoIcons.Restart]) GActionStart = TaskGui.InfoIcons.Restart;
-            else GActionStart = TaskGui.InfoIcons.Run;
+            if (SelInfo[(int)PostTask.InfoIcons.Restart]) GActionStart = PostTask.InfoIcons.Restart;
+            else GActionStart = PostTask.InfoIcons.Run;
             // Set global stop icon 
-            GTStop.Enabled = SelInfo[(int)TaskGui.InfoIcons.Restart] ||
-                SelInfo[(int)TaskGui.InfoIcons.Cancel] || SelInfo[(int)TaskGui.InfoIcons.Cancelled];
-            if (SelInfo[(int)TaskGui.InfoIcons.Cancel]) GActionStop = TaskGui.InfoIcons.Cancel;
-            else GActionStop = TaskGui.InfoIcons.Clear;
-            GTStart.Image = TaskGui.InfoIconsBitmaps[(int)GActionStart];
-            GTStop.Image = TaskGui.InfoIconsBitmaps[(int)GActionStop];
-            ToolTip.SetToolTip(GTStart, TaskGui.InfoIconsTooltips[(int)GActionStart]);
-            ToolTip.SetToolTip(GTStop, TaskGui.InfoIconsTooltips[(int)GActionStop]);
+            GTStop.Enabled = SelInfo[(int)PostTask.InfoIcons.Restart] ||
+                SelInfo[(int)PostTask.InfoIcons.Cancel] || SelInfo[(int)PostTask.InfoIcons.Cancelled];
+            if (SelInfo[(int)PostTask.InfoIcons.Cancel]) GActionStop = PostTask.InfoIcons.Cancel;
+            else GActionStop = PostTask.InfoIcons.Clear;
+            GTStart.Image = PostTask.InfoIconsBitmaps[(int)GActionStart];
+            GTStop.Image = PostTask.InfoIconsBitmaps[(int)GActionStop];
+            ToolTip.SetToolTip(GTStart, PostTask.InfoIconsTooltips[(int)GActionStart]);
+            ToolTip.SetToolTip(GTStop, PostTask.InfoIconsTooltips[(int)GActionStop]);
 
             if (Tasks.Count == 0 || !Checked) GTProgress.Value = 0;
             else
                 GTProgress.Value = ProgressSum / CheckedCount;
-            if ((SelInfo[(int)TaskGui.InfoIcons.Error] || SelInfo[(int)TaskGui.InfoIcons.Cancelled]) &&
-               !(SelInfo[(int)TaskGui.InfoIcons.Running] || SelInfo[(int)TaskGui.InfoIcons.Waiting]))
+            if ((SelInfo[(int)PostTask.InfoIcons.Error] || SelInfo[(int)PostTask.InfoIcons.Cancelled]) &&
+               !(SelInfo[(int)PostTask.InfoIcons.Running] || SelInfo[(int)PostTask.InfoIcons.Waiting]))
                 ModifyProgressBarColor.SetState(GTProgress, 2);
             else ModifyProgressBarColor.SetState(GTProgress, 1);
             //stopwatch.Stop();
@@ -484,17 +484,17 @@ namespace Voron_Poster
             GTStop.Enabled = false;
             GTDelete.Enabled = false;
             TasksUpdater.Enabled = false;
-            TaskGui.InfoIcons Action = (TaskGui.InfoIcons)Enum.Parse(typeof(TaskGui.InfoIcons), (string)(sender as Button).Image.Tag);
-            if (Action == TaskGui.InfoIcons.Clear)
+            PostTask.InfoIcons Action = (PostTask.InfoIcons)Enum.Parse(typeof(PostTask.InfoIcons), (string)(sender as Button).Image.Tag);
+            if (Action == PostTask.InfoIcons.Clear)
                 for (int i = 0; i < Tasks.Count; i++)
                 {
                     if (Tasks[i].Ctrls.Selected.Checked &&
                          Tasks[i].Ctrls.StartStop.Enabled && (
-                    Tasks[i].Status == TaskGui.InfoIcons.Cancelled ||
-                    Tasks[i].Status == TaskGui.InfoIcons.Error))
+                    Tasks[i].Status == PostTask.InfoIcons.Cancelled ||
+                    Tasks[i].Status == PostTask.InfoIcons.Error))
                     {
                         Tasks[i].Forum.Reset();
-                        Tasks[i].Status = TaskGui.InfoIcons.Stopped;
+                        Tasks[i].Status = PostTask.InfoIcons.Stopped;
                         //  Tasks[i].SetStatusIcon();
                     }
                 }
@@ -528,7 +528,7 @@ namespace Voron_Poster
         private void GTDelete_Click(object sender, EventArgs e)
         {
             (sender as Button).Enabled = false;
-            List<TaskGui> Remove = new List<TaskGui>();
+            List<PostTask> Remove = new List<PostTask>();
             lock (Tasks)
             {
                 for (int i = 0; i < Tasks.Count; i++)
@@ -539,7 +539,7 @@ namespace Voron_Poster
                     }
                 }
                 tasksTable.SuspendLayout();
-                foreach (TaskGui Task in Remove)
+                foreach (PostTask Task in Remove)
                 {
                     Task.Delete_Clicked(sender, e);
                 }
@@ -552,7 +552,7 @@ namespace Voron_Poster
         {
             public Forum.TaskBaseProperties[] Properties;
             public string[] TargetUrls;
-            public static void Save(List<TaskGui> tasks, string path)
+            public static void Save(List<PostTask> tasks, string path)
             {
                 TaskList TaskList;
                 TaskList.Properties = new Forum.TaskBaseProperties[tasks.Count];
@@ -566,7 +566,7 @@ namespace Voron_Poster
                 using (FileStream F = File.Create(path))
                     Xml.Serialize(F, TaskList);
             }
-            public static void Load(List<TaskGui> tasks, MainForm parent, string path)
+            public static void Load(List<PostTask> tasks, MainForm parent, string path)
             {
                 parent.tasksTable.SuspendLayout();
                 TaskList TaskList;
@@ -575,7 +575,7 @@ namespace Voron_Poster
                     TaskList = (TaskList)Xml.Deserialize(F);
                 for (int i = 0; i < TaskList.Properties.Length; i++)
                 {
-                    TaskGui NewTask = new TaskGui(parent);
+                    PostTask NewTask = new PostTask(parent);
                     NewTask.New = false;
                     NewTask.TargetUrl = TaskList.TargetUrls[i];
                     NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
@@ -687,7 +687,7 @@ namespace Voron_Poster
             for (int i = 0; i < Tasks.Count; i++)
             {
              //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
-                TaskGui.ResizeEnd(Tasks[i].Ctrls.Status);
+                PostTask.ResizeEnd(Tasks[i].Ctrls.Status);
             }
             tasksTable.ResumeLayout();
         }
@@ -844,7 +844,7 @@ namespace Voron_Poster
         {
             PropertiesActivity = true;
             propValidate();
-            propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
+            propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Activity];
             Forum.Engine Detected = Forum.Engine.Unknown;
             HttpClient Client = new HttpClient();
             StopProperties = new CancellationTokenSource();
@@ -859,7 +859,7 @@ namespace Voron_Poster
             catch
             {
                 Error = true;
-                propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
+                propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
             }
             finally
             {
@@ -868,16 +868,16 @@ namespace Voron_Poster
             if (!Error)
             {
                 if (Detected == Forum.Engine.Unknown)
-                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Question];
+                    propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Question];
                 else
                 {
                     TempProperties.Engine = Detected;
                     propEngine.SelectedIndex =
                         propEngine.Items.IndexOf(Enum.GetName(typeof(Forum.Engine), Detected).Replace("Universal", "Universal (Slow)"));
-                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
+                    propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
                 }
             }
-            else propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
+            else propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
             PropertiesActivity = false;
             propValidate();
         }
@@ -887,7 +887,7 @@ namespace Voron_Poster
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
             propValidate();
-            propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
+            propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Activity];
             TempForum = Forum.New(TempProperties.Engine);
             StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
@@ -908,10 +908,10 @@ namespace Voron_Poster
             {
                 Error = CatchedError;
             }
-            if (Error == null) propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
+            if (Error == null) propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
             else
             {
-                propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
+                propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
                 ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
             }
             PropertiesActivity = false;
@@ -931,10 +931,10 @@ namespace Voron_Poster
         {
             if (!PropertiesActivity)
             {
-                propAuthTryLogin.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Login];
+                propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Login];
                 ToolTip.SetToolTip(propAuthTryLogin, String.Empty);
                 if (sender == propMainUrl || sender == propEngine)
-                    propEngineDetect.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Gear];
+                    propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Gear];
             }
         }
 
@@ -987,7 +987,7 @@ namespace Voron_Poster
                 propScriptsList.Items.Count > 0 &&
                 propScriptsGroup.Enabled &&
                 !PropertiesActivity;
-            propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Save];
+            propProfileSave.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Save];
             //TaskPropCancel.Enabled = DetectEngineButton.Enabled &&
             //    TryLoginButton.Enabled;
         }
@@ -1216,11 +1216,11 @@ namespace Voron_Poster
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
                     Xml.Serialize(F, TempProperties);
                 propValidate();
-                propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
+                propProfileSave.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
             }
             catch (Exception Error)
             {
-                propProfileSave.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
+                propProfileSave.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
                 MessageBox.Show(Error.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -1306,7 +1306,7 @@ namespace Voron_Poster
                 }
                 else
                 {
-                    scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Test];
+                    scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Test];
                     scriptsSave.Enabled = true;
                 }
                 scriptsAccept.Enabled = scriptsList.SelectedIndex >= 0 || scriptsSave.Enabled;
@@ -1635,7 +1635,7 @@ namespace Voron_Poster
             scriptsNew.Enabled = false;
             scriptsSubject.TextChanged -= scriptsSubject_TextChanged;
             scriptsMessage.TextChanged -= scriptsSubject_TextChanged;
-            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Activity];
+            scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Activity];
             var Result = new List<string>();
             Exception Error = null;
             ToolTip.SetToolTip(scriptsStatusLabel, String.Empty);
@@ -1678,7 +1678,7 @@ namespace Voron_Poster
             if (Error != null)
             {
                 scriptsStatusLabel.Text = Error.Message;
-                scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Error];
+                scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
                 scriptsStatusLabel.ForeColor = Color.Red;
             }
             else
@@ -1686,7 +1686,7 @@ namespace Voron_Poster
                 scriptsResult.Clear();
                 scriptsResult.Lines = Result.ToArray();
                 scriptsResult.Focus();
-                scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Complete];
+                scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
                 scriptsStatusLabel.ForeColor = Color.Black;
                 scriptsStatusLabel.Text = "Скрипт выполнен";
             }
@@ -1714,7 +1714,7 @@ namespace Voron_Poster
             scriptsTestAbortTimer.Enabled = false;
             scriptsRun.Click -= scriptsRun_Click;
             scriptsRun.Click += scriptsAbort_Click;
-            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Cancelled];
+            scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Cancelled];
             scriptsRun.Text = "Прервать";
             scriptsRun.Enabled = true;
             ToolTip.SetToolTip(scriptsRun, "Завершить процесс\n"
@@ -1725,7 +1725,7 @@ namespace Voron_Poster
 
         private void scriptsSubject_TextChanged(object sender, EventArgs e)
         {
-            scriptsRun.Image = TaskGui.InfoIconsBitmaps[(int)TaskGui.InfoIcons.Test];
+            scriptsRun.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Test];
         }
 
         private void scriptsTestBox_Enter(object sender, EventArgs e)

@@ -21,7 +21,7 @@ namespace Voron_Poster
         }
     }
 
-    public class TaskGui
+    public class PostTask
     {
 
         #region Gui
@@ -433,7 +433,7 @@ namespace Voron_Poster
 
         #endregion
 
-        public TaskGui(MainForm Parent)
+        public PostTask(MainForm Parent)
         {
             MainForm = Parent;
             Ctrls.InitializeControls();

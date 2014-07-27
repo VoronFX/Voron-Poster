@@ -145,10 +145,11 @@ namespace Voron_Poster
             while (Bad.Count() > 0) Bad.First().Remove();
         }
 
-        public static void ClearDisplayNone(this HtmlAgilityPack.HtmlDocument doc)
+        public static void ClearHidden(this HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
-                x => x.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0);
+                x => x.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0
+                || x.GetAttributeValueDecoded("class", String.Empty).MatchCount(@"hidden") > 0);
             while (NoDisplay.Count() > 0) NoDisplay.First().Remove();
         }
 

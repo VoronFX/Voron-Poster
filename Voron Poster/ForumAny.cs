@@ -121,11 +121,7 @@ namespace Voron_Poster
             Stream stream = await response.Content.ReadAsStreamAsync();
             doc.Load(stream, Encoding);
             MapRelativeUrls(doc, response.RequestMessage.RequestUri);
-            var x = new System.Diagnostics.Stopwatch();
-            x.Start();
             ProcessCSSNoDisplayStyles(doc);
-            x.Stop();
-            Console.WriteLine("CSSProcessing: {0}", x.ElapsedMilliseconds);
             doc.ClearScriptsStylesComments();
             return doc;
         }
@@ -170,28 +166,24 @@ namespace Voron_Poster
                 string stylesheet;
                 if (!CSSChache.TryGetValue(Href, out stylesheet))
                 {
-                try
-                {
-                    Task<string> CSS = Client.GetStringAsync(Href);
-                    CSS.Wait();
-                    // CSSNode.Name = "style";
-                    // CSSNode.ClosingAttributes.Add("/style", "");
-                    // CSSNode.InnerHtml = CSS.Result;
-                    stylesheet = CleanCSSStylesheet(CSS.Result);
-                }
-                catch (Exception) { }
-                CSSChache.TryAdd(Href, stylesheet);
+                    try
+                    {
+                        Task<string> CSS = Client.GetStringAsync(Href);
+                        CSS.Wait();
+                        // CSSNode.Name = "style";
+                        // CSSNode.ClosingAttributes.Add("/style", "");
+                        // CSSNode.InnerHtml = CSS.Result;
+                        stylesheet = CleanCSSStylesheet(CSS.Result);
+                    }
+                    catch (Exception) { }
+                    CSSChache.TryAdd(Href, stylesheet);
                 }
                 InlineNoDisplayStyle(doc, stylesheet);
             });
-            var x3 = new System.Diagnostics.Stopwatch();
-            x3.Start();
             foreach (HtmlNode Style in doc.DocumentNode.Descendants("style"))
             {
                 InlineNoDisplayStyle(doc, CleanCSSStylesheet(Style.InnerHtml));
             }
-            x3.Stop();
-            Console.WriteLine("CSSInternal: {0}", x3.ElapsedMilliseconds);
         }
 
         protected string CleanCSSStylesheet(string stylesheet) {
@@ -199,44 +191,48 @@ namespace Voron_Poster
             stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines
             stylesheet = Regex.Replace(stylesheet, @"\s*(?!<\"")\/\*[^\*]+\*\/(?!\"")\s*", string.Empty); // remove comments
             // remove excess space
-            stylesheet = Regex.Replace(stylesheet, @"\s{2,}", @"\s");
+            stylesheet = Regex.Replace(stylesheet, @"\s{2,}", @" ");
             return stylesheet;
         }
 
         protected void InlineNoDisplayStyle(HtmlAgilityPack.HtmlDocument doc, string stylesheet)
         {
             // extract and inline NoDisplay css rules
-            MatchCollection allCssRules = Regex.Matches(stylesheet, "([^{]*){([^}]*)}", RegexOptions.Singleline);
+            MatchCollection allCssRules = Regex.Matches(stylesheet, "([^{}]*){([^}]*)}", RegexOptions.Singleline);
             foreach (Match cssRule in allCssRules)
             {
-                if (cssRule.Value.StartsWith("@") ||
-                    !Regex.IsMatch(cssRule.Value, @"(?i)display\s*?:\s*?none")) continue;
-                // string cssProperties = cssRule.Groups[2].Value.Trim();
-                string[] cssSelectors = cssRule.Groups[1].Value.Split(',');
-
-                foreach (string selector in cssSelectors)
+                try
                 {
-                    string xpath = css2xpath.Converter.CSSToXPath(selector.Trim());
-                    HtmlNodeCollection matchingNodes = doc.DocumentNode.SelectNodes(xpath);
-                    if (matchingNodes != null)
+                    if (cssRule.Value.IndexOf('@') >= 0 ||
+                        !Regex.IsMatch(cssRule.Value, @"(?i)display\s*?:\s*?none")) continue;
+                    // string cssProperties = cssRule.Groups[2].Value.Trim();
+                    string[] cssSelectors = cssRule.Groups[1].Value.Split(',');
+
+                    foreach (string selector in cssSelectors)
                     {
-                        foreach (HtmlNode node in matchingNodes)
+                        if (selector.IndexOf(':') >= 0) continue;
+                        string xpath = css2xpath.Converter.CSSToXPath(selector.Trim());
+                        HtmlNodeCollection matchingNodes = doc.DocumentNode.SelectNodes(xpath);
+                        if (matchingNodes != null)
                         {
-                            // detect if a style attribute already exists and create/append as necessary
-                            if (node.Attributes["style"] != null)
+                            foreach (HtmlNode node in matchingNodes)
                             {
-                                node.Attributes["style"].Value += ";" + "display: none";
-                            }
-                            else
-                            {
-                                node.Attributes.Add("style", "display: none");
+                                // detect if a style attribute already exists and create/append as necessary
+                                if (node.Attributes["style"] != null)
+                                {
+                                    node.Attributes["style"].Value += ";" + "display: none";
+                                }
+                                else
+                                {
+                                    node.Attributes.Add("style", "display: none");
+                                }
                             }
                         }
                     }
+
                 }
+                catch (Exception) { }
             }
-
-
         }
 
         protected static class Expr
@@ -1055,7 +1051,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-            // return null;
+             return null;
             // Delay needed on some sites     
             if (targetBoard.Host == "seodor.biz"
                 || targetBoard.Host == "webledi.ru")

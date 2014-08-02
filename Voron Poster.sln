@@ -14,11 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luncher2", "Luncher2\Luncher2.csproj", "{3760B0A0-9093-4ADE-960B-FA161655B8C0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LunchersAndOther", "LunchersAndOther", "{3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}"
-	ProjectSection(SolutionItems) = preProject
-		css2xpath\css2xpath.csproj = css2xpath\css2xpath.csproj
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A60FDEE1-6B5F-4FF4-AA3A-37C57BA92970}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "css2xpath", "css2xpath\css2xpath.csproj", "{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +45,10 @@ Global
 		{3760B0A0-9093-4ADE-960B-FA161655B8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3760B0A0-9093-4ADE-960B-FA161655B8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3760B0A0-9093-4ADE-960B-FA161655B8C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +58,6 @@ Global
 		{42E8CE72-4C25-40F4-8887-FAE4CB1642AC} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 		{3760B0A0-9093-4ADE-960B-FA161655B8C0} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 		{B2A361DA-1021-419F-97A3-7F8A8F011D25} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
+		{7A7520E6-D8C2-4AF9-9E56-A025DC10FE51} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 	EndGlobalSection
 EndGlobal

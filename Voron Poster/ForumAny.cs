@@ -18,7 +18,9 @@ namespace Voron_Poster
 {
     public class ForumAny : Forum
     {
-        public ForumAny() : base() { }
+        public ForumAny() : base() {
+            Regex.CacheSize = 100;
+        }
 
         protected static async Task<HtmlAgilityPack.HtmlDocument> InitHtml(HttpResponseMessage response)
         {
@@ -37,10 +39,10 @@ namespace Voron_Poster
             if (Encoding == null)
             {
                 string Html = await response.Content.ReadAsStringAsync();
-                Match CharsetMatch = new Regex(@"charset\s*=[\s""']*([^\s""'/>]*)").Match(Html);
+                Match CharsetMatch = new Regex(@"(?i)charset\s*=[\s""']*([^\s""'/>]*)").Match(Html);
                 string Charset = null;
                 if (CharsetMatch != null)
-                    Charset = new Regex(@"charset\s*=[\s""']*").Replace(CharsetMatch.Value, String.Empty);
+                    Charset = new Regex(@"(?i)charset\s*=[\s""']*").Replace(CharsetMatch.Value, String.Empty);
                 try
                 {
                     if (!String.IsNullOrEmpty(Charset))
@@ -65,17 +67,19 @@ namespace Voron_Poster
 
             public static class Url
             {
-                public static string Action = @"[&\?]?(act(ion)?|do|mode)=";
-                public static string Login = @"(?<!b)(sign|log)(\W|_)?in|auth\w*"; //|user|member|acc?ount
-                public static string Register = @"register|sign(\W|_)?up|(create|new)(\W|_)?(user|member|acc?ount)?";
-                public static string Reply = @"reply|(?<!new(\W|_)?)post|no(\W|_)?quot(e|ing)";
-                public static string NewTopic = @"new(\W|_)?(topic|thread|post)";
-                public static string CaptchaImage = @"verif(y|ication)|code|capt?cha|anti(\W|_)?bot";
-                public static string Quote = @"(?<!no(\W|_)?)quot(e|ing)";
-                public static string Poll = @"poll";
-                public static string LoggedIn = @"(sign|log)(\W|_)?out|" +
-                                                @"edit(\W|_)?profile|" +
-                                                @"profile(\W|_)?(settings|options|edit)";
+                public static string Action = @"(?i)[&\?]?(act(ion)?|do|mode)=";
+                public static string Login = @"(?i)(?<!b)(sign|log)[\W_]?in|auth\w*"; //|user|member|acc?ount
+                public static string Register = @"(?i)register|sign[\W_]?up|(create|new)[\W_]?(user|member|acc?ount)?";
+                public static string Reply = @"(?i)reply|(?<!new[\W_]?)post|no[\W_]?quot(e|ing)";
+                public static string NewTopic = @"(?i)new[\W_]?(topic|thread|post)";
+                public static string CaptchaImage = @"(?i)verif(y|ication)|code|capt?cha|anti[\W_]?bot";
+                public static string Quote = @"(?i)(?<!no[\W_]?)quot(e|ing)";
+                public static string Poll = @"(?i)poll";
+                public static string LoggedIn = @"(?i)" +
+                                                @"(sign|log)[\W_]?out|" +
+                                                @"unauth|" +
+                                                @"edit[\W_]?profile|" +
+                                                @"profile[\W_]?(settings|options|edit)";
             }
             public static class Text
             {
@@ -192,14 +196,14 @@ namespace Voron_Poster
                     #region Link
                     Link = new LocalText.LinkText
                     {
-                        Login = @"(?<!b)(sign|log)\s?in|auth\w*",
+                        Login = @"(?i)(?<!b)(sign|log)\s?in|auth\w*",
 
-                        Register = @"register|sign\s?up|(create|new)\s(user|member|acc?ount)",
+                        Register = @"(?i)register|sign\s?up|(create|new)\s(user|member|acc?ount)",
 
-                        Reply = @"reply",
-                        NewTopic = @"(create|open|new)\s(topic|thread)",
-                        Quote = @"(?<!no\s?)quot(e|ing)",
-                        Poll = @"poll",
+                        Reply = @"(?i)reply",
+                        NewTopic = @"(?i)(create|open|new)\s(topic|thread)",
+                        Quote = @"(?i)(?<!no\s?)quot(e|ing)",
+                        Poll = @"(?i)poll",
                         CaptchaImage = Expr.Url.CaptchaImage
                     },
                     #endregion
@@ -207,25 +211,26 @@ namespace Voron_Poster
                     #region Message
                     Message = new LocalText.MessageText
                     {
-                        Error = @"(login|user(name)?|password)\s+(incorrect|wrong)|" +
+                        Error = @"(?i)" +
+                                @"(login|user(name)?|password)\s+(incorrect|wrong)|" +
                                 @"errors?\s+occurred|please\s+enter\s+a\s+valid\s+message|" +
                                 @"do\s?n['o]t\s+have\s+permission|" +
-                                @"user(\s|\W)+(\w+(\s|\W)+)(could\s?)?n['o]t\s+(be\s+)?found|" +
+                                @"user.+?(could\s+)?n['o]t\s+(be\s+)?found|" +
                                 @"must\s+be\s+logg?ed(-?\s?in)|" +
-                                @"(incorrect|wrong)\s+password|please(\s|\W)+try\s+again"
+                                @"(incorrect|wrong)\s+password|please[\s\W]+try\s+again"
                     },
                     #endregion
 
                     #region Fields
                     Fields = new LocalText.FieldsNames
                     {
-                        Username = @"user|name|login|e(\W|_)?mail|nick",
-                        Password = @"pass(wr?d|word)?",
-                        RepeatPassword = @"match|repeat",
-                        Subject = @"subject|title",
-                        Message = @"post|reply|message|editor|text",
-                        Captcha = @"capt?cha|code",
-                        Preview = @"preview"
+                        Username = @"(?i)user|name|login|e[\W_]?mail|nick",
+                        Password = @"(?i)pass(wr?d|word)?",
+                        RepeatPassword = @"(?i)match|repeat",
+                        Subject = @"(?i)subject|title",
+                        Message = @"(?i)post|reply|message|editor|text|txt",
+                        Captcha = @"(?i)capt?cha|code",
+                        Preview = @"(?i)preview"
                     }
                     #endregion
                 };
@@ -237,18 +242,20 @@ namespace Voron_Poster
                     #region Link
                     Link = new LocalText.LinkText
                     {
-                        Login = @"(вход|войти|авториз(ация|ироваться)|запомнить|логин)\b",
+                        Login = @"(?i)(вход|войти|авториз(ация|ироваться)|запомнить|логин)\b",
 
-                        Register = @"(за)?регистр(ир(овать|уйтесь)|ация)|" +
-                                         @"(нов(ый|ого)|создать)\s+(пользовател(ь|я)|акк?аунт)|" +
-                                         @"первый\s+раз|нет\s+акк?аунта",
+                        Register = @"(?i)" +
+                                   @"(за)?регистр(ир(овать|уйтесь)|ация)|" +
+                                   @"(нов(ый|ого)|создать)\s+(пользовател[ья]|акк?аунт)|" +
+                                   @"первый\s+раз|нет\s+акк?аунта",
 
-                        Reply = @"ответ(ить)?\b",
-                        NewTopic = @"(создать|открыть|нов(ая|ую))\s+тем[ау]",
-                        Quote = @"цитат(а|ировать)",
-                        Poll = @"опрос\b",
-                        LoggedIn = @"ваш\s+последний\s+визит|" +
-                                   @"(редактировать|мо[йи])(\s+мой)?\s+(кабинет|профиль|закладки)|" +
+                        Reply = @"(?i)ответ(ить)?\b",
+                        NewTopic = @"(?i)(создать|открыть|нов(ая|ую))\s+тем[ау]",
+                        Quote = @"(?i)цитат(а|ировать)",
+                        Poll = @"(?i)опрос\b",
+                        LoggedIn = @"(?i)" +
+                                   @"ваш\s+последний\s+визит|" +
+                                   @"(редактировать|мо[йи]|ваши?)(\s+мой)?\s+(кабинет|профиль|закладки)|" +
                                    @"(личные)\s+сообщения|выход\b" //(новые|личные)\s+сообщения bad 
                     },
                     #endregion
@@ -256,31 +263,34 @@ namespace Voron_Poster
                     #region Message
                     Message = new LocalText.MessageText
                     {
-                        PostSuccess = @"спасибо\s+за\s+соо?бщение",
-                        LoginSuccess = @"вы\s+((за|во)шли|авторизировались)\s+как(?!(\s|\W)+(гость|guest))|" +
+                        PostSuccess = @"(?i)спасибо\s+за\s+соо?бщение",
+                        LoginSuccess = @"(?i)" +
+                                       @"вы\s+((за|во)шли|авторизировались)\s+как(?![\s\W]+(гость|guest))|" +
                                        @"благодарим\s+за\s+визит|" +
                                        @"спасибо,?\s+что\s+зашли",
 
-                        Error = @"(((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])\s+(следующ(ие|ая)\s+)?ошибк[иа])|" +
+                        Error = @"(?i)" +
+                                String.Format(@"{0}\s{1}|{1}\s{0}|",
+                                                @"((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])",
+                                                @"(следующ(ие|ая)\s+)?ошибк[иа]") +
                                 @"((неверн|неправильн|введите\s+правильн)(ое?|ый|ые))\s+(введен\s+)?(имя|логин|пароль|код|данные)|" +
                                 @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|повторите\s+попытку|" +
                                 @"логин\s+или\s+пароль\s+неверны|" +
                                 @"вы\s+не\s+авторизованы|недостаточно\s+прав|" +
                                 @"вы\s+были\s+заблокированы" +
                                 @"дата\s+снятия\s+блокировки|" +
-                                @"(пожалуйста(\s|\W)+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
-                                @"(такого\s+)?пользовател[яь]\s+((\W|\w)*\s+)?не\s+(существует|найден)|" +
-                                @"соо?бщение\s+слишком\s+короткое" //к\s+сож[ае]лению| bad
-
+                                @"(пожалуйста[\s\W]+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
+                                @"(такого\s+)?пользовател[яь]\s+([\w\W]*\s+)?не\s+(существует|найден)|" +
+                                @"соо?бщение\s+(было\s+)?(слишком\s+короткое|оставлено\s+пустым)" //к\s+сож[ае]лению| bad
                     },
                     #endregion
 
                     #region Fields
                     Fields = new LocalText.FieldsNames
                     {
-                        Subject = @"предмет|тема|заголовок",
-                        Message = @"сообщение|текст",
-                        Captcha = @"код"
+                        Subject = @"(?i)предмет|тема|заголовок",
+                        Message = @"(?i)сообщение|текст",
+                        Captcha = @"(?i)код"
                     }
                     #endregion
                 };
@@ -289,6 +299,22 @@ namespace Voron_Poster
                 // Keep this in the bottom! Initialization order matters. 
                 public static LocalText[] Localities = { English, Russian };
                 public static LocalText Global = LocalText.Join(Localities);
+            }
+
+            /// <summary>
+            /// Safe version of Expr.IsMatch(). (Null argument accepted)
+            /// </summary>
+            public static bool IsMatch(string input, string pattern)
+            {
+                return Regex.IsMatch(input ?? String.Empty, pattern);
+            }
+
+            /// <summary>
+            /// Safe version of Expr.Matches(). (Null argument accepted)
+            /// </summary>
+            public static MatchCollection Matches(string input, string pattern)
+            {
+                return Regex.Matches(input ?? String.Empty, pattern);
             }
         }
 
@@ -319,7 +345,7 @@ namespace Voron_Poster
 
             protected static void SelectBest(ref int bestScore, ref string bestText, string thisText, string matchPattern)
             {
-                int Score = thisText.MatchCount(matchPattern);
+                int Score = Expr.Matches(thisText, matchPattern).Count;
                 if (Score > 0 && Score > bestScore)
                 {
                     bestScore = Score;
@@ -423,9 +449,9 @@ namespace Voron_Poster
             {
                 IEnumerable<HtmlNode> Nodes =
                     doc.DocumentNode.Descendants().Where(
-                    x => x.Attributes.Sum(
-                        y => y.ValueDecoded().MatchCount(@"error|warn")) > 0
-                        && x.InnerText.MatchCount(@"отключен\s+javascript") == 0);
+                    x => x.Attributes.Any(
+                        y => Expr.IsMatch(y.ValueDecoded(), @"(?i)error|warn"))
+                        && !Expr.IsMatch(x.InnerText, @"(?i)отключен\s+javascript"));
                 return Nodes.Count();
             }
 
@@ -445,11 +471,11 @@ namespace Voron_Poster
             protected static int MatchLinkNode(string linkUrl, HtmlNode linkNode,
                                                  string regExprLinkPattern, string regExprTextPattern)
             {
-                int Score = linkUrl.MatchCount(regExprLinkPattern)
-                          + linkNode.InnerTextDecoded().MatchCount(regExprTextPattern);
+                int Score = Expr.Matches(linkUrl, regExprLinkPattern).Count
+                          + Expr.Matches(linkNode.InnerTextDecoded(), regExprTextPattern).Count;
                 foreach (HtmlNode Node in linkNode.DescendantsAndSelf())
-                    Score += Node.Attributes.Sum(x => x.ValueDecoded().MatchCount(regExprLinkPattern))
-                           + Node.Attributes.Sum(x => x.ValueDecoded().MatchCount(regExprTextPattern));
+                    Score += Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(),regExprLinkPattern).Count)
+                           + Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(),regExprTextPattern).Count);
                 return Score;
             }
 
@@ -523,7 +549,7 @@ namespace Voron_Poster
             public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
                 return WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
-                       linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
+                       Expr.Matches(linkUrl, Expr.Url.Action).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Login, Expr.Text.Global.Link.Login)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Register, Expr.Text.Global.Link.Register)
                     );
@@ -559,16 +585,16 @@ namespace Voron_Poster
 
             public override int Score()
             {
-                int UsernameScore = UsernameFieldName.MatchCount(Expr.Text.Global.Fields.Username);
-                int PasswordScore = PasswordFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.Password));
+                int UsernameScore = Expr.Matches(UsernameFieldName, Expr.Text.Global.Fields.Username).Count;
+                int PasswordScore = PasswordFields.Sum((x) => Expr.Matches(x, Expr.Text.Global.Fields.Password).Count);
 
-                if (UsernameScore <= 0 || PasswordScore <= 0 ||
-                    PasswordFields.Sum((x) => x.MatchCount(Expr.Text.Global.Fields.RepeatPassword)) > 0
+                if (UsernameScore <= 0 || PasswordScore <= 0 || String.IsNullOrEmpty(Action) ||
+                    PasswordFields.Any((x) => Expr.IsMatch(x, Expr.Text.Global.Fields.RepeatPassword))
                     || Method != "post") return 0;
                 else return UsernameScore + PasswordScore
-                    + Action.MatchCount(Expr.Url.Action)
-                    + Action.MatchCount(Expr.Url.Login)
-                    - Action.MatchCount(Expr.Url.Register)
+                    + Expr.Matches(Action, Expr.Url.Action).Count
+                    + Expr.Matches(Action, Expr.Url.Login).Count
+                    -Expr.Matches( Action, Expr.Url.Register).Count
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.Login, Expr.Text.Global.Link.Login);
             }
         }
@@ -618,13 +644,13 @@ namespace Voron_Poster
             public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
             {
                 List<KeyValuePair<string, int>> ReplyLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
-                       linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
+                      Expr.Matches(linkUrl, (Expr.Url.Action)).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Reply, Expr.Text.Global.Link.Reply)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Poll, Expr.Text.Global.Link.Poll)
                      ).OrderBy(x => x.Value).ThenByDescending(x => x.Key.Length).ToList();
                 List<KeyValuePair<string, int>> NewTopicLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
-                       linkUrl.MatchCount(Expr.Url.Action)// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
+                       Expr.Matches(linkUrl, Expr.Url.Action).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Poll, Expr.Text.Global.Link.Poll)
@@ -650,7 +676,7 @@ namespace Voron_Poster
             {
                 List<KeyValuePair<string, string>> OtherFieldsList = OtherFields.ToList();
                 for (int i = OtherFieldsList.Count - 1; i >= 0; i--)
-                    if (OtherFieldsList[i].Key.MatchCount(Expr.Text.Global.Fields.Preview) > 0)
+                    if (Expr.IsMatch(OtherFieldsList[i].Key, Expr.Text.Global.Fields.Preview))
                         OtherFieldsList.RemoveAt(i);
                 if (!String.IsNullOrEmpty(Enctype) && Enctype == "multipart/form-data")
                 {
@@ -696,14 +722,14 @@ namespace Voron_Poster
 
             public override int Score()
             {
-                int MessageScore = MessageFieldName.MatchCount(Expr.Text.Global.Fields.Message);
+                int MessageScore = Expr.Matches(MessageFieldName, Expr.Text.Global.Fields.Message).Count;
 
-                if (MessageScore <= 0 || Method != "post") return 0;
+                if (MessageScore <= 0 || Method != "post" || String.IsNullOrEmpty(Action)) return 0;
                 else return MessageScore +
-                    +Action.MatchCount(Expr.Url.Action)
-                    + Action.MatchCount(Expr.Url.NewTopic) + Action.MatchCount(Expr.Url.Reply)
-                    + SubjectFieldName.MatchCount(Expr.Text.Global.Fields.Subject)
-                    + CaptchaFieldName.MatchCount(Expr.Text.Global.Fields.Captcha)
+                    + Expr.Matches(Action, Expr.Url.Action).Count
+                    + Expr.Matches(Action, Expr.Url.NewTopic).Count + Expr.Matches(Action, Expr.Url.Reply).Count
+                    + Expr.Matches(SubjectFieldName, Expr.Text.Global.Fields.Subject).Count
+                    + Expr.Matches(CaptchaFieldName, Expr.Text.Global.Fields.Captcha).Count
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.Reply, Expr.Text.Global.Link.Reply);
             }
@@ -714,6 +740,10 @@ namespace Voron_Poster
             // Check for bad site
             if (Expr.NotSupported.Contains(new Uri(Properties.ForumMainPage).Host))
                 return new Exception("Сайт не поддерживается");
+
+            // Some site workaround
+            if (new Uri(Properties.ForumMainPage).Host == "gidtalk.ru")
+                Cookies.Add(new Uri("http://gidtalk.ru/"), new Cookie("beget", "begetok"));
 
             // Searching LoginForm
             StatusMessage = "Авторизация: Загрузка страницы";
@@ -779,8 +809,8 @@ namespace Voron_Poster
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
-            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
-            Text.MatchCount(Expr.Text.Global.Message.Error),
+            Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count,
+            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html),
             WebForm.LoggedInNodes(Html));
             //return null;
@@ -819,15 +849,15 @@ namespace Voron_Poster
             Text = Html.DocumentNode.InnerTextDecoded();
             progress.Login = 205;
             // Analyze response
-            int SuccessScore = Text.MatchCount(Expr.Text.Global.Message.LoginSuccess)
-                             - Text.MatchCount(Expr.Text.Global.Message.Error);
+            int SuccessScore = Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count
+                             - Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
             if (ErrorNodesValid)
                 SuccessScore -= WebForm.ErrorNodes(Html);
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Answer: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
-            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
-            Text.MatchCount(Expr.Text.Global.Message.Error),
+            Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count,
+            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html),
             WebForm.LoggedInNodes(Html));
             //return null;
@@ -857,8 +887,8 @@ namespace Voron_Poster
             progress.Login = 255;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
-            Text.MatchCount(Expr.Text.Global.Message.LoginSuccess),
-            Text.MatchCount(Expr.Text.Global.Message.Error),
+            Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count,
+            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html),
             WebForm.LoggedInNodes(Html));
             //return null;
@@ -874,8 +904,9 @@ namespace Voron_Poster
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
             // return null;
-            // Delay needed on some sites
-            if (targetBoard.Host == "seodor.biz")
+            // Delay needed on some sites     
+            if (targetBoard.Host == "seodor.biz"
+                || targetBoard.Host == "webledi.ru")
             {
                 WaitingForQueue = true;
                 StatusMessage = "Задержка 5 сек";
@@ -926,12 +957,12 @@ namespace Voron_Poster
             string Text = Html.DocumentNode.InnerTextDecoded();
             int SuccessScore = 0;
             bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
-            bool ErrorValid = Text.MatchCount(Expr.Text.Global.Message.Error) == 0;
+            bool ErrorValid = !Expr.IsMatch(Text, Expr.Text.Global.Message.Error);
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
-            Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
-            Text.MatchCount(Expr.Text.Global.Message.Error),
+            Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count,
+            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html));
             //     return null;
 #endif
@@ -972,17 +1003,17 @@ namespace Voron_Poster
 
             //if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5; bad idea
 
-            SuccessScore += Text.MatchCount(Expr.Text.Global.Message.PostSuccess);
+            SuccessScore += Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count;
             if (ErrorValid)
-                SuccessScore -= Text.MatchCount(Expr.Text.Global.Message.Error);
+                SuccessScore -= Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
             if (ErrorNodesValid)
                 SuccessScore -= WebForm.ErrorNodes(Html);
 
             progress.Post += 10 / progress.PostCount;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
-            Text.MatchCount(Expr.Text.Global.Message.PostSuccess),
-            Text.MatchCount(Expr.Text.Global.Message.Error),
+            Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count,
+            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html));
             //return null;
 #endif

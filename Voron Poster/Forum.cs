@@ -101,23 +101,6 @@ namespace Voron_Poster
             return false;
         }
 
-        /// <summary>
-        /// Returns number of Matches. Case ignored.
-        /// </summary>
-        public static int MatchCount(this string s, string regExprPattern)
-        {
-            return String.IsNullOrEmpty(regExprPattern) || String.IsNullOrEmpty(s)
-                ? 0 : (new Regex(regExprPattern, RegexOptions.IgnoreCase)).Matches(s).Count;
-        }
-        /// <summary>
-        /// Returns number of Matches.
-        /// </summary>
-        public static int MatchCount(this string s, string regExprPattern, RegexOptions options)
-        {
-            return String.IsNullOrEmpty(regExprPattern) || String.IsNullOrEmpty(s)
-                ? 0 : (new Regex(regExprPattern, options)).Matches(s).Count;
-        }
-
         #region HtmlAgilityPackFixes
 
         public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name)
@@ -148,8 +131,8 @@ namespace Voron_Poster
         public static void ClearHidden(this HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
-                x => x.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0
-                || x.GetAttributeValueDecoded("class", String.Empty).MatchCount(@"hidden") > 0);
+                x => Regex.IsMatch(x.GetAttributeValueDecoded("style", String.Empty), @"(?i)display:\s*none")
+                    || Regex.IsMatch(x.GetAttributeValueDecoded("class", String.Empty), @"(?i)hidden")); 
             while (NoDisplay.Count() > 0) NoDisplay.First().Remove();
         }
 
@@ -166,7 +149,7 @@ namespace Voron_Poster
             bool NoDisplay = false;
             do
             {
-                NoDisplay = node.GetAttributeValueDecoded("style", String.Empty).MatchCount(@"display:\s*none") > 0;
+                NoDisplay = Regex.IsMatch(node.GetAttributeValueDecoded("style", String.Empty), @"(?i)display:\s*none");
                 node = node.ParentNode;
             }
             while (!NoDisplay && node.ParentNode != null);
@@ -179,7 +162,7 @@ namespace Voron_Poster
         public static HtmlNodeCollection SelectNodesSafe(this HtmlAgilityPack.HtmlNode node, string xpath)
         {
             HtmlNodeCollection Selected = node.SelectNodes(xpath);
-            return Selected == null ? new HtmlNodeCollection(node) : Selected;
+            return Selected ?? new HtmlNodeCollection(node);
         }
 
         #endregion
@@ -352,7 +335,7 @@ namespace Voron_Poster
 
         [XmlIgnore]
         public Progress<int> Progress = new Progress<int>();
-   
+
 
         protected string status;
         public string StatusMessage
@@ -365,13 +348,13 @@ namespace Voron_Poster
                     status = value;
                     Log.Add(status);
                     if (StatusUpdate != null)
-                    StatusUpdate(status);
+                        StatusUpdate(status);
                 }
             }
         }
         [XmlIgnore]
         public Action<string> StatusUpdate;
-     protected struct ForumRunProgress
+        protected struct ForumRunProgress
         {
             int login, scripts, post, postcount;
             [XmlIgnore]
@@ -516,12 +499,13 @@ namespace Voron_Poster
         //}
 
         protected HttpClient Client;
+        protected CookieContainer Cookies;
 
         public virtual void Reset()
         {
 
             Log = new List<string>();
-            StatusMessage ="Остановлено";
+            StatusMessage = "Остановлено";
             HttpLog = new List<KeyValuePair<object, string>>();
             Error = null;
             //      Activity = null;
@@ -531,7 +515,9 @@ namespace Voron_Poster
 
             // Recreating client
             if (Client != null) Client.Dispose();
-            Client = new HttpClient();
+            Cookies = new CookieContainer();
+            var handler = new HttpClientHandler() { CookieContainer = Cookies };
+            Client = new HttpClient(handler);
             Client.Timeout = RequestTimeout;
         }
 
@@ -629,7 +615,7 @@ namespace Voron_Poster
         }
 
         private static string[] References = new string[]{"System","System.IO","System.Linq","System.Data",
-           "System.Xml","System.Web"};
+           "System.Xml","System.Web", "System.Text.RegularExpressions"};
 
         public static Roslyn.Scripting.Session InitScriptEngine(ScriptData ScriptData)
         {
@@ -690,7 +676,7 @@ namespace Voron_Poster
                     ContinueWith((uselessvar) => { LoginProcess = Login(); });
 
                 // Meanwile process the scripts
-               StatusMessage = "Обработка скриптов";
+                StatusMessage = "Обработка скриптов";
                 CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
                 var Session = InitScriptEngine(CurrentScriptData);
                 progress.Scripts += 50;
@@ -706,7 +692,7 @@ namespace Voron_Poster
                 if (LoginProcess == null)
                 {
                     WaitingForQueue = true;
-                   StatusMessage = "Авторизация: В очереди";
+                    StatusMessage = "Авторизация: В очереди";
                 }
                 await WaitingDomain;
                 WaitingForQueue = false;

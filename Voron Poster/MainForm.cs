@@ -671,7 +671,7 @@ namespace Voron_Poster
             tasksTable.SuspendLayout();
             for (int i = 0; i < Tasks.Count; i++)
             {
-             //   Tasks[i].Ctrls.Name.Dock = DockStyle.Fill;
+                //   Tasks[i].Ctrls.Name.Dock = DockStyle.Fill;
                 Tasks[i].Ctrls.Status.Dock = DockStyle.Fill;
             }
             tasksTable.ResumeLayout();
@@ -686,7 +686,7 @@ namespace Voron_Poster
             tasksTable.SuspendLayout();
             for (int i = 0; i < Tasks.Count; i++)
             {
-             //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
+                //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
                 PostTask.ResizeEnd(Tasks[i].Ctrls.Status);
             }
             tasksTable.ResumeLayout();
@@ -882,13 +882,29 @@ namespace Voron_Poster
             propValidate();
         }
 
+        LinkLabelLinkClickedEventHandler AuthStatusLinkClicked;
         private async void propAuthTryLogin_Click(object sender, EventArgs e)
         {
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
             propValidate();
+            ResetIcon(sender, e);
             propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Activity];
             TempForum = Forum.New(TempProperties.Engine);
+
+            TempForum.Progress.ProgressChanged += (o, e2) =>
+            {
+                propAuthProgress.Value = e2;
+            };
+            TempForum.StatusUpdate = (status) =>
+            {
+                propAuthStatus.BeginInvoke((Action)(() =>
+                {
+                    status = status.Replace("Авторизация: ", String.Empty);
+                    propAuthStatus.Text = status;
+                    ToolTip.SetToolTip(propAuthStatus, status);
+                }));
+            };
             StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
             TempForum.Reset();
@@ -908,12 +924,35 @@ namespace Voron_Poster
             {
                 Error = CatchedError;
             }
-            if (Error == null) propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
+            if (Error == null)
+            {
+                propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
+                propAuthStatus.LinkColor = Color.Green;
+
+            }
             else
             {
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
-                ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
+                //   ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
+                if (TempForum.Cancel.IsCancellationRequested)
+                {
+                    TempForum.StatusMessage = "Отменено";
+                }
+                else
+                {
+                    if (Error is OperationCanceledException)
+                        TempForum.StatusMessage = "Ошибка: Время ожидания истекло";
+                    else
+                        TempForum.StatusMessage = "Ошибка: " + Error.Message;
+                }
+                propAuthProgress.SetState(2);
+                propAuthStatus.LinkColor = Color.Red;
             }
+            AuthStatusLinkClicked = (o, e2) => { 
+                TempForum.ShowData(propTargetUrl.Text);
+            };
+            propAuthStatus.LinkClicked += AuthStatusLinkClicked;
+            propAuthStatus.LinkBehavior = LinkBehavior.HoverUnderline;
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
             propValidate();
@@ -932,7 +971,13 @@ namespace Voron_Poster
             if (!PropertiesActivity)
             {
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Login];
-                ToolTip.SetToolTip(propAuthTryLogin, String.Empty);
+                ToolTip.SetToolTip(propAuthStatus, String.Empty);
+                propAuthStatus.LinkClicked -= AuthStatusLinkClicked;
+                propAuthStatus.LinkColor = Color.Black;
+                propAuthStatus.LinkBehavior = LinkBehavior.NeverUnderline;
+                propAuthStatus.Text = "Остановлено";
+                propAuthProgress.Value = 0;
+                propAuthProgress.SetState(1);
                 if (sender == propMainUrl || sender == propEngine)
                     propEngineDetect.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Gear];
             }

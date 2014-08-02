@@ -109,7 +109,7 @@ namespace Voron_Poster
                             Ctrls.Status.LinkColor = Color.Red;
                             Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
                         }
-                        else if (Status == InfoIcons.Complete)
+                        else if (status == InfoIcons.Complete)
                         {
                             Ctrls.Status.LinkColor = Color.Green;
                             Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
@@ -122,9 +122,9 @@ namespace Voron_Poster
 
                         switch (status)
                         {
-                            case InfoIcons.Error: ModifyProgressBarColor.SetState(Ctrls.Progress, 2); break;
-                            case InfoIcons.Waiting: ModifyProgressBarColor.SetState(Ctrls.Progress, 3); break;
-                            default: ModifyProgressBarColor.SetState(Ctrls.Progress, 1); break;
+                            case InfoIcons.Error: Ctrls.Progress.SetState(2); break;
+                            case InfoIcons.Waiting: Ctrls.Progress.SetState(3); break;
+                            default: Ctrls.Progress.SetState(1); break;
                         }
                     }));
                 }

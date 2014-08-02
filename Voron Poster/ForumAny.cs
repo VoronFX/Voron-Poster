@@ -2,6 +2,7 @@
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -14,15 +15,81 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+
 namespace Voron_Poster
 {
+    public static class HtmlAgilityPackExtension
+    {
+
+        public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name, string defaultValue = null)
+        {
+            return HttpUtility.HtmlDecode(node.GetAttributeValue(name, defaultValue));
+        }
+
+        public static string ValueDecoded(this HtmlAgilityPack.HtmlAttribute attribute)
+        {
+            return HttpUtility.HtmlDecode(attribute.Value);
+        }
+
+        public static void ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
+        {
+            var Bad = doc.DocumentNode.Descendants("script");
+            while (Bad.Count() > 0) Bad.First().Remove();
+            Bad = doc.DocumentNode.Descendants("style");
+            while (Bad.Count() > 0) Bad.First().Remove();
+            Bad = doc.DocumentNode.Descendants("#comment");
+            while (Bad.Count() > 0) Bad.First().Remove();
+        }
+
+        public static void ClearHidden(this HtmlAgilityPack.HtmlDocument doc)
+        {
+            IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
+                x => Regex.IsMatch(x.GetAttributeValueDecoded("style", String.Empty), @"(?i)display\s*?:\s*?none")
+                //   || Regex.IsMatch(x.GetAttributeValueDecoded("class", String.Empty), @"(?i)hidden")
+                    );
+            while (NoDisplay.Count() > 0) NoDisplay.First().Remove();
+        }
+
+        public static string InnerTextDecoded(this HtmlAgilityPack.HtmlNode node)
+        {
+            return HttpUtility.HtmlDecode(node.InnerText);
+        }
+
+        /// <summary>
+        /// Checks if node or any parent node has "display: none" style
+        /// </summary>
+        public static bool IsNoDisplay(this HtmlAgilityPack.HtmlNode node)
+        {
+            bool NoDisplay = false;
+            do
+            {
+                NoDisplay = Regex.IsMatch(node.GetAttributeValueDecoded("style", String.Empty), @"(?i)display\s*?:\s*?none");
+                node = node.ParentNode;
+            }
+            while (!NoDisplay && node.ParentNode != null);
+            return NoDisplay;
+        }
+
+        /// <summary>
+        /// Don't use it! Use LINQ instead of XPath because here it's buggy
+        /// </summary>
+        public static HtmlNodeCollection SelectNodesSafe(this HtmlAgilityPack.HtmlNode node, string xpath)
+        {
+            HtmlNodeCollection Selected = node.SelectNodes(xpath);
+            return Selected ?? new HtmlNodeCollection(node);
+        }
+
+    }
+
     public class ForumAny : Forum
     {
-        public ForumAny() : base() {
+        public ForumAny()
+            : base()
+        {
             Regex.CacheSize = 100;
         }
 
-        protected static async Task<HtmlAgilityPack.HtmlDocument> InitHtml(HttpResponseMessage response)
+        protected async Task<HtmlAgilityPack.HtmlDocument> InitHtml(HttpResponseMessage response)
         {
             var doc = new HtmlAgilityPack.HtmlDocument();
             // Otherwise forms have no children. Why it doesn't work out of the box =_= 
@@ -39,10 +106,10 @@ namespace Voron_Poster
             if (Encoding == null)
             {
                 string Html = await response.Content.ReadAsStringAsync();
-                Match CharsetMatch = new Regex(@"(?i)charset\s*=[\s""']*([^\s""'/>]*)").Match(Html);
+                Match CharsetMatch = Regex.Match(Html, @"(?i)charset\s*=[\s""']*([^\s""'/>]*)");
                 string Charset = null;
                 if (CharsetMatch != null)
-                    Charset = new Regex(@"(?i)charset\s*=[\s""']*").Replace(CharsetMatch.Value, String.Empty);
+                    Charset = Regex.Replace(CharsetMatch.Value, @"(?i)charset\s*=[\s""']*", String.Empty);
                 try
                 {
                     if (!String.IsNullOrEmpty(Charset))
@@ -53,8 +120,123 @@ namespace Voron_Poster
             if (Encoding == null) Encoding = Encoding.Default;
             Stream stream = await response.Content.ReadAsStreamAsync();
             doc.Load(stream, Encoding);
+            MapRelativeUrls(doc, response.RequestMessage.RequestUri);
+            var x = new System.Diagnostics.Stopwatch();
+            x.Start();
+            ProcessCSSNoDisplayStyles(doc);
+            x.Stop();
+            Console.WriteLine("CSSProcessing: {0}", x.ElapsedMilliseconds);
             doc.ClearScriptsStylesComments();
             return doc;
+        }
+
+        protected static void MapRelativeUrls(HtmlAgilityPack.HtmlDocument doc, Uri defaulBaseUrl)
+        {
+            Uri BaseUrl = defaulBaseUrl;
+            foreach (HtmlNode Base in doc.DocumentNode.Descendants("base"))
+            {
+                string Href = Base.GetAttributeValueDecoded("href");
+                if (!String.IsNullOrEmpty(Href) &&
+                Uri.TryCreate(Href, UriKind.Absolute, out defaulBaseUrl))
+                {
+                    break;
+                }
+                else BaseUrl = defaulBaseUrl;
+            }
+            Parallel.ForEach(doc.DocumentNode.DescendantsAndSelf(), (Node) =>
+            {
+                foreach (string UrlAttributeName in new[] { "href", "src", "action" })
+                {
+                    string Url = Node.GetAttributeValueDecoded(UrlAttributeName);
+                    Uri RelativeUrl;
+                    if (!String.IsNullOrEmpty(Url) && Uri.TryCreate(Url, UriKind.Relative, out RelativeUrl))
+                    {
+
+                        RelativeUrl = new Uri(BaseUrl, RelativeUrl);
+                        Node.SetAttributeValue(UrlAttributeName, HttpUtility.HtmlEncode(RelativeUrl.AbsoluteUri));
+                    }
+                }
+            });
+        }
+
+        static ConcurrentDictionary<string, string> CSSChache = new ConcurrentDictionary<string, string>();
+        protected void ProcessCSSNoDisplayStyles(HtmlAgilityPack.HtmlDocument doc)
+        {
+            IEnumerable<HtmlNode> ExternalCSS =
+                doc.DocumentNode.Descendants("link").Where(x => x.GetAttributeValueDecoded("rel") == "stylesheet");
+            Parallel.ForEach(ExternalCSS, (CSSNode) =>
+            {
+                string Href = CSSNode.GetAttributeValueDecoded("href");
+                string stylesheet;
+                if (!CSSChache.TryGetValue(Href, out stylesheet))
+                {
+                try
+                {
+                    Task<string> CSS = Client.GetStringAsync(Href);
+                    CSS.Wait();
+                    // CSSNode.Name = "style";
+                    // CSSNode.ClosingAttributes.Add("/style", "");
+                    // CSSNode.InnerHtml = CSS.Result;
+                    stylesheet = CleanCSSStylesheet(CSS.Result);
+                }
+                catch (Exception) { }
+                CSSChache.TryAdd(Href, stylesheet);
+                }
+                InlineNoDisplayStyle(doc, stylesheet);
+            });
+            var x3 = new System.Diagnostics.Stopwatch();
+            x3.Start();
+            foreach (HtmlNode Style in doc.DocumentNode.Descendants("style"))
+            {
+                InlineNoDisplayStyle(doc, CleanCSSStylesheet(Style.InnerHtml));
+            }
+            x3.Stop();
+            Console.WriteLine("CSSInternal: {0}", x3.ElapsedMilliseconds);
+        }
+
+        protected string CleanCSSStylesheet(string stylesheet) {
+            // clean up the stylesheet
+            stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines
+            stylesheet = Regex.Replace(stylesheet, @"\s*(?!<\"")\/\*[^\*]+\*\/(?!\"")\s*", string.Empty); // remove comments
+            // remove excess space
+            stylesheet = Regex.Replace(stylesheet, @"\s{2,}", @"\s");
+            return stylesheet;
+        }
+
+        protected void InlineNoDisplayStyle(HtmlAgilityPack.HtmlDocument doc, string stylesheet)
+        {
+            // extract and inline NoDisplay css rules
+            MatchCollection allCssRules = Regex.Matches(stylesheet, "([^{]*){([^}]*)}", RegexOptions.Singleline);
+            foreach (Match cssRule in allCssRules)
+            {
+                if (cssRule.Value.StartsWith("@") ||
+                    !Regex.IsMatch(cssRule.Value, @"(?i)display\s*?:\s*?none")) continue;
+                // string cssProperties = cssRule.Groups[2].Value.Trim();
+                string[] cssSelectors = cssRule.Groups[1].Value.Split(',');
+
+                foreach (string selector in cssSelectors)
+                {
+                    string xpath = css2xpath.Converter.CSSToXPath(selector.Trim());
+                    HtmlNodeCollection matchingNodes = doc.DocumentNode.SelectNodes(xpath);
+                    if (matchingNodes != null)
+                    {
+                        foreach (HtmlNode node in matchingNodes)
+                        {
+                            // detect if a style attribute already exists and create/append as necessary
+                            if (node.Attributes["style"] != null)
+                            {
+                                node.Attributes["style"].Value += ";" + "display: none";
+                            }
+                            else
+                            {
+                                node.Attributes.Add("style", "display: none");
+                            }
+                        }
+                    }
+                }
+            }
+
+
         }
 
         protected static class Expr
@@ -325,7 +507,6 @@ namespace Voron_Poster
             public string Method;
             public string Action;
             public string AcceptCharset;
-            public string BaseUrl;
             public string CaptchaFieldName;
             public string CaptchaPictureUrl;
             public bool IsHidden;
@@ -343,101 +524,74 @@ namespace Voron_Poster
                 catch { return encoding; }
             }
 
-            protected static void SelectBest(ref int bestScore, ref string bestText, string thisText, string matchPattern)
+            protected static void SelectBest(ref int bestScore, ref string bestName, string thisName, string matchPattern)
             {
-                int Score = Expr.Matches(thisText, matchPattern).Count;
+                int Score = Expr.Matches(thisName, matchPattern).Count;
                 if (Score > 0 && Score > bestScore)
                 {
                     bestScore = Score;
-                    bestText = thisText;
+                    bestName = thisName;
                 }
-            }
-
-            protected static string GetBase(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
-            {
-                string BaseUrl = defaultMainPage.AbsoluteUri;
-                foreach (HtmlNode Base in doc.DocumentNode.Descendants("base"))
-                {
-                    string Href = Base.GetAttributeValueDecoded("href");
-                    if (!String.IsNullOrEmpty(Href))
-                    {
-                        BaseUrl = Href;
-                    }
-                }
-                return BaseUrl;
             }
 
             protected abstract void FormProcessor();
-            protected static WebForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage, Func<WebForm> formConstructor)
+            protected static WebForm Find(HtmlAgilityPack.HtmlDocument doc, Func<WebForm> formConstructor)
             {
-                IEnumerable<HtmlNode> Forms = doc.DocumentNode.Descendants("form");
                 WebForm BestForm = null;
                 int BestFormScore = int.MinValue;
-                foreach (HtmlNode HtmlForm in Forms)
+                Parallel.ForEach(doc.DocumentNode.Descendants("form"), (HtmlForm) =>
                 {
-                    HtmlNode TempForm = HtmlForm.Clone();
-
-                    // Remove children forms
-                    IEnumerable<HtmlNode> SubForms = TempForm.Descendants("form");
-                    foreach (HtmlNode SubForm in SubForms)
-                        SubForm.Remove();
-                    WebForm Form = formConstructor();
-                    Form.FormNode = TempForm;
-                    Form.BaseUrl = GetBase(doc, defaultMainPage);
-                    Uri ActionUri;
-                    if (Uri.TryCreate(TempForm.GetAttributeValueDecoded("action", ""), UriKind.RelativeOrAbsolute, out ActionUri) &&
-                    (!ActionUri.IsAbsoluteUri || ((ActionUri.Scheme == Uri.UriSchemeHttp || ActionUri.Scheme == Uri.UriSchemeHttps)
-                     && ActionUri.Host.EndsWith(new Uri(Form.BaseUrl).Host, StringComparison.OrdinalIgnoreCase))))
                     {
-                        if (!ActionUri.IsAbsoluteUri) ActionUri = new Uri(new Uri(Form.BaseUrl), ActionUri);
-                        Form.Action = ActionUri.AbsoluteUri;
-                    }
-                    Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
-                    Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
-                    Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
+                        HtmlNode TempForm = HtmlForm.Clone();
 
-                    int BestCaptchaScore = int.MinValue;
-                    foreach (HtmlNode Input in Form.FormNode.Descendants("input"))
-                    {
-                        if (Input.GetAttributeValueDecoded("type") == "text")
+                        // Remove children forms
+                        IEnumerable<HtmlNode> SubForms = TempForm.Descendants("form");
+                        foreach (HtmlNode SubForm in SubForms)
+                            SubForm.Remove();
+                        WebForm Form = formConstructor();
+                        Form.FormNode = TempForm;
+                        Form.Action = TempForm.GetAttributeValueDecoded("action");
+                        Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
+                        Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
+                        Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
+
+                        int BestCaptchaScore = int.MinValue;
+                        foreach (HtmlNode Input in Form.FormNode.Descendants("input"))
                         {
-                            SelectBest(ref BestCaptchaScore, ref Form.CaptchaFieldName,
-                                Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Captcha);
-                        }
-                    }
-
-                    // Search for captcha image
-                    if (!String.IsNullOrEmpty(Form.CaptchaFieldName))
-                    {
-                        int BestCaptchaImgScore = int.MinValue;
-                        foreach (HtmlNode Image in Form.FormNode.Descendants("img"))
-                        {
-                            Uri Src;
-                            if (Uri.TryCreate(Image.GetAttributeValueDecoded("src", String.Empty), UriKind.RelativeOrAbsolute, out Src) &&
-                                (!Src.IsAbsoluteUri || (Src.Scheme == Uri.UriSchemeHttp || Src.Scheme == Uri.UriSchemeHttps)))
+                            if (Input.GetAttributeValueDecoded("type") == "text")
                             {
-                                if (!Src.IsAbsoluteUri) Src = new Uri(new Uri(Form.BaseUrl), Src);
+                                SelectBest(ref BestCaptchaScore, ref Form.CaptchaFieldName,
+                                    Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Captcha);
+                            }
+                        }
 
-                                int CaptchaImgScore = MatchLinkNode(Src.AbsoluteUri, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
+                        // Search for captcha image
+                        if (!String.IsNullOrEmpty(Form.CaptchaFieldName))
+                        {
+                            int BestCaptchaImgScore = int.MinValue;
+                            foreach (HtmlNode Image in Form.FormNode.Descendants("img"))
+                            {
+                                string Src = Image.GetAttributeValueDecoded("src", String.Empty);
+                                int CaptchaImgScore = MatchLinkNode(Src, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
                                 if (CaptchaImgScore > BestCaptchaImgScore)
                                 {
-                                    Form.CaptchaPictureUrl = Src.AbsoluteUri;
+                                    Form.CaptchaPictureUrl = Src;
                                     BestCaptchaImgScore = CaptchaImgScore;
                                 }
                             }
                         }
-                    }
 
-                    Form.FormProcessor();
-                    Form.IsHidden = HtmlForm.IsNoDisplay();
-                    int Score = Form.Score();
+                        Form.FormProcessor();
+                        Form.IsHidden = HtmlForm.IsNoDisplay();
+                        int Score = Form.Score();
 
-                    if (Score > BestFormScore && Score > 0)
-                    {
-                        BestForm = Form;
-                        BestFormScore = Score;
+                        if (Score > BestFormScore && Score > 0)
+                        {
+                            BestForm = Form;
+                            BestFormScore = Score;
+                        }
                     }
-                }
+                });
 #if DEBUG && DEBUGANYFORUM
                 if (BestForm != null)
                     Console.WriteLine("FormScore: " + BestFormScore + " ActionUrl: " + BestForm.Action);
@@ -474,27 +628,25 @@ namespace Voron_Poster
                 int Score = Expr.Matches(linkUrl, regExprLinkPattern).Count
                           + Expr.Matches(linkNode.InnerTextDecoded(), regExprTextPattern).Count;
                 foreach (HtmlNode Node in linkNode.DescendantsAndSelf())
-                    Score += Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(),regExprLinkPattern).Count)
-                           + Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(),regExprTextPattern).Count);
+                    Score += Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(), regExprLinkPattern).Count)
+                           + Node.Attributes.Sum(x => Expr.Matches(x.ValueDecoded(), regExprTextPattern).Count);
                 return Score;
             }
 
-            protected static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage,
+            protected static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, string host,
                                                               Func<string, HtmlNode, int> scoreFunction)
             {
-                Uri BaseUrl = new Uri(GetBase(doc, defaultMainPage));
                 IEnumerable<HtmlNode> AllLinks = doc.DocumentNode.Descendants().Where(
                     x => !String.IsNullOrEmpty(x.GetAttributeValueDecoded("href")));
                 var LoginLinks = new Dictionary<string, int>();
                 foreach (HtmlNode Link in AllLinks)
                 {
                     Uri Url;
-                    if (Uri.TryCreate(Link.GetAttributeValueDecoded("href", ""), UriKind.RelativeOrAbsolute, out Url) &&
-                        (!Url.IsAbsoluteUri || ((Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps)
-                         && Url.Host.EndsWith(BaseUrl.Host, StringComparison.OrdinalIgnoreCase))))
+                    if (Uri.TryCreate(Link.GetAttributeValueDecoded("href", ""), UriKind.Absolute, out Url) &&
+                        (Url.Scheme == Uri.UriSchemeHttp || Url.Scheme == Uri.UriSchemeHttps)
+                         && Url.Host.EndsWith(host, StringComparison.OrdinalIgnoreCase))
                     {
                         int Score = scoreFunction(Url.OriginalString, Link);
-                        if (!Url.IsAbsoluteUri) Url = new Uri(BaseUrl, Url);
                         if (Score > 0 && !LoginLinks.ContainsKey(Url.AbsoluteUri))
                             LoginLinks.Add(Url.AbsoluteUri, Score);
                     }
@@ -541,14 +693,14 @@ namespace Voron_Poster
 
             }
 
-            public static LoginForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
+            public static LoginForm Find(HtmlAgilityPack.HtmlDocument doc)
             {
-                return Find(doc, defaultMainPage, () => new LoginForm()) as LoginForm;
+                return Find(doc, () => new LoginForm()) as LoginForm;
             }
 
-            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
+            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, string host)
             {
-                return WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
+                return WebForm.FindLinks(doc, host, (linkUrl, linkNode) =>
                        Expr.Matches(linkUrl, Expr.Url.Action).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Login, Expr.Text.Global.Link.Login)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Register, Expr.Text.Global.Link.Register)
@@ -566,10 +718,10 @@ namespace Voron_Poster
                     PostString.Append("&" + PasswordFields[i] + "=");
                     PostString.Append(HttpUtility.UrlEncode(Password, encoding));
                 }
-                
+
                 if (!String.IsNullOrEmpty(CaptchaFieldName))
                     PostString.Append("&" + CaptchaFieldName + "=");
-                
+
                 PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
                 List<KeyValuePair<string, string>> OtherFieldsList = OtherFields.ToList();
                 for (int i = 0; i < OtherFieldsList.Count; i++)
@@ -594,7 +746,7 @@ namespace Voron_Poster
                 else return UsernameScore + PasswordScore
                     + Expr.Matches(Action, Expr.Url.Action).Count
                     + Expr.Matches(Action, Expr.Url.Login).Count
-                    -Expr.Matches( Action, Expr.Url.Register).Count
+                    - Expr.Matches(Action, Expr.Url.Register).Count
                     + MatchLinkNode(String.Empty, FormNode, Expr.Url.Login, Expr.Text.Global.Link.Login);
             }
         }
@@ -636,20 +788,20 @@ namespace Voron_Poster
 
             }
 
-            public static PostForm Find(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
+            public static PostForm Find(HtmlAgilityPack.HtmlDocument doc)
             {
-                return Find(doc, defaultMainPage, () => new PostForm()) as PostForm;
+                return Find(doc, () => new PostForm()) as PostForm;
             }
 
-            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, Uri defaultMainPage)
+            public static List<KeyValuePair<string, int>> FindLinks(HtmlAgilityPack.HtmlDocument doc, string host)
             {
-                List<KeyValuePair<string, int>> ReplyLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
+                List<KeyValuePair<string, int>> ReplyLinks = WebForm.FindLinks(doc, host, (linkUrl, linkNode) =>
                       Expr.Matches(linkUrl, (Expr.Url.Action)).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.Reply, Expr.Text.Global.Link.Reply)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Poll, Expr.Text.Global.Link.Poll)
                      ).OrderBy(x => x.Value).ThenByDescending(x => x.Key.Length).ToList();
-                List<KeyValuePair<string, int>> NewTopicLinks = WebForm.FindLinks(doc, defaultMainPage, (linkUrl, linkNode) =>
+                List<KeyValuePair<string, int>> NewTopicLinks = WebForm.FindLinks(doc, host, (linkUrl, linkNode) =>
                        Expr.Matches(linkUrl, Expr.Url.Action).Count// <= 0 ? 0 : linkUrl.MatchCount(Expr.Url.Action)
                      + MatchLinkNode(linkUrl, linkNode, Expr.Url.NewTopic, Expr.Text.Global.Link.NewTopic)
                      - MatchLinkNode(linkUrl, linkNode, Expr.Url.Quote, Expr.Text.Global.Link.Quote)
@@ -726,7 +878,7 @@ namespace Voron_Poster
 
                 if (MessageScore <= 0 || Method != "post" || String.IsNullOrEmpty(Action)) return 0;
                 else return MessageScore +
-                    + Expr.Matches(Action, Expr.Url.Action).Count
+                    +Expr.Matches(Action, Expr.Url.Action).Count
                     + Expr.Matches(Action, Expr.Url.NewTopic).Count + Expr.Matches(Action, Expr.Url.Reply).Count
                     + Expr.Matches(SubjectFieldName, Expr.Text.Global.Fields.Subject).Count
                     + Expr.Matches(CaptchaFieldName, Expr.Text.Global.Fields.Captcha).Count
@@ -771,14 +923,14 @@ namespace Voron_Poster
             StatusMessage = "Авторизация: Поиск формы авторизации";
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
-            LoginForm LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
+            LoginForm LoginForm = LoginForm.Find(Html);
             progress.Login = 50;
 
             // Check other pages for LoginForm
             if (LoginForm == null)
             {
                 StatusMessage = "Авторизация: Поиск страницы авторизации";
-                List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl));
+                List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl).Host);
                 progress.Login = 55;
                 int i = 0;
                 while (LoginForm == null && i < LoginLinks.Count)
@@ -789,7 +941,7 @@ namespace Voron_Poster
                     progress.Login += 50 / LoginLinks.Count;
                     StatusMessage = "Авторизация: Поиск формы авторизации";
                     Html = await InitHtml(Response);
-                    LoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
+                    LoginForm = LoginForm.Find(Html);
                     progress.Login += 10 / LoginLinks.Count;
                     i++;
                 }
@@ -869,7 +1021,7 @@ namespace Voron_Poster
             progress.Login = 245;
             StatusMessage = "Авторизация: Проверка авторизации";
             Html = await InitHtml(Response);
-            LoginForm AfterLoginForm = LoginForm.Find(Html, new Uri(LoginUrl));
+            LoginForm AfterLoginForm = LoginForm.Find(Html);
 
 
             // Summarize analyzies and return conclusion if login was successfull
@@ -883,7 +1035,7 @@ namespace Voron_Poster
             }
             if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
             else if (LoggedInScore == 0 && AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
-     
+
             progress.Login = 255;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
@@ -921,7 +1073,7 @@ namespace Voron_Poster
             StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
-            PostForm PostForm = PostForm.Find(Html, new Uri(PostUrl));
+            PostForm PostForm = PostForm.Find(Html);
             progress.Post = +10 / progress.PostCount;
 
             // Check other pages for PostForm
@@ -929,7 +1081,7 @@ namespace Voron_Poster
             if (PostForm == null)
             {
                 StatusMessage = "Постинг: Поиск страницы постинга";
-                List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl));
+                List<KeyValuePair<string, int>> PostLinks = PostForm.FindLinks(Html, new Uri(PostUrl).Host);
 #if DEBUG && DEBUGANYFORUM
                 Console.WriteLine("PostLinks: {0}", PostUrl);
                 //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
@@ -944,7 +1096,7 @@ namespace Voron_Poster
                     progress.Post += (80 / progress.PostCount) / PostLinks.Count;
                     StatusMessage = "Постинг: Поиск формы постинга";
                     Html = await InitHtml(Response);
-                    PostForm = PostForm.Find(Html, new Uri(PostUrl));
+                    PostForm = PostForm.Find(Html);
                     progress.Post += (20 / progress.PostCount) / PostLinks.Count;
                     i++;
                 }
@@ -995,7 +1147,7 @@ namespace Voron_Poster
                 PostForm.PostData(AccountToUse, PostForm.ChooseEncoding(Html.Encoding), subject, message, Captcha));
             progress.Post += 40 / progress.PostCount;
             Html = await InitHtml(Response);
-            PostForm AfterPostForm = PostForm.Find(Html, new Uri(PostUrl));
+            PostForm AfterPostForm = PostForm.Find(Html);
             Html.ClearHidden();
             Text = Html.DocumentNode.InnerTextDecoded();
 

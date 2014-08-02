@@ -15,7 +15,6 @@ using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Web;
-using HtmlAgilityPack;
 
 namespace Voron_Poster
 {
@@ -101,71 +100,6 @@ namespace Voron_Poster
             return false;
         }
 
-        #region HtmlAgilityPackFixes
-
-        public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name)
-        {
-            return HttpUtility.HtmlDecode(node.GetAttributeValue(name, null));
-        }
-
-        public static string GetAttributeValueDecoded(this HtmlAgilityPack.HtmlNode node, string name, string defaultValue)
-        {
-            return HttpUtility.HtmlDecode(node.GetAttributeValue(name, defaultValue));
-        }
-
-        public static string ValueDecoded(this HtmlAgilityPack.HtmlAttribute attribute)
-        {
-            return HttpUtility.HtmlDecode(attribute.Value);
-        }
-
-        public static void ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
-        {
-            var Bad = doc.DocumentNode.Descendants("script");
-            while (Bad.Count() > 0) Bad.First().Remove();
-            Bad = doc.DocumentNode.Descendants("style");
-            while (Bad.Count() > 0) Bad.First().Remove();
-            Bad = doc.DocumentNode.Descendants("#comment");
-            while (Bad.Count() > 0) Bad.First().Remove();
-        }
-
-        public static void ClearHidden(this HtmlAgilityPack.HtmlDocument doc)
-        {
-            IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
-                x => Regex.IsMatch(x.GetAttributeValueDecoded("style", String.Empty), @"(?i)display:\s*none")
-                    || Regex.IsMatch(x.GetAttributeValueDecoded("class", String.Empty), @"(?i)hidden")); 
-            while (NoDisplay.Count() > 0) NoDisplay.First().Remove();
-        }
-
-        public static string InnerTextDecoded(this HtmlAgilityPack.HtmlNode node)
-        {
-            return HttpUtility.HtmlDecode(node.InnerText);
-        }
-
-        /// <summary>
-        /// Checks if node or any parent node has "display: none" style
-        /// </summary>
-        public static bool IsNoDisplay(this HtmlAgilityPack.HtmlNode node)
-        {
-            bool NoDisplay = false;
-            do
-            {
-                NoDisplay = Regex.IsMatch(node.GetAttributeValueDecoded("style", String.Empty), @"(?i)display:\s*none");
-                node = node.ParentNode;
-            }
-            while (!NoDisplay && node.ParentNode != null);
-            return NoDisplay;
-        }
-
-        /// <summary>
-        /// Don't use it! Use LINQ instead of XPath because here it's buggy
-        /// </summary>
-        public static HtmlNodeCollection SelectNodesSafe(this HtmlAgilityPack.HtmlNode node, string xpath)
-        {
-            HtmlNodeCollection Selected = node.SelectNodes(xpath);
-            return Selected ?? new HtmlNodeCollection(node);
-        }
-
-        #endregion
     }
 
     public abstract class Forum

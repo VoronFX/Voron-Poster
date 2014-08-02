@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voron Poster", "Voron Poster\Voron Poster.csproj", "{0BB074B0-44DC-492B-8B9B-4EA836AC42DC}"
 EndProject
@@ -13,12 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuncherMakeEncryption", "Lu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luncher2", "Luncher2\Luncher2.csproj", "{3760B0A0-9093-4ADE-960B-FA161655B8C0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lunchers", "Lunchers", "{3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LunchersAndOther", "LunchersAndOther", "{3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}"
+	ProjectSection(SolutionItems) = preProject
+		css2xpath\css2xpath.csproj = css2xpath\css2xpath.csproj
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A60FDEE1-6B5F-4FF4-AA3A-37C57BA92970}"
-	ProjectSection(SolutionItems) = preProject
-		Performance1.psess = Performance1.psess
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +51,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B2A361DA-1021-419F-97A3-7F8A8F011D25} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 		{074EC4AC-1D2E-4FAF-B762-C67FF0DF5B5C} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 		{42E8CE72-4C25-40F4-8887-FAE4CB1642AC} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 		{3760B0A0-9093-4ADE-960B-FA161655B8C0} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
+		{B2A361DA-1021-419F-97A3-7F8A8F011D25} = {3E28C83D-1F1D-4309-B051-04DEA6A0C6C4}
 	EndGlobalSection
 EndGlobal

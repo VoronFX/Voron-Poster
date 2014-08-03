@@ -41,7 +41,7 @@ namespace Voron_Poster
             while (Bad.Count() > 0) Bad.First().Remove();
         }
 
-        public static void ClearHidden(this HtmlAgilityPack.HtmlDocument doc)
+        public static void ClearNoDisplay(this HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> NoDisplay = doc.DocumentNode.DescendantsAndSelf().Where(
                 x => Regex.IsMatch(x.GetAttributeValueDecoded("style", String.Empty), @"(?i)display\s*?:\s*?none")
@@ -155,7 +155,7 @@ namespace Voron_Poster
             });
         }
 
-        static ConcurrentDictionary<string, string> CSSChache = new ConcurrentDictionary<string, string>();
+        protected static ConcurrentDictionary<string, string> CSSChache = new ConcurrentDictionary<string, string>();
         protected void ProcessCSSNoDisplayStyles(HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> ExternalCSS =
@@ -178,7 +178,7 @@ namespace Voron_Poster
                     catch (Exception) { }
                     CSSChache.TryAdd(Href, stylesheet);
                 }
-                InlineNoDisplayStyle(doc, stylesheet);
+                lock (doc) InlineNoDisplayStyle(doc, stylesheet);
             });
             foreach (HtmlNode Style in doc.DocumentNode.Descendants("style"))
             {
@@ -189,7 +189,7 @@ namespace Voron_Poster
         protected string CleanCSSStylesheet(string stylesheet) {
             // clean up the stylesheet
             stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines
-            stylesheet = Regex.Replace(stylesheet, @"\s*(?!<\"")\/\*[^\*]+\*\/(?!\"")\s*", string.Empty); // remove comments
+            stylesheet = Regex.Replace(stylesheet, @"/\*.+?\*/", string.Empty, RegexOptions.Singleline); // remove comments
             // remove excess space
             stylesheet = Regex.Replace(stylesheet, @"\s{2,}", @" ");
             return stylesheet;
@@ -198,7 +198,7 @@ namespace Voron_Poster
         protected void InlineNoDisplayStyle(HtmlAgilityPack.HtmlDocument doc, string stylesheet)
         {
             // extract and inline NoDisplay css rules
-            MatchCollection allCssRules = Regex.Matches(stylesheet, "([^{}]*){([^}]*)}", RegexOptions.Singleline);
+            MatchCollection allCssRules = Regex.Matches(stylesheet ?? String.Empty, "[^{}]*{[^}]*}", RegexOptions.Singleline);
             foreach (Match cssRule in allCssRules)
             {
                 try
@@ -458,7 +458,7 @@ namespace Voron_Poster
                                 @"вы\s+были\s+заблокированы" +
                                 @"дата\s+снятия\s+блокировки|" +
                                 @"(пожалуйста[\s\W]+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
-                                @"(такого\s+)?пользовател[яь]\s+([\w\W]*\s+)?не\s+(существует|найден)|" +
+                                @"(такого\s+)?пользовател[яь][^\r\n]*?не\s+(существует|найден)|" +
                                 @"соо?бщение\s+(было\s+)?(слишком\s+короткое|оставлено\s+пустым)" //к\s+сож[ае]лению| bad
                     },
                     #endregion
@@ -950,7 +950,7 @@ namespace Voron_Poster
 #endif
 
             // LoginPage preanalyse for future success detection
-            Html.ClearHidden();
+            Html.ClearNoDisplay();
             string Text = Html.DocumentNode.InnerTextDecoded();
             bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
             bool LoggedInNodesValid = WebForm.LoggedInNodes(Html) == 0;
@@ -993,7 +993,7 @@ namespace Voron_Poster
                 LoginForm.PostData(AccountToUse, Captcha, LoginForm.ChooseEncoding(Html.Encoding)));
             progress.Login = 195;
             Html = await InitHtml(Response);
-            Html.ClearHidden();
+            Html.ClearNoDisplay();
             Text = Html.DocumentNode.InnerTextDecoded();
             progress.Login = 205;
             // Analyze response
@@ -1021,7 +1021,7 @@ namespace Voron_Poster
 
 
             // Summarize analyzies and return conclusion if login was successfull
-            Html.ClearHidden();
+            Html.ClearNoDisplay();
             Text = Html.DocumentNode.InnerTextDecoded();
             int LoggedInScore = 0;
             if (LoggedInNodesValid)
@@ -1051,7 +1051,7 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-             return null;
+            // return null;
             // Delay needed on some sites     
             if (targetBoard.Host == "seodor.biz"
                 || targetBoard.Host == "webledi.ru")
@@ -1070,7 +1070,7 @@ namespace Voron_Poster
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
             PostForm PostForm = PostForm.Find(Html);
-            progress.Post = +10 / progress.PostCount;
+            progress.Post += 10 / progress.PostCount;
 
             // Check other pages for PostForm
             int TempProgress = progress.Post;
@@ -1098,10 +1098,10 @@ namespace Voron_Poster
                 }
             }
             if (PostForm == null) return new Exception("Форма постинга не найдена");
-            progress.Post = TempProgress + (100 / progress.PostCount);
+            progress.Post = TempProgress + (105 / progress.PostCount);
 
             // PostPage preanalyse for future success detection
-            Html.ClearHidden();
+            Html.ClearNoDisplay();
             string Text = Html.DocumentNode.InnerTextDecoded();
             int SuccessScore = 0;
             bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
@@ -1144,7 +1144,7 @@ namespace Voron_Poster
             progress.Post += 40 / progress.PostCount;
             Html = await InitHtml(Response);
             PostForm AfterPostForm = PostForm.Find(Html);
-            Html.ClearHidden();
+            Html.ClearNoDisplay();
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully

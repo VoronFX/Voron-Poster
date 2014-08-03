@@ -122,6 +122,7 @@ namespace Voron_Poster
 
                         switch (status)
                         {
+                            case InfoIcons.Cancelled:
                             case InfoIcons.Error: Ctrls.Progress.SetState(2); break;
                             case InfoIcons.Waiting: Ctrls.Progress.SetState(3); break;
                             default: Ctrls.Progress.SetState(1); break;

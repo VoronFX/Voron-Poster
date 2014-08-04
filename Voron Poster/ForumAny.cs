@@ -31,11 +31,9 @@ namespace Voron_Poster
             return HttpUtility.HtmlDecode(attribute.Value);
         }
 
-        public static void ClearScriptsStylesComments(this HtmlAgilityPack.HtmlDocument doc)
+        public static void ClearScriptsComments(this HtmlAgilityPack.HtmlDocument doc)
         {
             var Bad = doc.DocumentNode.Descendants("script");
-            while (Bad.Count() > 0) Bad.First().Remove();
-            Bad = doc.DocumentNode.Descendants("style");
             while (Bad.Count() > 0) Bad.First().Remove();
             Bad = doc.DocumentNode.Descendants("#comment");
             while (Bad.Count() > 0) Bad.First().Remove();
@@ -102,7 +100,6 @@ namespace Voron_Poster
             Stream stream = await response.Content.ReadAsStreamAsync();          
             doc.Load(stream, Encoding);
             MapRelativeUrls(doc, response.RequestMessage.RequestUri);
-            ProcessCSSNoDisplayStyles(doc);
 
             // Run some JS manually
             // JS on forum.bigfozzy.com
@@ -118,7 +115,8 @@ namespace Voron_Poster
                         Element.SetAttributeValue("value", Token);
             }
 
-            doc.ClearScriptsStylesComments();
+            doc.ClearScriptsComments();
+            ProcessCSSNoDisplayStyles(doc);
             return doc;
         }
 
@@ -173,9 +171,10 @@ namespace Voron_Poster
                 }
                 lock (doc) InlineNoDisplayStyle(doc, stylesheet);
             });
-            foreach (HtmlNode Style in doc.DocumentNode.Descendants("style"))
-            {
-                InlineNoDisplayStyle(doc, CleanCSSStylesheet(Style.InnerHtml));
+            var Styles = doc.DocumentNode.Descendants("style");
+            while (Styles.Count() > 0){
+                InlineNoDisplayStyle(doc, CleanCSSStylesheet(Styles.First().InnerHtml));
+                Styles.First().Remove();
             }
         }
 
@@ -183,7 +182,7 @@ namespace Voron_Poster
         {
             // clean up the stylesheet
             stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines
-            stylesheet = Regex.Replace(stylesheet, @"/\*.+?\*/", string.Empty, RegexOptions.Singleline); // remove comments
+            stylesheet = Regex.Replace(stylesheet, @"/\*.+?\*/|<!--.*?-->", string.Empty, RegexOptions.Singleline); // remove comments
             // remove excess space
             stylesheet = Regex.Replace(stylesheet, @"\s{2,}", @" ");
             return stylesheet;
@@ -1217,9 +1216,6 @@ namespace Voron_Poster
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully
-
-            //if (AfterPostForm != null && !AfterPostForm.IsHidden) SuccessScore -= 5; bad idea
-
             SuccessScore += Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count;
             if (ErrorValid)
                 SuccessScore -= Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;

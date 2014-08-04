@@ -81,6 +81,7 @@ namespace Voron_Poster
 
     }
 
+
     public class ForumAny : Forum
     {
         public ForumAny()
@@ -88,7 +89,7 @@ namespace Voron_Poster
         {
             Regex.CacheSize = 100;
         }
-
+        
         protected async Task<HtmlAgilityPack.HtmlDocument> InitHtml(HttpResponseMessage response)
         {
             var doc = new HtmlAgilityPack.HtmlDocument();
@@ -96,29 +97,9 @@ namespace Voron_Poster
             HtmlNode.ElementsFlags.Remove("form");
 
             // Detect encoding by our own if stupid server such as rutracker.org forgets to say it in header
-            Encoding Encoding = null;
-            try
-            {
-                if (!String.IsNullOrEmpty(response.Content.Headers.ContentType.CharSet))
-                    Encoding = Encoding.GetEncoding(response.Content.Headers.ContentType.CharSet);
-            }
-            catch { }
-            if (Encoding == null)
-            {
-                string Html = await response.Content.ReadAsStringAsync();
-                Match CharsetMatch = Regex.Match(Html, @"(?i)charset\s*=[\s""']*([^\s""'/>]*)");
-                string Charset = null;
-                if (CharsetMatch != null)
-                    Charset = Regex.Replace(CharsetMatch.Value, @"(?i)charset\s*=[\s""']*", String.Empty);
-                try
-                {
-                    if (!String.IsNullOrEmpty(Charset))
-                        Encoding = Encoding.GetEncoding(Charset);
-                }
-                catch { }
-            }
-            if (Encoding == null) Encoding = Encoding.Default;
-            Stream stream = await response.Content.ReadAsStreamAsync();
+            Encoding Encoding = DetectEncoding(response);
+
+            Stream stream = await response.Content.ReadAsStreamAsync();          
             doc.Load(stream, Encoding);
             MapRelativeUrls(doc, response.RequestMessage.RequestUri);
             ProcessCSSNoDisplayStyles(doc);
@@ -148,7 +129,7 @@ namespace Voron_Poster
             {
                 string Href = Base.GetAttributeValueDecoded("href");
                 if (!String.IsNullOrEmpty(Href) &&
-                Uri.TryCreate(Href, UriKind.Absolute, out defaulBaseUrl))
+                Uri.TryCreate(Href, UriKind.Absolute, out BaseUrl))
                 {
                     break;
                 }
@@ -184,6 +165,7 @@ namespace Voron_Poster
                     try
                     {
                         HttpResponseMessage Response = Client.GetAsync(Href, Cancel.Token).Result;
+                        if (Response.IsSuccessStatusCode)
                         stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
                     }
                     catch (Exception) { }
@@ -210,7 +192,7 @@ namespace Voron_Poster
         protected void InlineNoDisplayStyle(HtmlAgilityPack.HtmlDocument doc, string stylesheet)
         {
             // extract and inline NoDisplay css rules
-            MatchCollection allCssRules = Regex.Matches(stylesheet ?? String.Empty, "[^{}]*{[^}]*}", RegexOptions.Singleline);
+            MatchCollection allCssRules = Regex.Matches(stylesheet ?? String.Empty, "([^{}]*){([^}]*)}", RegexOptions.Singleline);
             foreach (Match cssRule in allCssRules)
             {
                 if (Cancel.IsCancellationRequested) return;
@@ -551,7 +533,7 @@ namespace Voron_Poster
                 if (String.IsNullOrEmpty(AcceptCharset)) return encoding;
                 try
                 {
-                    return Encoding.GetEncoding(AcceptCharset);
+                    return EncodingFromCharset(AcceptCharset);
                 }
                 catch { return encoding; }
             }
@@ -976,6 +958,7 @@ namespace Voron_Poster
             // Searching LoginForm
             StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage);
+            if (!Response.IsSuccessStatusCode) return new Exception("Авторизация: " + Response.StatusCode.ToString());
             progress.Login = 40;
 
             // If Windows authetification
@@ -1016,8 +999,11 @@ namespace Voron_Poster
                     Response = await GetAndLog(LoginUrl);
                     progress.Login += 50 / LoginLinks.Count;
                     StatusMessage = "Авторизация: Поиск формы авторизации";
-                    Html = await InitHtml(Response);
-                    LoginForm = LoginForm.Find(Html);
+                    if (Response.IsSuccessStatusCode)
+                    {
+                        Html = await InitHtml(Response);
+                        LoginForm = LoginForm.Find(Html);
+                    }
                     progress.Login += 10 / LoginLinks.Count;
                     i++;
                 }
@@ -1081,6 +1067,7 @@ namespace Voron_Poster
                              - Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
             if (ErrorNodesValid)
                 SuccessScore -= WebForm.ErrorNodes(Html);
+            if (!Response.IsSuccessStatusCode) SuccessScore -= 10;
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Answer: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
@@ -1131,7 +1118,6 @@ namespace Voron_Poster
 
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
-            // return null;
             // Delay needed on some sites
             if (Expr.DelayNeeded.Contains(targetBoard.Host))
             {
@@ -1144,6 +1130,7 @@ namespace Voron_Poster
             // Searching PostForm
             StatusMessage = "Постинг: Загрузка страницы";
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
+            if (!Response.IsSuccessStatusCode) return new Exception("Постинг: " + Response.StatusCode.ToString());
             progress.Post += 40 / progress.PostCount;
             StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
@@ -1170,8 +1157,11 @@ namespace Voron_Poster
                     Response = await GetAndLog(PostUrl);
                     progress.Post += (80 / progress.PostCount) / PostLinks.Count;
                     StatusMessage = "Постинг: Поиск формы постинга";
-                    Html = await InitHtml(Response);
-                    PostForm = PostForm.Find(Html);
+                    if (Response.IsSuccessStatusCode)
+                    {
+                        Html = await InitHtml(Response);
+                        PostForm = PostForm.Find(Html);
+                    }
                     progress.Post += (20 / progress.PostCount) / PostLinks.Count;
                     i++;
                 }
@@ -1235,6 +1225,7 @@ namespace Voron_Poster
                 SuccessScore -= Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
             if (ErrorNodesValid)
                 SuccessScore -= WebForm.ErrorNodes(Html);
+            if (!Response.IsSuccessStatusCode) SuccessScore -= 10;
 
             progress.Post += 10 / progress.PostCount;
 #if DEBUG && DEBUGANYFORUM

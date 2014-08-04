@@ -548,7 +548,7 @@ namespace Voron_Poster
                 if (WB.Document != null)
                 {
                     Stream documentStream = WB.DocumentStream;
-                    using (StreamReader streamReader = new StreamReader(documentStream, Encoding.GetEncoding(WB.Document.Encoding)))
+                    using (StreamReader streamReader = new StreamReader(documentStream, EncodingFromCharset(WB.Document.Encoding)))
                     {
                         documentStream.Position = 0L;
                         string Url = String.Empty;

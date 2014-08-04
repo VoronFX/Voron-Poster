@@ -108,25 +108,24 @@ namespace Voron_Poster
             reportEmail.Text = Log.Email;
         }
 
-        private string GetUrl(KeyValuePair<object, string> LogItem)
+        private static string GetUrl(KeyValuePair<object, string> LogItem)
         {
             if (LogItem.Key is HttpResponseMessage)
                 return (LogItem.Key as HttpResponseMessage).RequestMessage.RequestUri.AbsoluteUri;
             else return LogItem.Value;
         }
 
-        private string GetHtml(KeyValuePair<object, string> LogItem)
+        private static string GetHtml(KeyValuePair<object, string> LogItem)
         {
             if (LogItem.Key is HttpResponseMessage)
             {
-                Task<string> T = (LogItem.Key as HttpResponseMessage).Content.ReadAsStringAsync();
-                T.Wait();
-                return T.Result;
+                return Forum.DetectEncoding((LogItem.Key as HttpResponseMessage)).GetString(
+                    (LogItem.Key as HttpResponseMessage).Content.ReadAsByteArrayAsync().Result);
             }
             return LogItem.Key as string;
         }
 
-        private string FormatHttpResponse(KeyValuePair<object, string> LogItem)
+        private static string FormatHttpResponse(KeyValuePair<object, string> LogItem)
         {
             string Text = String.Empty;
             if (LogItem.Key is HttpResponseMessage)
@@ -167,7 +166,7 @@ namespace Voron_Poster
             }
         }
 
-        private byte[] MakeReport()
+        private  byte[] MakeReport()
         {
             var Dumper = new BinaryFormatter();
             LogData LogCopy = Log;
@@ -231,10 +230,9 @@ namespace Voron_Poster
 
                     //  Form.Add(new StreamContent(Stream), "filMyFile");
 
-                    //  var x = await HttpClient.PostAsync(new Uri("http://voron-exe.pp.ua/Projects/Voron%20Poster/Report.aspx", true), new StreamContent(Stream));
+                    //  var x = await HttpClient.PostAsync(new Uri("http://voron-exe.pp.ua/Projects/Voron Poster/Report.aspx"), new StreamContent(Stream));
 
-                    WebClient.UploadDataAsync(new Uri("http://voron-exe.pp.ua/Projects/Voron%20Poster/Report.aspx",
-                        true), "POST", MakeReport());
+                    WebClient.UploadDataAsync(new Uri("http://voron-exe.pp.ua/Projects/Voron Poster/Report.aspx"), "POST", MakeReport());
 
                 }
                 MessageBox.Show("Отчет отправлен", this.Text, MessageBoxButtons.OK);

@@ -363,6 +363,38 @@ namespace Voron_Poster
             return tcs.Task;
         }
 
+        protected static Encoding EncodingFromCharset(string charset)
+        {
+            return Encoding.GetEncoding(Regex.Replace(charset, @"cp-?12", @"windows-12"));
+        }
+
+        public static Encoding DetectEncoding(HttpResponseMessage response)
+        {
+            Encoding Encoding = null;
+            try
+            {
+                if (!String.IsNullOrEmpty(response.Content.Headers.ContentType.CharSet))
+                    Encoding = EncodingFromCharset(response.Content.Headers.ContentType.CharSet);
+            }
+            catch { }
+            if (Encoding == null)
+            {
+                string Html = response.Content.ReadAsStringAsync().Result;
+                Match CharsetMatch = Regex.Match(Html, @"(?i)charset\s*=[\s""']*([^\s""'/>]*)");
+                string Charset = null;
+                if (CharsetMatch != null)
+                    Charset = Regex.Replace(CharsetMatch.Value, @"(?i)charset\s*=[\s""']*", String.Empty);
+                try
+                {
+                    if (!String.IsNullOrEmpty(Charset))
+                        Encoding = EncodingFromCharset(Charset);
+                }
+                catch { }
+            }
+            return Encoding ?? Encoding.Default;
+        }
+
+
         protected async Task<HttpResponseMessage> PostAndLog(string requestUri, HttpContent content)
         {
             string StringContent = await content.ReadAsStringAsync();

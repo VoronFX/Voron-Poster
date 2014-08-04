@@ -476,7 +476,6 @@ namespace Voron_Poster
             Error = null;
             //      Activity = null;
             progress.Average = 0;
-            Cancel = new CancellationTokenSource();
             WaitingForQueue = true;
 
             // Recreating client
@@ -626,6 +625,7 @@ namespace Voron_Poster
 
         public Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
         {
+            Cancel = new CancellationTokenSource();
             return Task.Run<Exception>(
             async () =>
             {

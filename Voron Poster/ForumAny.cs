@@ -87,7 +87,7 @@ namespace Voron_Poster
         {
             Regex.CacheSize = 100;
         }
-        
+
         protected async Task<HtmlAgilityPack.HtmlDocument> InitHtml(HttpResponseMessage response)
         {
             var doc = new HtmlAgilityPack.HtmlDocument();
@@ -97,14 +97,15 @@ namespace Voron_Poster
             // Detect encoding by our own if stupid server such as rutracker.org forgets to say it in header
             Encoding Encoding = DetectEncoding(response);
 
-            Stream stream = await response.Content.ReadAsStreamAsync();          
+            Stream stream = await response.Content.ReadAsStreamAsync();
             doc.Load(stream, Encoding);
             MapRelativeUrls(doc, response.RequestMessage.RequestUri);
 
             // Run some JS manually
             // JS on forum.bigfozzy.com
             string Token = null;
-            foreach (HtmlNode Script in doc.DocumentNode.Descendants("script")){
+            foreach (HtmlNode Script in doc.DocumentNode.Descendants("script"))
+            {
                 Match TokenMatch = Regex.Match(Script.InnerHtml, @"(?<=tokenFields\[i\]\.value\.replace\(\W+)\w+(?=\W+)");
                 if (!String.IsNullOrEmpty(TokenMatch.Value)) Token = HttpUtility.HtmlEncode(TokenMatch.Value);
             }
@@ -164,7 +165,7 @@ namespace Voron_Poster
                     {
                         HttpResponseMessage Response = Client.GetAsync(Href, Cancel.Token).Result;
                         if (Response.IsSuccessStatusCode)
-                        stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
+                            stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
                     }
                     catch (Exception) { }
                     CSSChache.TryAdd(Href, stylesheet);
@@ -172,7 +173,8 @@ namespace Voron_Poster
                 lock (doc) InlineNoDisplayStyle(doc, stylesheet);
             });
             var Styles = doc.DocumentNode.Descendants("style");
-            while (Styles.Count() > 0){
+            while (Styles.Count() > 0)
+            {
                 InlineNoDisplayStyle(doc, CleanCSSStylesheet(Styles.First().InnerHtml));
                 Styles.First().Remove();
             }
@@ -231,6 +233,37 @@ namespace Voron_Poster
 
         protected static class Expr
         {
+            public static T MergeRegexExpr<T>(T[] expressions)
+            {
+                if (expressions.Length == 0) return default(T);
+                T Result = expressions[0];
+                for (int i = 1; i < expressions.Length; i++)
+                {
+                    Result = MergeRegexExpr(Result, expressions[i]);
+                }
+                return Result;
+            }
+
+            public static T MergeRegexExpr<T>(T a, T b)
+            {
+                if (a == null && b == null) return default(T);
+                else if (a == null) return b;
+                else if (b == null) return a;
+                else if (a.GetType() != b.GetType()) throw new ArgumentException();
+                else if (a.GetType() == typeof(string))
+                    return (T)Convert.ChangeType((a as string) + '|' + (b as string), typeof(T));
+                else
+                {
+                    T Result = (T)Activator.CreateInstance(a.GetType());
+                    foreach (var Field in a.GetType().GetFields())
+                    {
+                        if (Field.IsStatic) continue;
+                        Field.SetValue(Result, MergeRegexExpr(Field.GetValue(a), Field.GetValue(b)));
+                    }
+                    return Result;
+                }
+            }
+
             public static string[] NotSupported = {   "www.nulled.cc", // ip ban after post request 
                                                       "www.maultalk.com", // hard captcha request
                                                       "www.master-x.com", // "not found" on login post request
@@ -261,6 +294,7 @@ namespace Voron_Poster
             }
             public static class Text
             {
+
                 public class LocalText
                 {
                     public class LinkText
@@ -273,41 +307,12 @@ namespace Voron_Poster
                         public string Poll;
                         public string CaptchaImage;
                         public string LoggedIn;
-                        public static LinkText operator +(LinkText a, LinkText b)
-                        {
-                            if (a == null && b == null) return null;
-                            else if (a == null) return b;
-                            else if (b == null) return a;
-                            return new LinkText
-                            {
-                                Login = JoinExpression(a.Login, b.Login),
-                                Register = JoinExpression(a.Register, b.Register),
-                                Reply = JoinExpression(a.Reply, b.Reply),
-                                NewTopic = JoinExpression(a.NewTopic, b.NewTopic),
-                                Quote = JoinExpression(a.Quote, b.Quote),
-                                CaptchaImage = JoinExpression(a.CaptchaImage, b.CaptchaImage),
-                                Poll = JoinExpression(a.Poll, b.Poll),
-                                LoggedIn = JoinExpression(a.LoggedIn, b.LoggedIn)
-                            };
-                        }
                     }
                     public class MessageText
                     {
                         public string LoginSuccess;
                         public string PostSuccess;
                         public string Error;
-                        public static MessageText operator +(MessageText a, MessageText b)
-                        {
-                            if (a == null && b == null) return null;
-                            else if (a == null) return b;
-                            else if (b == null) return a;
-                            return new MessageText
-                            {
-                                LoginSuccess = JoinExpression(a.LoginSuccess, b.LoginSuccess),
-                                PostSuccess = JoinExpression(a.PostSuccess, b.PostSuccess),
-                                Error = JoinExpression(a.Error, b.Error)
-                            };
-                        }
                     }
                     public class FieldsNames
                     {
@@ -320,56 +325,11 @@ namespace Voron_Poster
                         public string Preview;
                         public string SubmitLogin;
                         public string SubmitPost;
-                        public static FieldsNames operator +(FieldsNames a, FieldsNames b)
-                        {
-                            if (a == null && b == null) return null;
-                            else if (a == null) return b;
-                            else if (b == null) return a;
-                            return new FieldsNames
-                            {
-                                Username = JoinExpression(a.Username, b.Username),
-                                Password = JoinExpression(a.Password, b.Password),
-                                RepeatPassword = JoinExpression(a.RepeatPassword, b.RepeatPassword),
-                                Subject = JoinExpression(a.Subject, b.Subject),
-                                Message = JoinExpression(a.Message, b.Message),
-                                Captcha = JoinExpression(a.Captcha, b.Captcha),
-                                Preview = JoinExpression(a.Preview, b.Preview),
-                                SubmitLogin = JoinExpression(a.SubmitLogin, b.SubmitLogin),
-                                SubmitPost = JoinExpression(a.SubmitPost, b.SubmitPost)
-                            };
-                        }
                     }
 
                     public LinkText Link;
                     public MessageText Message;
                     public FieldsNames Fields;
-
-                    protected static string JoinExpression(string a, string b)
-                    {
-                        if (String.IsNullOrEmpty(a) && String.IsNullOrEmpty(b)) return null;
-                        else if (String.IsNullOrEmpty(a)) return b;
-                        else if (String.IsNullOrEmpty(b)) return a;
-                        return a + '|' + b;
-                    }
-                    public static LocalText operator +(LocalText a, LocalText b)
-                    {
-                        if (a == null && b == null) return null;
-                        else if (a == null) return b;
-                        else if (b == null) return a;
-                        return new LocalText
-                        {
-                            Link = a.Link + b.Link,
-                            Message = a.Message + b.Message,
-                            Fields = a.Fields + b.Fields
-                        };
-                    }
-                    public static LocalText Join(LocalText[] array)
-                    {
-                        LocalText t = new LocalText();
-                        for (int i = 0; i < array.Length; i++)
-                            t += array[i];
-                        return t;
-                    }
                 }
 
                 #region English
@@ -414,7 +374,7 @@ namespace Voron_Poster
                         Captcha = @"(?i)capt?cha|code",
                         Preview = @"(?i)preview",
                         SubmitLogin = Url.Login,
-                        SubmitPost = Url.Reply + "|" + Url.NewTopic
+                        SubmitPost = MergeRegexExpr(Url.Reply, Url.NewTopic)
                     }
                     #endregion
                 };
@@ -492,8 +452,7 @@ namespace Voron_Poster
                 #endregion
 
                 // Keep this in the bottom! Initialization order matters. 
-                public static LocalText[] Localities = { English, Russian };
-                public static LocalText Global = LocalText.Join(Localities);
+                public static LocalText Global = MergeRegexExpr(new []{ English, Russian });
             }
 
             /// <summary>

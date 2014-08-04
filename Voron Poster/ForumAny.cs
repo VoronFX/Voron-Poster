@@ -168,12 +168,8 @@ namespace Voron_Poster
                 {
                     try
                     {
-                        Task<string> CSS = Client.GetStringAsync(Href);
-                        CSS.Wait();
-                        // CSSNode.Name = "style";
-                        // CSSNode.ClosingAttributes.Add("/style", "");
-                        // CSSNode.InnerHtml = CSS.Result;
-                        stylesheet = CleanCSSStylesheet(CSS.Result);
+                        HttpResponseMessage Response = Client.GetAsync(Href, Cancel.Token).Result;
+                        stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
                     }
                     catch (Exception) { }
                     CSSChache.TryAdd(Href, stylesheet);
@@ -186,7 +182,8 @@ namespace Voron_Poster
             }
         }
 
-        protected string CleanCSSStylesheet(string stylesheet) {
+        protected string CleanCSSStylesheet(string stylesheet)
+        {
             // clean up the stylesheet
             stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines
             stylesheet = Regex.Replace(stylesheet, @"/\*.+?\*/", string.Empty, RegexOptions.Singleline); // remove comments
@@ -201,6 +198,7 @@ namespace Voron_Poster
             MatchCollection allCssRules = Regex.Matches(stylesheet ?? String.Empty, "[^{}]*{[^}]*}", RegexOptions.Singleline);
             foreach (Match cssRule in allCssRules)
             {
+                if (Cancel.IsCancellationRequested) return;
                 try
                 {
                     if (cssRule.Value.IndexOf('@') >= 0 ||
@@ -209,8 +207,8 @@ namespace Voron_Poster
                     string[] cssSelectors = cssRule.Groups[1].Value.Split(',');
 
                     foreach (string selector in cssSelectors)
-                    {
-                        if (selector.IndexOf(':') >= 0) continue;
+                    {                       
+                        if (selector.Trim() == String.Empty || selector.IndexOf(':') >= 0) continue;
                         string xpath = css2xpath.Converter.CSSToXPath(selector.Trim());
                         HtmlNodeCollection matchingNodes = doc.DocumentNode.SelectNodes(xpath);
                         if (matchingNodes != null)
@@ -239,8 +237,13 @@ namespace Voron_Poster
         {
             public static string[] NotSupported = {   "www.nulled.cc", // ip ban after post request 
                                                       "www.maultalk.com", // hard captcha request
-                                                      "www.master-x.com" // "not found" on login post request 
+                                                      "www.master-x.com", // "not found" on login post request
+                                                      "usale.biz" // ucoz uid authorization
                                                   };
+            public static string[] DelayNeeded = {  "seodor.biz",
+                                                    "webledi.ru"
+                                                 };
+
             //     public static string[] EasySkipCaptcha = { "www.maultalk.com" }; // not working
 
             public static class Url
@@ -432,34 +435,44 @@ namespace Voron_Poster
                         Quote = @"(?i)цитат(а|ировать)",
                         Poll = @"(?i)опрос\b",
                         LoggedIn = @"(?i)" +
+                                   @"вы\s+последний\s+раз\s+заходили|" +
                                    @"ваш\s+последний\s+визит|" +
                                    @"(редактировать|мо[йи]|ваши?)(\s+мой)?\s+(кабинет|профиль|закладки)|" +
-                                   @"(личные)\s+сообщения|выход\b" //(новые|личные)\s+сообщения bad 
+                                   @"(личные)\s+сообщения|выход\b|" +
+                                   // copy from LoginSuccess
+                                   @"((вы\s+((за|во)шли|авторизировались)|подключен)\s+(как|под\s+(логином|именем)))(?![\s\W]+(гость|guest))"
                     },
                     #endregion
 
                     #region Message
                     Message = new LocalText.MessageText
                     {
-                        PostSuccess = @"(?i)спасибо\s+за\s+соо?бщение",
+                        PostSuccess = @"(?i)" + 
+                                      @"спасибо\s+за\s+соо?бщение|" +
+                                      @"сообщение\s+(было\s+)?успешно\s+добавлено",
+
                         LoginSuccess = @"(?i)" +
-                                       @"вы\s+((за|во)шли|авторизировались)\s+как(?![\s\W]+(гость|guest))|" +
                                        @"благодарим\s+за\s+визит|" +
-                                       @"спасибо,?\s+что\s+зашли",
+                                       @"спасибо,?\s+что\s+зашли|" +
+                                       @"((вы\s+((за|во)шли|авторизировались)|подключен)\s+(как|под\s+(логином|именем)))(?![\s\W]+(гость|guest))",
 
                         Error = @"(?i)" +
                                 String.Format(@"{0}\s{1}|{1}\s{0}|",
                                                 @"((обнаруж|допущ)ен[ыа]|(возникл|произошл)[иа])",
                                                 @"(следующ(ие|ая)\s+)?ошибк[иа]") +
                                 @"((неверн|неправильн|введите\s+правильн)(ое?|ый|ые))\s+(введен\s+)?(имя|логин|пароль|код|данные)|" +
-                                @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|попробуйте\s+ещё\s+раз|повторите\s+попытку|" +
+                                @"(нет|не\s+имеете)\s+доступа?|доступе?\s+(закрыт|отказано)|" + 
+                                @"попробуйте\s+ещ[ёе]\s+раз|" + 
+                                @"повторите\s+попытку|" +
                                 @"логин\s+или\s+пароль\s+неверны|" +
                                 @"вы\s+не\s+авторизованы|недостаточно\s+прав|" +
                                 @"вы\s+были\s+заблокированы" +
                                 @"дата\s+снятия\s+блокировки|" +
                                 @"(пожалуйста[\s\W]+)?(войдите\s+или\s+зарегистрируйтесь|попробуйте\s+чуть\s+позже)|" +
                                 @"(такого\s+)?пользовател[яь][^\r\n]*?не\s+(существует|найден)|" +
-                                @"соо?бщение\s+(было\s+)?(слишком\s+короткое|оставлено\s+пустым)" //к\s+сож[ае]лению| bad
+                                @"соо?бщение\s+(было\s+)?(слишком\s+короткое|оставлено\s+пустым)|" +
+                                @"должны\s+ввести\s+текст\s+сообщения"
+
                     },
                     #endregion
 
@@ -537,55 +550,53 @@ namespace Voron_Poster
                 int BestFormScore = int.MinValue;
                 Parallel.ForEach(doc.DocumentNode.Descendants("form"), (HtmlForm) =>
                 {
+                    HtmlNode TempForm = HtmlForm.Clone();
+
+                    // Remove children forms
+                    IEnumerable<HtmlNode> SubForms = TempForm.Descendants("form");
+                    foreach (HtmlNode SubForm in SubForms)
+                        SubForm.Remove();
+                    WebForm Form = formConstructor();
+                    Form.FormNode = TempForm;
+                    Form.Action = TempForm.GetAttributeValueDecoded("action");
+                    Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
+                    Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
+                    Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
+
+                    int BestCaptchaScore = int.MinValue;
+                    foreach (HtmlNode Input in Form.FormNode.Descendants("input"))
                     {
-                        HtmlNode TempForm = HtmlForm.Clone();
-
-                        // Remove children forms
-                        IEnumerable<HtmlNode> SubForms = TempForm.Descendants("form");
-                        foreach (HtmlNode SubForm in SubForms)
-                            SubForm.Remove();
-                        WebForm Form = formConstructor();
-                        Form.FormNode = TempForm;
-                        Form.Action = TempForm.GetAttributeValueDecoded("action");
-                        Form.Method = TempForm.GetAttributeValueDecoded("method", "").ToLower();
-                        Form.Enctype = TempForm.GetAttributeValueDecoded("enctype", "").ToLower();
-                        Form.AcceptCharset = TempForm.GetAttributeValueDecoded("accept-charset", "").ToLower();
-
-                        int BestCaptchaScore = int.MinValue;
-                        foreach (HtmlNode Input in Form.FormNode.Descendants("input"))
+                        if (Input.GetAttributeValueDecoded("type") == "text")
                         {
-                            if (Input.GetAttributeValueDecoded("type") == "text")
+                            SelectBest(ref BestCaptchaScore, ref Form.CaptchaFieldName,
+                                Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Captcha);
+                        }
+                    }
+
+                    // Search for captcha image
+                    if (!String.IsNullOrEmpty(Form.CaptchaFieldName))
+                    {
+                        int BestCaptchaImgScore = int.MinValue;
+                        foreach (HtmlNode Image in Form.FormNode.Descendants("img"))
+                        {
+                            string Src = Image.GetAttributeValueDecoded("src", String.Empty);
+                            int CaptchaImgScore = MatchLinkNode(Src, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
+                            if (CaptchaImgScore > BestCaptchaImgScore)
                             {
-                                SelectBest(ref BestCaptchaScore, ref Form.CaptchaFieldName,
-                                    Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Captcha);
+                                Form.CaptchaPictureUrl = Src;
+                                BestCaptchaImgScore = CaptchaImgScore;
                             }
                         }
+                    }
 
-                        // Search for captcha image
-                        if (!String.IsNullOrEmpty(Form.CaptchaFieldName))
-                        {
-                            int BestCaptchaImgScore = int.MinValue;
-                            foreach (HtmlNode Image in Form.FormNode.Descendants("img"))
-                            {
-                                string Src = Image.GetAttributeValueDecoded("src", String.Empty);
-                                int CaptchaImgScore = MatchLinkNode(Src, Image, Expr.Url.CaptchaImage, Expr.Text.Global.Link.CaptchaImage);
-                                if (CaptchaImgScore > BestCaptchaImgScore)
-                                {
-                                    Form.CaptchaPictureUrl = Src;
-                                    BestCaptchaImgScore = CaptchaImgScore;
-                                }
-                            }
-                        }
+                    Form.FormProcessor();
+                    Form.IsHidden = HtmlForm.IsNoDisplay();
+                    int Score = Form.Score();
 
-                        Form.FormProcessor();
-                        Form.IsHidden = HtmlForm.IsNoDisplay();
-                        int Score = Form.Score();
-
-                        if (Score > BestFormScore && Score > 0)
-                        {
-                            BestForm = Form;
-                            BestFormScore = Score;
-                        }
+                    if (Score > BestFormScore && Score > 0)
+                    {
+                        BestForm = Form;
+                        BestFormScore = Score;
                     }
                 });
 #if DEBUG && DEBUGANYFORUM
@@ -671,7 +682,7 @@ namespace Voron_Poster
                         else if (Input.GetAttributeValueDecoded("type") == "password")
                             PasswordFields.Add(Input.GetAttributeValueDecoded("name", String.Empty));
 
-                        else if (Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
+                        else if (//Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
                             (Input.GetAttributeValueDecoded("type") != "radio" ||
                             Input.GetAttributeValueDecoded("checked") == "checked") &&
                             !OtherFields.ContainsKey(Input.GetAttributeValueDecoded("name", String.Empty)))
@@ -715,10 +726,17 @@ namespace Voron_Poster
                     PostString.Append(HttpUtility.UrlEncode(Password, encoding));
                 }
 
-                if (!String.IsNullOrEmpty(CaptchaFieldName))
-                    PostString.Append("&" + CaptchaFieldName + "=");
+                // Avoid some easy text captcha
+                string code2 = null;
+                if (String.IsNullOrEmpty(captcha) && String.IsNullOrEmpty(CaptchaPictureUrl) && CaptchaFieldName == "code"
+                    && OtherFields.TryGetValue("code2", out code2) && !String.IsNullOrEmpty(code2))
+                    captcha = code2;
 
-                PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
+                if (!String.IsNullOrEmpty(CaptchaFieldName)){
+                    PostString.Append("&" + CaptchaFieldName + "=");
+                    PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
+                }
+
                 List<KeyValuePair<string, string>> OtherFieldsList = OtherFields.ToList();
                 for (int i = 0; i < OtherFieldsList.Count; i++)
                 {
@@ -767,7 +785,7 @@ namespace Voron_Poster
                             SelectBest(ref BestSubjectScore, ref SubjectFieldName,
                                 Input.GetAttributeValueDecoded("name", String.Empty), Expr.Text.Global.Fields.Subject);
                         }
-                        else if (Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
+                        else if (//Input.GetAttributeValueDecoded("type", String.Empty) != "submit" &&
                             (Input.GetAttributeValueDecoded("type") != "radio" ||
                             Input.GetAttributeValueDecoded("checked") == "checked") &&
                             !OtherFields.ContainsKey(Input.GetAttributeValueDecoded("name", String.Empty)))
@@ -854,8 +872,10 @@ namespace Voron_Poster
                     PostString.Append(HttpUtility.UrlEncode(message, encoding));
 
                     if (!String.IsNullOrEmpty(CaptchaFieldName))
+                    {
                         PostString.Append("&" + CaptchaFieldName + "=");
-                    PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
+                        PostString.Append(HttpUtility.UrlEncode(captcha, encoding));
+                    }
 
                     for (int i = 0; i < OtherFieldsList.Count; i++)
                     {
@@ -1052,9 +1072,8 @@ namespace Voron_Poster
         public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
         {
             // return null;
-            // Delay needed on some sites     
-            if (targetBoard.Host == "seodor.biz"
-                || targetBoard.Host == "webledi.ru")
+            // Delay needed on some sites
+            if (Expr.DelayNeeded.Contains(targetBoard.Host))
             {
                 WaitingForQueue = true;
                 StatusMessage = "Задержка 5 сек";

@@ -885,10 +885,10 @@ namespace Voron_Poster
         LinkLabelLinkClickedEventHandler AuthStatusLinkClicked;
         private async void propAuthTryLogin_Click(object sender, EventArgs e)
         {
+            ResetIcon(sender, e);
             PropertiesActivity = true;
             PropertiesLoginActivity = true;
             propValidate();
-            ResetIcon(sender, e);
             propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Activity];
             TempForum = Forum.New(TempProperties.Engine);
 

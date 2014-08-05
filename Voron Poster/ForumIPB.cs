@@ -18,7 +18,7 @@ namespace Voron_Poster
         public ForumIPB() : base() { }
 
 
-        public override async Task<Exception> Login()
+        public override async Task Login()
         {
            StatusMessage = "Авторизация: Подготовка данных";
 
@@ -32,27 +32,26 @@ namespace Voron_Poster
             // Send data to login and wait response
            StatusMessage = "Авторизация: Запрос авторизации";
             var Response = await PostAndLog(Properties.ForumMainPage + "index.php?act=Login&CODE=01", PostData);
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Cancel.Token.ThrowIfCancellationRequested();
             progress.Login += 120;
             string Html = (await Response.Content.ReadAsStringAsync()).ToLower();
             progress.Login += 60;
 
             // Check if login successfull
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Cancel.Token.ThrowIfCancellationRequested();
             if ((Html.IndexOf("act=login&amp;code=03") < 0 &&
                 Html.IndexOf("Вы вошли как", StringComparison.OrdinalIgnoreCase) < 0) ||
                 Html.IndexOf("class=\"errorwrap\"") != -1 ||
                 Html.IndexOf("обнаружена ошибка") != -1)
-                return new Exception("Ошибка при авторизации");
+                throw new Exception("Ошибка при авторизации");
             else
             {
                StatusMessage = "Успешно авторизирован";
                 progress.Login += 35;
-                return null;
             }
         }
 
-        public override async Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message)
+        public override async Task PostMessage(Uri TargetBoard, string Subject, string Message)
         {
 
             // Get post url
@@ -69,18 +68,18 @@ namespace Voron_Poster
             {
                StatusMessage = "Публикация: Загрузка страницы";
                 var ResponseF = await GetAndLog(TargetBoard.AbsoluteUri);
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                Cancel.Token.ThrowIfCancellationRequested();
                 string HtmlF = (await ResponseF.Content.ReadAsStringAsync());
                 Regex RegFSearch = new Regex(@"[&\?;]f=\d+");
                 MatchCollection FMatches = RegFSearch.Matches(HtmlF);
                 if (FMatches.Count > 0)
                 TargetForum = new string(FMatches.AsEnumerable().Mode().Value.SkipWhile(x => !char.IsDigit(x)).ToArray());
             }
-            if (TargetForum == null) return new Exception("Неправильная ссылка на тему или раздел");
+            if (TargetForum == null) throw new Exception("Неправильная ссылка на тему или раздел");
             string Do = "reply_post";
             if (TargetTopic == null) Do = "new_post";
             progress.Post += 40 / progress.PostCount;
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Cancel.Token.ThrowIfCancellationRequested();
 
             //var PostData = new FormUrlEncodedContent(new[]
             //        {
@@ -97,7 +96,7 @@ namespace Voron_Poster
             progress.Post += 60 / progress.PostCount;
             string Html = await Response.Content.ReadAsStringAsync();
             progress.Post += 25 / progress.PostCount;
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+            Cancel.Token.ThrowIfCancellationRequested();
 
            StatusMessage = "Публикация: Поиск переменных";
             string auth_key = GetFieldValue(Html, "auth_key");
@@ -106,7 +105,7 @@ namespace Voron_Poster
             progress.Post += 10 / progress.PostCount;
 
            StatusMessage = "Публикация: Подготовка данных";
-            if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+           Cancel.Token.ThrowIfCancellationRequested();
             using (var FormData = new MultipartFormDataContent())
             {
                 if (TargetTopic != String.Empty)
@@ -123,7 +122,7 @@ namespace Voron_Poster
                 progress.Post += 10 / progress.PostCount;
 
                StatusMessage = "Публикация: Отправка запроса";
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+               Cancel.Token.ThrowIfCancellationRequested();
                 Response = await PostAndLog(Properties.ForumMainPage + "index.php?", FormData);
                 progress.Post += 60 / progress.PostCount;
                 Html = await Response.Content.ReadAsStringAsync();
@@ -132,16 +131,15 @@ namespace Voron_Poster
                 progress.Post += 10 / progress.PostCount;
 
                 // Check if success
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                Cancel.Token.ThrowIfCancellationRequested();
                 if ((Html.IndexOf("ошибки") >= 0 && Html.IndexOf("обнаружены") >= 0)
                     || Html.IndexOf("class=\"errorwrap\"") != -1 ||
                          Html.IndexOf("обнаружена ошибка") != -1)
-                    return new Exception("Сайт вернул ошибку");
+                    throw new Exception("Сайт вернул ошибку");
                 else
                 {
                    StatusMessage = "Опубликовано";
                     progress.Post += 15 / progress.PostCount;
-                    return null;
                 }
             }
         }

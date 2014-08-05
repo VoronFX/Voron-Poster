@@ -912,39 +912,18 @@ namespace Voron_Poster
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
             if (TempForum.Properties.UseLocalAccount) TempForum.AccountToUse = TempForum.Properties.Account;
             else TempForum.AccountToUse = Settings.Account;
-            TempForum.Activity = Task.Run<Exception>(async () => await TempForum.Login());
-            Task<Exception> LoginTask = TempForum.Activity;
-            PropertiesActivityTask = LoginTask;
-            Exception Error;
+            TempForum.Activity = TempForum.Login();
+            PropertiesActivityTask = TempForum.Activity;
             try
             {
-                Error = await LoginTask;
-            }
-            catch (Exception CatchedError)
-            {
-                Error = CatchedError;
-            }
-            if (Error == null)
-            {
+                await PropertiesActivityTask;
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
                 propAuthStatus.LinkColor = Color.Green;
-
             }
-            else
+            catch (Exception Error)
             {
+                TempForum.Error = Error;
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
-                //   ToolTip.SetToolTip(propAuthTryLogin, "Ошибка: " + Error.Message);
-                if (TempForum.Cancel.IsCancellationRequested)
-                {
-                    TempForum.StatusMessage = "Отменено";
-                }
-                else
-                {
-                    if (Error is OperationCanceledException)
-                        TempForum.StatusMessage = "Ошибка: Время ожидания истекло";
-                    else
-                        TempForum.StatusMessage = "Ошибка: " + Error.Message;
-                }
                 propAuthProgress.SetState(2);
                 propAuthStatus.LinkColor = Color.Red;
             }
@@ -1895,6 +1874,7 @@ namespace Voron_Poster
                     case 5: Path += "Roslyn.txt"; break;
                     case 6: Path += "Apache2.0.txt"; break;
                     case 7: Path += "MicrosoftPublicLicense.txt"; break;
+                    case 8: Path += "css2xpath.txt"; break;
                 }
                 aboutLicenseBox.Text = File.ReadAllText(Path);
             }

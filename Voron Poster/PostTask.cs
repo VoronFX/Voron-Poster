@@ -311,8 +311,8 @@ namespace Voron_Poster
                 Name.Location = new System.Drawing.Point(0, 0);
                 Name.Name = "GTName";
                 Name.Size = new System.Drawing.Size(377, 24);
-               // Name.MaximumSize = new System.Drawing.Size(0, 24);
-            //    Name.MinimumSize = new System.Drawing.Size(0, 24);
+                // Name.MaximumSize = new System.Drawing.Size(0, 24);
+                //    Name.MinimumSize = new System.Drawing.Size(0, 24);
                 Name.TabIndex = 3;
                 Name.Text = "Тема/Раздел";
                 Name.Padding = new Padding(3, 6, 3, 0);
@@ -427,9 +427,9 @@ namespace Voron_Poster
 
         public static void ResizeEnd(Control control)
         {
-                Size s = control.ClientSize;
-                control.Dock = DockStyle.None;
-                control.Size = s;
+            Size s = control.ClientSize;
+            control.Dock = DockStyle.None;
+            control.Size = s;
         }
 
         #endregion
@@ -535,40 +535,20 @@ namespace Voron_Poster
                 Forum.Cancel.Cancel();
             else
             {
-                try
-                {
-                    var Settings = MainForm.Settings;
-                    var GlobalAccount = Settings.Account;
-                    Forum.AccountToUse = GlobalAccount;
-                    Forum.Activity =
-                        Forum.Run(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
-                    Status = InfoIcons.Running;
-                    Ctrls.StartStop.Enabled = true;
-                    Forum.Error = await Forum.Activity;
-                }
-                catch (Exception Error)
-                {
-                    Forum.Error = Error;
-                    //if (!(Error is OperationCanceledException))
-                    //    throw;
-                }
-                if (Forum.Error != null)
-                {
-                    if (Forum.Cancel.IsCancellationRequested)
-                    {
-                        Forum.StatusMessage = "Отменено";
-                        Status = InfoIcons.Cancelled;
-                    }
-                    else
-                    {
-                        Status = InfoIcons.Error;
-                        if (Forum.Error is OperationCanceledException)
-                            Forum.StatusMessage = "Ошибка: Время ожидания истекло";
-                        else
-                            Forum.StatusMessage = "Ошибка: " + Forum.Error.Message;
-                    }
-                }
-                else Status = InfoIcons.Complete;
+                var Settings = MainForm.Settings;
+                var GlobalAccount = Settings.Account;
+                Forum.AccountToUse = GlobalAccount;
+                Task PostingTask = Forum.ShedulePostingTask(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
+                Ctrls.StartStop.Enabled = true;
+                Status = InfoIcons.Running;
+                Forum.Activity.Start();
+                await PostingTask;
+                if (Forum.Cancel.IsCancellationRequested)
+                    Status = InfoIcons.Cancelled;
+                else if (Forum.Error != null)
+                    Status = InfoIcons.Error;
+                else
+                    Status = InfoIcons.Complete;
                 Ctrls.Delete.Enabled = true;
                 Ctrls.Properties.Enabled = true;
                 Ctrls.StartStop.Enabled = true;

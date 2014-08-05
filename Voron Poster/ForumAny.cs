@@ -452,7 +452,7 @@ namespace Voron_Poster
                 #endregion
 
                 // Keep this in the bottom! Initialization order matters. 
-                public static LocalText Global = MergeRegexExpr(new []{ English, Russian });
+                public static LocalText Global = MergeRegexExpr(new[] { English, Russian });
             }
 
             /// <summary>
@@ -903,11 +903,16 @@ namespace Voron_Poster
             }
         }
 
-        public override async Task<Exception> Login()
+        protected static int PreAnalyseFilter(int preresult, int result)
+        {
+            return result > preresult ? result - preresult : 0;
+        }
+
+        public override async Task Login()
         {
             // Check for bad site
             if (Expr.NotSupported.Contains(new Uri(Properties.ForumMainPage).Host))
-                return new Exception("Сайт не поддерживается");
+                throw new Exception("Сайт не поддерживается");
 
             // Some site workaround
             if (new Uri(Properties.ForumMainPage).Host == "gidtalk.ru")
@@ -916,7 +921,7 @@ namespace Voron_Poster
             // Searching LoginForm
             StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage);
-            if (!Response.IsSuccessStatusCode) return new Exception("Авторизация: " + Response.StatusCode.ToString());
+            if (!Response.IsSuccessStatusCode) throw new Exception("Авторизация: " + Response.StatusCode.ToString());
             progress.Login = 40;
 
             // If Windows authetification
@@ -932,9 +937,9 @@ namespace Voron_Poster
                 if (Response.IsSuccessStatusCode)
                 {
                     StatusMessage = "Авторизация: Успешно";
-                    return null;
+                    return;
                 }
-                else return new Exception("Авторизация не удалась");
+                else throw new Exception("Авторизация не удалась");
             }
 
             StatusMessage = "Авторизация: Поиск формы авторизации";
@@ -966,7 +971,7 @@ namespace Voron_Poster
                     i++;
                 }
             }
-            if (LoginForm == null) return new Exception("Форма авторизации не найдена");
+            if (LoginForm == null) throw new Exception("Форма авторизации не найдена");
             progress.Login = 155;
 
 #if DEBUG && DEBUGANYFORUM
@@ -976,16 +981,14 @@ namespace Voron_Poster
             // LoginPage preanalyse for future success detection
             Html.ClearNoDisplay();
             string Text = Html.DocumentNode.InnerTextDecoded();
-            bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
-            bool LoggedInNodesValid = WebForm.LoggedInNodes(Html) == 0;
+            int PreLoginSuccess = Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count;
+            int PreError = Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
+            int PreErrorNodes = WebForm.ErrorNodes(Html);
+            int PreLoggedInNodes = WebForm.LoggedInNodes(Html);
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("Before: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
-            Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count,
-            Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
-            WebForm.ErrorNodes(Html),
-            WebForm.LoggedInNodes(Html));
-            //return null;
+            PreLoginSuccess, PreError, PreErrorNodes, PreLoggedInNodes);
 #endif
             // Ask user for captcha if one was found
             string Captcha = String.Empty;
@@ -1021,10 +1024,9 @@ namespace Voron_Poster
             Text = Html.DocumentNode.InnerTextDecoded();
             progress.Login = 205;
             // Analyze response
-            int SuccessScore = Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count
-                             - Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
-            if (ErrorNodesValid)
-                SuccessScore -= WebForm.ErrorNodes(Html);
+            int SuccessScore = PreAnalyseFilter(PreLoginSuccess, Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count)
+                             - PreAnalyseFilter(PreError, Expr.Matches(Text, Expr.Text.Global.Message.Error).Count)
+                             - PreAnalyseFilter(PreErrorNodes, WebForm.ErrorNodes(Html));
             if (!Response.IsSuccessStatusCode) SuccessScore -= 10;
 
 #if DEBUG && DEBUGANYFORUM
@@ -1033,7 +1035,6 @@ namespace Voron_Poster
             Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html),
             WebForm.LoggedInNodes(Html));
-            //return null;
 #endif
 
             // Load LoginPage again and analyze it now (after we've tryed to login)
@@ -1048,12 +1049,8 @@ namespace Voron_Poster
             // Summarize analyzies and return conclusion if login was successfull
             Html.ClearNoDisplay();
             Text = Html.DocumentNode.InnerTextDecoded();
-            int LoggedInScore = 0;
-            if (LoggedInNodesValid)
-            {
-                LoggedInScore = WebForm.LoggedInNodes(Html);
-                SuccessScore += LoggedInScore;
-            }
+            int LoggedInScore = PreAnalyseFilter(PreLoggedInNodes, WebForm.LoggedInNodes(Html));
+            SuccessScore += LoggedInScore;
             if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
             else if (LoggedInScore == 0 && AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
 
@@ -1064,18 +1061,17 @@ namespace Voron_Poster
             Expr.Matches(Text, Expr.Text.Global.Message.Error).Count,
             WebForm.ErrorNodes(Html),
             WebForm.LoggedInNodes(Html));
-            //return null;
 #endif
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("AuthSuccessScore: " + SuccessScore + '\n');
 #endif
-            if (SuccessScore < 0) return new Exception("Авторизация не удалась");
+            if (SuccessScore < 0) throw new Exception("Авторизация не удалась");
             StatusMessage = "Авторизация: Успешно";
-            return null;
         }
 
-        public override async Task<Exception> PostMessage(Uri targetBoard, string subject, string message)
+        public override async Task PostMessage(Uri targetBoard, string subject, string message)
         {
+            return;
             // Delay needed on some sites
             if (Expr.DelayNeeded.Contains(targetBoard.Host))
             {
@@ -1088,7 +1084,7 @@ namespace Voron_Poster
             // Searching PostForm
             StatusMessage = "Постинг: Загрузка страницы";
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
-            if (!Response.IsSuccessStatusCode) return new Exception("Постинг: " + Response.StatusCode.ToString());
+            if (!Response.IsSuccessStatusCode) throw new Exception("Постинг: " + Response.StatusCode.ToString());
             progress.Post += 40 / progress.PostCount;
             StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
@@ -1124,15 +1120,15 @@ namespace Voron_Poster
                     i++;
                 }
             }
-            if (PostForm == null) return new Exception("Форма постинга не найдена");
+            if (PostForm == null) throw new Exception("Форма постинга не найдена");
             progress.Post = TempProgress + (105 / progress.PostCount);
 
             // PostPage preanalyse for future success detection
             Html.ClearNoDisplay();
             string Text = Html.DocumentNode.InnerTextDecoded();
-            int SuccessScore = 0;
-            bool ErrorNodesValid = WebForm.ErrorNodes(Html) == 0;
-            bool ErrorValid = !Expr.IsMatch(Text, Expr.Text.Global.Message.Error);
+            int PrePostSuccess = Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count;
+            int PreError = Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
+            int PreErrorNodes = WebForm.ErrorNodes(Html);
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
@@ -1175,11 +1171,9 @@ namespace Voron_Poster
             Text = Html.DocumentNode.InnerTextDecoded();
 
             // Analyze response and return conslusion if message posted successfully
-            SuccessScore += Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count;
-            if (ErrorValid)
-                SuccessScore -= Expr.Matches(Text, Expr.Text.Global.Message.Error).Count;
-            if (ErrorNodesValid)
-                SuccessScore -= WebForm.ErrorNodes(Html);
+            int SuccessScore = PreAnalyseFilter(PrePostSuccess, Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count)
+                             - PreAnalyseFilter(PreError, Expr.Matches(Text, Expr.Text.Global.Message.Error).Count)
+                             - PreAnalyseFilter(PreErrorNodes, WebForm.ErrorNodes(Html));
             if (!Response.IsSuccessStatusCode) SuccessScore -= 10;
 
             progress.Post += 10 / progress.PostCount;
@@ -1193,9 +1187,8 @@ namespace Voron_Poster
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("PostSuccessScore: " + SuccessScore);
 #endif
-            if (SuccessScore < 0) return new Exception("Постинг не удался");
+            if (SuccessScore < 0) throw new Exception("Постинг не удался");
             StatusMessage = "Успешно Опубликовано";
-            return null;
         }
     }
 }

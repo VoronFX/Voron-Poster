@@ -256,11 +256,31 @@ namespace Voron_Poster
         }
         [XmlIgnore]
         protected List<KeyValuePair<object, string>> HttpLog;
+        protected Exception error;
         [XmlIgnore]
-        public Exception Error;
+        public Exception Error { 
+            get { return error; }
+            set
+            {
+                error = value; 
+                if (Cancel != null && Cancel.IsCancellationRequested)
+                {
+                    StatusMessage = "Отменено";
+                }
+                else if (error != null)
+                {
+                    while (error is AggregateException && error.InnerException != null)
+                        error = error.InnerException;
+                    if (error is OperationCanceledException)
+                        StatusMessage = "Ошибка: Время ожидания истекло";
+                    else
+                        StatusMessage = "Ошибка: " + error.Message;
+                }
+            } 
+        }
         [XmlIgnore]
         [NonSerialized]
-        public Task<Exception> Activity;
+        public Task Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         [XmlIgnore]
         public TaskBaseProperties.AccountData AccountToUse;
@@ -554,8 +574,8 @@ namespace Voron_Poster
             return String.Empty;
         }
 
-        public abstract Task<Exception> Login();
-        public abstract Task<Exception> PostMessage(Uri TargetBoard, string Subject, string Message);
+        public abstract Task Login();
+        public abstract Task PostMessage(Uri TargetBoard, string Subject, string Message);
 
         public class ScriptData
         {
@@ -612,7 +632,7 @@ namespace Voron_Poster
         //        for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
         //        {
         //            Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-        //            if (Cancel.IsCancellationRequested) throw new OperationCanceledException();
+        //            Cancel.Token.ThrowIfCancellationRequested();
         //        }
         //    }
         //    catch (Exception e)
@@ -623,63 +643,64 @@ namespace Voron_Poster
         //    Console.WriteLine("Script end");
         //}
 
-        public Task<Exception> Run(Uri TargetBoard, string Subject, string Message)
+        public Task ShedulePostingTask(Uri TargetBoard, string Subject, string Message)
         {
             Cancel = new CancellationTokenSource();
-            return Task.Run<Exception>(
-            async () =>
+            Activity = new Task(() =>
             {
-                // Clearing
-                this.Reset();
-
-                // Wait untill "Activity" will be assigned with this task,
-                // sometimes it happens later then this task begins executing
-                while (Activity == null) Task.Delay(100).Wait();
-
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                WaitingForQueue = false;
-                if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
-                // Async Magic. Wait for domain free and then run login operation 
-                Task<Exception> LoginProcess = null;
-                Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
-                    ContinueWith((uselessvar) => { LoginProcess = Login(); });
-
-                // Meanwile process the scripts
-                StatusMessage = "Обработка скриптов";
-                CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
-                var Session = InitScriptEngine(CurrentScriptData);
-                progress.Scripts += 50;
-                for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+                try
                 {
-                    Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                    progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
-                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
-                }
-                progress.Scripts = 255;
+                    // Clearing
+                    this.Reset();
+                    Cancel.Token.ThrowIfCancellationRequested();
+                    WaitingForQueue = false;
+                    if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
+                    // Async Magic. Wait for domain free and then run login operation 
+                    Task LoginProcess = null;
+                    Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
+                        ContinueWith((uselessvar) => { LoginProcess = Login(); });
 
-                // Waiting for login end
-                if (LoginProcess == null)
-                {
-                    WaitingForQueue = true;
-                    StatusMessage = "Авторизация: В очереди";
-                }
-                await WaitingDomain;
-                WaitingForQueue = false;
-                if (await LoginProcess != null) return LoginProcess.Result;
-                if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                    // Meanwile process the scripts
+                    StatusMessage = "Обработка скриптов";
+                    CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
+                    var Session = InitScriptEngine(CurrentScriptData);
+                    progress.Scripts += 50;
+                    for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+                    {
+                        Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+                        progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
+                        Cancel.Token.ThrowIfCancellationRequested();
+                    }
+                    progress.Scripts = 255;
 
-                // Post messages
-                progress.PostCount = CurrentScriptData.Output.Count;
-                for (int i = 0; i < CurrentScriptData.Output.Count; i++)
-                {
-                    Task<Exception> PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
-                    if (await PostProcess != null) return PostProcess.Result;
-                    await Task.Delay(1000);
-                    if (Cancel.IsCancellationRequested) return new OperationCanceledException();
+                    // Waiting for login end
+                    if (LoginProcess == null)
+                    {
+                        WaitingForQueue = true;
+                        StatusMessage = "Авторизация: В очереди";
+                    }
+                    WaitingDomain.Wait();
+                    WaitingForQueue = false;
+                    LoginProcess.Wait();
+                    Cancel.Token.ThrowIfCancellationRequested();
+
+                    // Post messages
+                    progress.PostCount = CurrentScriptData.Output.Count;
+                    for (int i = 0; i < CurrentScriptData.Output.Count; i++)
+                    {
+                        Task PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
+                        PostProcess.Wait();
+                        Task.Delay(1000).Wait();
+                        Cancel.Token.ThrowIfCancellationRequested();
+                    }
+                    progress.Post = 255;
                 }
-                progress.Post = 255;
-                return null;
-            }, Cancel.Token);
+                catch (Exception e)
+                {
+                    Error = e;
+                }
+            }, Cancel.Token, TaskCreationOptions.LongRunning);
+            return Activity;
         }
 
     }

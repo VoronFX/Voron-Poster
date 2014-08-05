@@ -179,6 +179,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Content Include="Licenses\css2xpath.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Licenses\MicrosoftPublicLicense.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

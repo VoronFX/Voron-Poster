@@ -85,6 +85,8 @@ namespace Voron_Poster
             aboutProgramName.Text = "Voron Poster " + Application.ProductVersion;
             Thread thrd = Thread.CurrentThread;
             thrd.Priority = ThreadPriority.Highest;
+
+            PostTask.MainForm = this;
         }
 
         private async void MainForm_Load(object sender, EventArgs e)
@@ -345,13 +347,13 @@ namespace Voron_Poster
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
-            tasksTable.SuspendLayout();
-            PostTask New = new PostTask(this);
+            tasksTable.SuspendLayoutSafe();
+            PostTask New = new PostTask();
             New.TargetUrl = tasksUrl.Text;
             New.Properties_Clicked(sender, e);
             propEngine.SelectedIndex = 4;
             Tasks.Add(New);
-            tasksTable.ResumeLayout();
+            tasksTable.ResumeLayoutSafe();
 
             //TaskPropertiesPage.Enabled = false;
             // Tabs.TabIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
@@ -521,6 +523,7 @@ namespace Voron_Poster
                         //   Tasks[i].Ctrls.StartStop.PerformClick();
                         Tasks[i].StartStop_Clicked(sender, e);
                 }
+                PostTask.StartNext();
             }
             TasksUpdater.Enabled = true;
         }
@@ -538,12 +541,12 @@ namespace Voron_Poster
                         Remove.Add(Tasks[i]);
                     }
                 }
-                tasksTable.SuspendLayout();
+                tasksTable.SuspendLayoutSafe();
                 foreach (PostTask Task in Remove)
                 {
                     Task.Delete_Clicked(sender, e);
                 }
-                tasksTable.ResumeLayout();
+                tasksTable.ResumeLayoutSafe();
             }
             Remove.Clear();
         }
@@ -568,14 +571,14 @@ namespace Voron_Poster
             }
             public static void Load(List<PostTask> tasks, MainForm parent, string path)
             {
-                parent.tasksTable.SuspendLayout();
+                parent.tasksTable.SuspendLayoutSafe();
                 TaskList TaskList;
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
                 using (FileStream F = File.OpenRead(path))
                     TaskList = (TaskList)Xml.Deserialize(F);
                 for (int i = 0; i < TaskList.Properties.Length; i++)
                 {
-                    PostTask NewTask = new PostTask(parent);
+                    PostTask NewTask = new PostTask();
                     NewTask.New = false;
                     NewTask.TargetUrl = TaskList.TargetUrls[i];
                     NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
@@ -583,7 +586,7 @@ namespace Voron_Poster
                     NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
                     tasks.Add(NewTask);
                 }
-                parent.tasksTable.ResumeLayout();
+                parent.tasksTable.ResumeLayoutSafe();
             }
         }
 
@@ -619,8 +622,8 @@ namespace Voron_Poster
                 OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     TaskList.Load(Tasks, this, OpenFileDialog.FileName);
-
-                MainForm_ResizeEnd(null, EventArgs.Empty);
+                Application.DoEvents();
+                MainForm_Resize(null, EventArgs.Empty);
             }
             catch (Exception Error)
             {
@@ -629,89 +632,37 @@ namespace Voron_Poster
             tasksLoad.Enabled = true;
         }
 
-
-        public void tasksUpdateTable()
+        private void MainForm_Resize(object sender, EventArgs e)
         {
-            if (TableLayoutSuspended)
-            {
-                tasksTable.ResumeLayout();
-                //TableLayoutSuspended = false;
-                //tasksTable.PerformLayout();
-                // TableLayoutSuspended = true;
-                tasksTable.SuspendLayout();
-            }
-        }
-
-        public void tasksTableResume()
-        {
-            tasksTable.Invoke((Action)(() =>
-               {
-                   if (TableLayoutSuspended)
-                   {
-                       tasksTable.ResumeLayout();
-                       TableLayoutSuspended = false;
-                   }
-               }));
-        }
-
-        public void tasksTableSuspend()
-        {
-            tasksTable.Invoke((Action)(() =>
-                  {
-                      if (!TableLayoutSuspended)
-                      {
-                          TableLayoutSuspended = true;
-                          tasksTable.SuspendLayout();
-                      }
-                  }));
-        }
-
-        public void MainForm_ResizeBegin(object sender, EventArgs e)
-        {
-            tasksTable.SuspendLayout();
+            tasksTable.SuspendLayoutSafe();
             for (int i = 0; i < Tasks.Count; i++)
             {
                 //   Tasks[i].Ctrls.Name.Dock = DockStyle.Fill;
                 Tasks[i].Ctrls.Status.Dock = DockStyle.Fill;
             }
-            tasksTable.ResumeLayout();
-        }
+            tasksTable.ResumeLayoutSafe();
 
-        int ResizeTasksCount = 0;
-        bool TableLayoutSuspended;
-        public void MainForm_ResizeEnd(object sender, EventArgs e)
-        {
-            //Manually sizing text elements, because Dock = Fill or Anchor auto size causes
-            //tasksTable to invoke thousands redraw events on chenging text
-            tasksTable.SuspendLayout();
+            Application.DoEvents();
+
+            //  Manually sizing text elements, because Dock = Fill or Anchor auto size causes
+            //  tasksTable to invoke thousands redraw events on chenging text
+            tasksTable.SuspendLayoutSafe();
             for (int i = 0; i < Tasks.Count; i++)
             {
                 //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
                 PostTask.ResizeEnd(Tasks[i].Ctrls.Status);
             }
-            tasksTable.ResumeLayout();
-        }
-
-        public void tasksTable_Resize(object sender, EventArgs e)
-        {
-
-        }
-
-        private void tasksTable_Layout(object sender, LayoutEventArgs e)
-        {
+            tasksTable.ResumeLayoutSafe();
         }
 
         private void tasksTable_Paint(object sender, PaintEventArgs e)
         {
             tasksTable.Paint -= tasksTable_Paint;
-            MainForm_ResizeBegin(sender, e);
-            MainForm_ResizeEnd(sender, e);
+            MainForm_Resize(sender, e);
         }
 
         private void tasksTable_SizeChanged(object sender, EventArgs e)
         {
-
-
             //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
             //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
             //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
@@ -905,30 +856,30 @@ namespace Voron_Poster
                     ToolTip.SetToolTip(propAuthStatus, status);
                 }));
             };
-            StopProperties = new CancellationTokenSource();
             TempForum.Properties = TempProperties;
-            TempForum.Reset();
-            TempForum.Cancel = StopProperties;
             TempForum.RequestTimeout = new TimeSpan(0, 0, 10);
             if (TempForum.Properties.UseLocalAccount) TempForum.AccountToUse = TempForum.Properties.Account;
             else TempForum.AccountToUse = Settings.Account;
-            TempForum.Activity = TempForum.Login();
+
+            TempForum.CreateActivity(() => TempForum.Login().Wait());
+            StopProperties = TempForum.Cancel;
             PropertiesActivityTask = TempForum.Activity;
-            try
+            PropertiesActivityTask.Start();
+            await PropertiesActivityTask;
+            if (TempForum.Error == null)
             {
-                await PropertiesActivityTask;
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Complete];
                 propAuthStatus.LinkColor = Color.Green;
             }
-            catch (Exception Error)
+            else
             {
-                TempForum.Error = Error;
                 propAuthTryLogin.Image = PostTask.InfoIconsBitmaps[(int)PostTask.InfoIcons.Error];
                 propAuthProgress.SetState(2);
                 propAuthStatus.LinkColor = Color.Red;
             }
-            AuthStatusLinkClicked = (o, e2) => { 
-                TempForum.ShowData(propTargetUrl.Text);
+            AuthStatusLinkClicked = (o, e2) =>
+            {
+                TempForum.ShowDebugData(propTargetUrl.Text);
             };
             propAuthStatus.LinkClicked += AuthStatusLinkClicked;
             propAuthStatus.LinkBehavior = LinkBehavior.HoverUnderline;
@@ -941,7 +892,7 @@ namespace Voron_Poster
         {
             if (TempForum != null)
             {
-                TempForum.ShowData(TempForum.Properties.ForumMainPage);
+                TempForum.ShowDebugData(TempForum.Properties.ForumMainPage);
             }
         }
 
@@ -1041,7 +992,7 @@ namespace Voron_Poster
             //for (int i = 0; i < Tabs.TabPages.Count; i++)
             //    Tabs.TabPages[i].Enabled = Tabs.TabPages[i] == propTab;
             //  TaskPropertiesPage.Enabled = true;
-            // this.ResumeLayout();
+            // this.ResumeLayoutSafe();
             ProfileComboBox_Enter(propProfiles, EventArgs.Empty);
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
@@ -1805,6 +1756,7 @@ namespace Voron_Poster
             public bool LoadLastTaskList;
             public bool ApplySuggestedProfile;
             public Forum.TaskBaseProperties.AccountData Account;
+            public int MaxActiveTasks;
             public static void Save(SettingsData Data, string path)
             {
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(SettingsData));
@@ -1827,6 +1779,7 @@ namespace Voron_Poster
                 Settings.ApplySuggestedProfile = settingsApplySuggestedProfile.Checked;
                 Settings.Account.Username = settingsGAuthUsername.Text;
                 Settings.Account.Password = settingsGAuthPassword.Text;
+                Settings.MaxActiveTasks = (int)settingsMaxActive.Value;
                 SettingsData.Save(Settings, "Settings.xml");
             }
             catch (Exception Error)
@@ -1842,6 +1795,7 @@ namespace Voron_Poster
             settingsApplySuggestedProfile.Checked = Settings.ApplySuggestedProfile;
             settingsGAuthUsername.Text = Settings.Account.Username;
             settingsGAuthPassword.Text = Settings.Account.Password;
+            settingsMaxActive.Value = Settings.MaxActiveTasks;
             settingsUnsaved = false;
         }
 
@@ -1853,6 +1807,12 @@ namespace Voron_Poster
         private void settingsGAuthShowPassword_CheckedChanged(object sender, EventArgs e)
         {
             settingsGAuthPassword.UseSystemPasswordChar = !settingsGAuthShowPassword.Checked;
+        }
+
+        private void settingsMaxActive_ValueChanged(object sender, EventArgs e)
+        {
+            if (settingsMaxActive.Value < 0) settingsMaxActive.Value = 0;
+            settings_Changed(sender, e);
         }
 
         #endregion
@@ -1900,17 +1860,6 @@ namespace Voron_Poster
         }
 
         #endregion
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

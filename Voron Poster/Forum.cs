@@ -134,6 +134,42 @@ namespace Voron_Poster
                 });
         }
 
+        protected Task<bool> WaitFor(AutoResetEvent waitHandle)
+        {
+            return WaitFor(waitHandle, Timeout.InfiniteTimeSpan);
+        }
+
+        protected Task<bool> WaitFor(AutoResetEvent waitHandle, TimeSpan Timeout)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            Cancel.Token.Register(() => tcs.TrySetResult(false));
+            var CancelCopy = Cancel; // Avoid changing Cancel meanwile we are waiting
+
+            // Registering callback to wait till WaitHandle changes its state
+            ThreadPool.RegisterWaitForSingleObject(
+                waitObject: waitHandle,
+                callBack: (o, timeout) =>
+                {
+
+                    if (CancelCopy.IsCancellationRequested)
+                        // If main task is cancelled give signal to next in queue immediatly
+                        waitHandle.Set();
+                    else
+                    {
+                        // Give signal to to next in queue when main task ends
+                        Activity.ContinueWith((uselessvar) => waitHandle.Set());
+                        WaitingForQueue = false;
+                    }
+                    if (timeout)
+                        tcs.TrySetResult(false);
+                    else tcs.TrySetResult(true);
+                },
+                state: null,
+                timeout: Timeout,
+                executeOnlyOnce: true);
+            return tcs.Task;
+        }
+
         #region Detect Engine
         public enum Engine { Unknown, SMF, vBulletin, IPB, Universal, AnyForum }
 
@@ -198,6 +234,33 @@ namespace Voron_Poster
 
         #endregion
 
+        [XmlIgnore]
+        protected List<KeyValuePair<object, string>> HttpLog;
+        protected Exception error;
+        [XmlIgnore]
+        public Exception Error
+        {
+            get { return error; }
+            set
+            {
+                error = value;
+                if (Cancel != null && Cancel.IsCancellationRequested)
+                {
+                    StatusMessage = "Отменено";
+                }
+                else if (error != null)
+                {
+                    while (error is AggregateException && error.InnerException != null)
+                        error = error.InnerException;
+                    if (error is OperationCanceledException)
+                        StatusMessage = "Ошибка: Время ожидания истекло";
+                    else
+                        StatusMessage = "Ошибка: " + error.Message;
+                }
+            }
+        }
+        [XmlIgnore]
+        public Task Activity;
         public class TaskBaseProperties
         {
             public Engine Engine;
@@ -254,42 +317,12 @@ namespace Voron_Poster
                 PreProcessingScripts = new List<string>(Data.PreProcessingScripts);
             }
         }
-        [XmlIgnore]
-        protected List<KeyValuePair<object, string>> HttpLog;
-        protected Exception error;
-        [XmlIgnore]
-        public Exception Error { 
-            get { return error; }
-            set
-            {
-                error = value; 
-                if (Cancel != null && Cancel.IsCancellationRequested)
-                {
-                    StatusMessage = "Отменено";
-                }
-                else if (error != null)
-                {
-                    while (error is AggregateException && error.InnerException != null)
-                        error = error.InnerException;
-                    if (error is OperationCanceledException)
-                        StatusMessage = "Ошибка: Время ожидания истекло";
-                    else
-                        StatusMessage = "Ошибка: " + error.Message;
-                }
-            } 
-        }
-        [XmlIgnore]
         [NonSerialized]
-        public Task Activity;
         public TaskBaseProperties Properties = new TaskBaseProperties();
         [XmlIgnore]
         public TaskBaseProperties.AccountData AccountToUse;
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 20);
         protected List<string> Log;
-
-        [XmlIgnore]
-        public Progress<int> Progress = new Progress<int>();
-
 
         protected string status;
         public string StatusMessage
@@ -308,6 +341,8 @@ namespace Voron_Poster
         }
         [XmlIgnore]
         public Action<string> StatusUpdate;
+        [XmlIgnore]
+        public Progress<int> Progress = new Progress<int>();
         protected struct ForumRunProgress
         {
             int login, scripts, post, postcount;
@@ -325,63 +360,13 @@ namespace Voron_Poster
         }
         protected ForumRunProgress progress;
 
-        //  public int[] Progress;
         public CancellationTokenSource Cancel;
         public static CaptchaForm CaptchaForm = new CaptchaForm();
-        public Forum()
-        {
-            progress.Progress = Progress;
-            Reset();
-        }
 
-        public static Forum New(Engine Engine)
-        {
-            switch (Engine)
-            {
-                case Engine.SMF: return new ForumSMF();
-                case Engine.vBulletin: return new ForumvBulletin();
-                case Engine.IPB: return new ForumIPB();
-                case Engine.Universal: return new ForumUniversal();
-                case Engine.AnyForum: return new ForumAny();
-                default: return null;
-            }
-        }
+        protected HttpClient Client;
+        protected CookieContainer Cookies;
 
-        protected Task<bool> WaitFor(AutoResetEvent waitHandle)
-        {
-            return WaitFor(waitHandle, Timeout.InfiniteTimeSpan);
-        }
-
-        protected Task<bool> WaitFor(AutoResetEvent waitHandle, TimeSpan Timeout)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-            Cancel.Token.Register(() => tcs.TrySetResult(false));
-            var CancelCopy = Cancel; // Avoid changing Cancel meanwile we are waiting
-
-            // Registering callback to wait till WaitHandle changes its state
-            ThreadPool.RegisterWaitForSingleObject(
-                waitObject: waitHandle,
-                callBack: (o, timeout) =>
-                {
-
-                    if (CancelCopy.IsCancellationRequested)
-                        // If main task is cancelled give signal to next in queue immediatly
-                        waitHandle.Set();
-                    else
-                    {
-                        // Give signal to to next in queue when main task ends
-                        Activity.ContinueWith((uselessvar) => waitHandle.Set());
-                        WaitingForQueue = false;
-                    }
-                    if (timeout)
-                        tcs.TrySetResult(false);
-                    else tcs.TrySetResult(true);
-                },
-                state: null,
-                timeout: Timeout,
-                executeOnlyOnce: true);
-            return tcs.Task;
-        }
+        #region SomeHtmlFunctions
 
         protected static Encoding EncodingFromCharset(string charset)
         {
@@ -414,7 +399,6 @@ namespace Voron_Poster
             return Encoding ?? Encoding.Default;
         }
 
-
         protected async Task<HttpResponseMessage> PostAndLog(string requestUri, HttpContent content)
         {
             string StringContent = await content.ReadAsStringAsync();
@@ -431,7 +415,271 @@ namespace Voron_Poster
             return Response;
         }
 
-        public void ShowData(string Title)
+        public static string GetDomain(string Url)
+        {
+            string Domain = new String(Url.Replace("http://", String.Empty)
+                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
+            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
+                return Domain;
+            return String.Empty;
+        }
+
+        protected static string HexStringFromBytes(byte[] bytes)
+        {
+            var sb = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                var hex = b.ToString("x2");
+                sb.Append(hex);
+            }
+            return sb.ToString();
+        }
+
+        protected string GetBetweenStrAfterStr(string Html, string After, string Beg, string End)
+        {
+            int b = Html.IndexOf(After);
+            if (b < 0 || b + After.Length >= Html.Length) return "";
+            b = Html.IndexOf(Beg, b + After.Length);
+            if (b < 0 || b + Beg.Length >= Html.Length) return "";
+            int e = Html.IndexOf(End, b + Beg.Length);
+            if (e > 0)
+                return Html.Substring(b + Beg.Length, e - b - Beg.Length);
+            return "";
+        }
+
+        protected string GetFieldValue(string Html, string Name)
+        {
+            return GetFieldValue(Html, Name, "value");
+        }
+
+        protected string GetFieldValue(string Html, string Name, string Attribute)
+        {
+            return GetFieldValue(Html, "name", Name, "value");
+        }
+
+        protected string GetFieldValue(string Html, string SearchAttr, string SearchValue, string GetAttr)
+        {
+            Html = Html.Replace('\'', '"');
+            int b = Html.IndexOf(SearchAttr + "=\"" + SearchValue + "\"", StringComparison.OrdinalIgnoreCase);
+            if (b < 0) return String.Empty;
+            int TagBeg = Html.LastIndexOf("<", b, StringComparison.OrdinalIgnoreCase);
+            int TagEnd = Html.IndexOf(">", b + SearchAttr.Length + SearchValue.Length + 2, StringComparison.OrdinalIgnoreCase);
+            if (TagBeg < 0) TagBeg = 0;
+            if (TagEnd < 0) TagEnd = Html.Length;
+            string Tag = Html.Substring(TagBeg, TagEnd - TagBeg + 1);
+            TagBeg = Tag.IndexOf(GetAttr + "=\"", StringComparison.OrdinalIgnoreCase);
+            if (TagBeg < 0) return String.Empty;
+            TagEnd = Tag.IndexOf("\"", TagBeg + GetAttr.Length + 2, StringComparison.OrdinalIgnoreCase);
+            if (TagEnd < 0) return String.Empty;
+            return Tag.Substring(TagBeg + GetAttr.Length + 2, TagEnd - (TagBeg + GetAttr.Length + 2));
+        } 
+
+        #endregion
+
+        //public byte[] GetDump(bool inludeAccount)
+        //{
+        //    BinaryFormatter Dumper = new BinaryFormatter();
+        //    var LocalAccountBackup = Properties.Account;
+        //    var CurrentAccountBackup = AccountToUse;
+        //    if (!inludeAccount)
+        //    {
+        //        Properties.Account = new TaskBaseProperties.AccountData();
+        //        LocalAccountBackup = new TaskBaseProperties.AccountData();
+        //    }
+        //    byte[] Result;
+        //    using (var Stream = new System.IO.MemoryStream()){
+        //        Dumper.Serialize(Stream, this);
+        //        Result = Stream.ToArray();
+        //    }
+        //    Properties.Account = LocalAccountBackup;
+        //    AccountToUse = CurrentAccountBackup;
+        //    return Result;
+        //}
+
+        private static string[] References = new string[]{"System","System.IO","System.Linq","System.Data",
+           "System.Xml","System.Web", "System.Text.RegularExpressions"};
+
+        public static Roslyn.Scripting.Session InitScriptEngine(ScriptData ScriptData)
+        {
+            var ScriptEngine = new ScriptEngine();
+            var Session = ScriptEngine.CreateSession(ScriptData);
+            Session.AddReference(ScriptData.GetType().Assembly);
+            foreach (string Reference in References)
+            {
+                Session.AddReference(Reference);
+                Session.ImportNamespace(Reference);
+            }
+            Session.ImportNamespace("System.Text");
+            Session.ImportNamespace("System.Collections.Generic");
+            Session.ImportNamespace("System.Security.Cryptography");
+            return Session;
+        }
+
+        public class ScriptData
+        {
+            public ScriptData(PostMessage InputData)
+            {
+                Input = InputData;
+                Output = new List<PostMessage>();
+            }
+            public struct PostMessage
+            {
+                public string Subject;
+                public string Message;
+                public PostMessage(string nSubject, string nMessage)
+                {
+                    Subject = nSubject;
+                    Message = nMessage;
+                }
+            }
+            public PostMessage Input;
+            public List<PostMessage> Output;
+            public void Post(string Subject, string Message)
+            {
+                Output.Add(new PostMessage(Subject, Message));
+            }
+        }
+        protected ScriptData CurrentScriptData;
+
+        public Forum()
+        {
+            progress.Progress = Progress;
+            Reset();
+        }
+
+        public static Forum New(Engine Engine)
+        {
+            switch (Engine)
+            {
+                case Engine.SMF: return new ForumSMF();
+                case Engine.vBulletin: return new ForumvBulletin();
+                case Engine.IPB: return new ForumIPB();
+                case Engine.Universal: return new ForumUniversal();
+                case Engine.AnyForum: return new ForumAny();
+                default: return null;
+            }
+        }
+
+        public virtual void Reset()
+        {
+            Log = new List<string>();
+            StatusMessage = "Остановлено";
+            HttpLog = new List<KeyValuePair<object, string>>();
+            Error = null;
+            Activity = null;
+            progress.Average = 0;
+            WaitingForQueue = true;
+            Cancel = new CancellationTokenSource();
+        }
+
+        public virtual void Init()
+        {
+            // Recreating client
+            if (Client != null) Client.Dispose();
+            Cookies = new CookieContainer();
+            var handler = new HttpClientHandler() { CookieContainer = Cookies };
+            Client = new HttpClient(handler);
+            Client.Timeout = RequestTimeout;
+            Client.DefaultRequestHeaders.UserAgent.Clear();
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd
+                (@"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36");
+        }
+
+        ~Forum()
+        {
+            if (Client != null) Client.Dispose();
+        }
+
+        /// <summary>
+        /// Async login using AccountToUse credentials
+        /// </summary>
+        /// <returns></returns>
+        public abstract Task Login();
+
+        /// <summary>
+        /// Async post message. Must be already logged in.
+        /// </summary>
+        /// <param name="TargetBoard">Url of target theme or board for posting.</param>
+        /// <param name="Subject">Post subject.</param>
+        /// <param name="Message">Post text.</param>
+        /// <returns></returns>
+        public abstract Task PostMessage(Uri TargetBoard, string Subject, string Message);
+
+        /// <summary>
+        /// Login, process scripts and post message.
+        /// </summary>
+        /// <param name="TargetBoard">>Url of target theme or board for posting.</param>
+        /// <param name="Subject">Post subject.</param>
+        /// <param name="Message">Post text.</param>
+        public void LoginRunScritsAndPost(Uri TargetBoard, string Subject, string Message)
+        {
+            Cancel.Token.ThrowIfCancellationRequested();
+            WaitingForQueue = false;
+            if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
+            // Async Magic. Wait for domain free and then run login operation 
+            Task LoginProcess = null;
+            Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
+                ContinueWith((uselessvar) => { LoginProcess = Login(); });
+
+            // Meanwile process the scripts
+            StatusMessage = "Обработка скриптов";
+            CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
+            var Session = InitScriptEngine(CurrentScriptData);
+            progress.Scripts += 50;
+            for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
+            {
+                Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
+                progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
+                Cancel.Token.ThrowIfCancellationRequested();
+            }
+            progress.Scripts = 255;
+
+            // Waiting for login end
+            if (LoginProcess == null)
+            {
+                WaitingForQueue = true;
+                StatusMessage = "Авторизация: В очереди";
+            }
+            WaitingDomain.Wait();
+            WaitingForQueue = false;
+            LoginProcess.Wait();
+            Cancel.Token.ThrowIfCancellationRequested();
+
+            // Post messages
+            progress.PostCount = CurrentScriptData.Output.Count;
+            for (int i = 0; i < CurrentScriptData.Output.Count; i++)
+            {
+                Task PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
+                PostProcess.Wait();
+                Task.Delay(1000).Wait();
+                Cancel.Token.ThrowIfCancellationRequested();
+            }
+            progress.Post = 255;
+        }
+
+        /// <summary>
+        /// Create parallel task with specified action and error handling. Activity need to be started manually.
+        /// </summary>
+        /// <param name="action">Action that will be executed in task.</param>
+        public void CreateActivity(Action action)
+        {
+            Reset();
+            Activity = new Task(() =>
+            {
+                try
+                {
+                    Init();
+                    action.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Error = e;
+                }
+                finally { Client.Dispose(); }
+            }, TaskCreationOptions.LongRunning);
+        }
+
+        public void ShowDebugData(string Title)
         {
             var Xml = new System.Xml.Serialization.XmlSerializer(this.GetType());
             try
@@ -462,245 +710,6 @@ namespace Voron_Poster
             {
                 MessageBox.Show(Error.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        //public byte[] GetDump(bool inludeAccount)
-        //{
-        //    BinaryFormatter Dumper = new BinaryFormatter();
-        //    var LocalAccountBackup = Properties.Account;
-        //    var CurrentAccountBackup = AccountToUse;
-        //    if (!inludeAccount)
-        //    {
-        //        Properties.Account = new TaskBaseProperties.AccountData();
-        //        LocalAccountBackup = new TaskBaseProperties.AccountData();
-        //    }
-        //    byte[] Result;
-        //    using (var Stream = new System.IO.MemoryStream()){
-        //        Dumper.Serialize(Stream, this);
-        //        Result = Stream.ToArray();
-        //    }
-        //    Properties.Account = LocalAccountBackup;
-        //    AccountToUse = CurrentAccountBackup;
-        //    return Result;
-        //}
-
-        protected HttpClient Client;
-        protected CookieContainer Cookies;
-
-        public virtual void Reset()
-        {
-
-            Log = new List<string>();
-            StatusMessage = "Остановлено";
-            HttpLog = new List<KeyValuePair<object, string>>();
-            Error = null;
-            //      Activity = null;
-            progress.Average = 0;
-            WaitingForQueue = true;
-
-            // Recreating client
-            if (Client != null) Client.Dispose();
-            Cookies = new CookieContainer();
-            var handler = new HttpClientHandler() { CookieContainer = Cookies };
-            Client = new HttpClient(handler);
-            Client.Timeout = RequestTimeout;
-            Client.DefaultRequestHeaders.UserAgent.Clear();
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd
-                (@"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36");
-        }
-
-        protected static string HexStringFromBytes(byte[] bytes)
-        {
-            var sb = new StringBuilder();
-            foreach (byte b in bytes)
-            {
-                var hex = b.ToString("x2");
-                sb.Append(hex);
-            }
-            return sb.ToString();
-        }
-
-        protected string GetBetweenStrAfterStr(string Html, string After, string Beg, string End)
-        {
-            int b = Html.IndexOf(After);
-            if (b < 0 || b + After.Length >= Html.Length) return "";
-            b = Html.IndexOf(Beg, b + After.Length);
-            if (b < 0 || b + Beg.Length >= Html.Length) return "";
-            int e = Html.IndexOf(End, b + Beg.Length);
-            if (e > 0)
-                return Html.Substring(b + Beg.Length, e - b - Beg.Length);
-            return "";
-        }
-
-        ~Forum()
-        {
-            if (Client != null) Client.Dispose();
-        }
-
-        protected string GetFieldValue(string Html, string Name)
-        {
-            return GetFieldValue(Html, Name, "value");
-        }
-
-        protected string GetFieldValue(string Html, string Name, string Attribute)
-        {
-            return GetFieldValue(Html, "name", Name, "value");
-        }
-
-        protected string GetFieldValue(string Html, string SearchAttr, string SearchValue, string GetAttr)
-        {
-            Html = Html.Replace('\'', '"');
-            int b = Html.IndexOf(SearchAttr + "=\"" + SearchValue + "\"", StringComparison.OrdinalIgnoreCase);
-            if (b < 0) return String.Empty;
-            int TagBeg = Html.LastIndexOf("<", b, StringComparison.OrdinalIgnoreCase);
-            int TagEnd = Html.IndexOf(">", b + SearchAttr.Length + SearchValue.Length + 2, StringComparison.OrdinalIgnoreCase);
-            if (TagBeg < 0) TagBeg = 0;
-            if (TagEnd < 0) TagEnd = Html.Length;
-            string Tag = Html.Substring(TagBeg, TagEnd - TagBeg + 1);
-            TagBeg = Tag.IndexOf(GetAttr + "=\"", StringComparison.OrdinalIgnoreCase);
-            if (TagBeg < 0) return String.Empty;
-            TagEnd = Tag.IndexOf("\"", TagBeg + GetAttr.Length + 2, StringComparison.OrdinalIgnoreCase);
-            if (TagEnd < 0) return String.Empty;
-            return Tag.Substring(TagBeg + GetAttr.Length + 2, TagEnd - (TagBeg + GetAttr.Length + 2));
-        }
-
-
-        public static string GetDomain(string Url)
-        {
-            string Domain = new String(Url.Replace("http://", String.Empty)
-                .Replace("https://", String.Empty).TakeWhile(c => c != '/').ToArray());
-            if (Domain.IndexOf('.') > 0 && Domain.IndexOf('.') < Domain.Length - 1)
-                return Domain;
-            return String.Empty;
-        }
-
-        public abstract Task Login();
-        public abstract Task PostMessage(Uri TargetBoard, string Subject, string Message);
-
-        public class ScriptData
-        {
-            public ScriptData(PostMessage InputData)
-            {
-                Input = InputData;
-                Output = new List<PostMessage>();
-            }
-            public struct PostMessage
-            {
-                public string Subject;
-                public string Message;
-                public PostMessage(string nSubject, string nMessage)
-                {
-                    Subject = nSubject;
-                    Message = nMessage;
-                }
-            }
-            public PostMessage Input;
-            public List<PostMessage> Output;
-            public void Post(string Subject, string Message)
-            {
-                Output.Add(new PostMessage(Subject, Message));
-            }
-        }
-
-        private static string[] References = new string[]{"System","System.IO","System.Linq","System.Data",
-           "System.Xml","System.Web", "System.Text.RegularExpressions"};
-
-        public static Roslyn.Scripting.Session InitScriptEngine(ScriptData ScriptData)
-        {
-            var ScriptEngine = new ScriptEngine();
-            var Session = ScriptEngine.CreateSession(ScriptData);
-            Session.AddReference(ScriptData.GetType().Assembly);
-            foreach (string Reference in References)
-            {
-                Session.AddReference(Reference);
-                Session.ImportNamespace(Reference);
-            }
-            Session.ImportNamespace("System.Text");
-            Session.ImportNamespace("System.Collections.Generic");
-            Session.ImportNamespace("System.Security.Cryptography");
-            return Session;
-        }
-
-        private ScriptData CurrentScriptData;
-
-        //public Exception ExecuteScripts()
-        //{
-        //    Console.WriteLine("Script start");
-        //    try
-        //    {
-        //        var Session = InitScriptEngine(CurrentScriptData);
-        //        for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
-        //        {
-        //            Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-        //            Cancel.Token.ThrowIfCancellationRequested();
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return e;
-        //    }
-        //    return null;
-        //    Console.WriteLine("Script end");
-        //}
-
-        public Task ShedulePostingTask(Uri TargetBoard, string Subject, string Message)
-        {
-            Cancel = new CancellationTokenSource();
-            Activity = new Task(() =>
-            {
-                try
-                {
-                    // Clearing
-                    this.Reset();
-                    Cancel.Token.ThrowIfCancellationRequested();
-                    WaitingForQueue = false;
-                    if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
-                    // Async Magic. Wait for domain free and then run login operation 
-                    Task LoginProcess = null;
-                    Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
-                        ContinueWith((uselessvar) => { LoginProcess = Login(); });
-
-                    // Meanwile process the scripts
-                    StatusMessage = "Обработка скриптов";
-                    CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
-                    var Session = InitScriptEngine(CurrentScriptData);
-                    progress.Scripts += 50;
-                    for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
-                    {
-                        Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                        progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
-                        Cancel.Token.ThrowIfCancellationRequested();
-                    }
-                    progress.Scripts = 255;
-
-                    // Waiting for login end
-                    if (LoginProcess == null)
-                    {
-                        WaitingForQueue = true;
-                        StatusMessage = "Авторизация: В очереди";
-                    }
-                    WaitingDomain.Wait();
-                    WaitingForQueue = false;
-                    LoginProcess.Wait();
-                    Cancel.Token.ThrowIfCancellationRequested();
-
-                    // Post messages
-                    progress.PostCount = CurrentScriptData.Output.Count;
-                    for (int i = 0; i < CurrentScriptData.Output.Count; i++)
-                    {
-                        Task PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
-                        PostProcess.Wait();
-                        Task.Delay(1000).Wait();
-                        Cancel.Token.ThrowIfCancellationRequested();
-                    }
-                    progress.Post = 255;
-                }
-                catch (Exception e)
-                {
-                    Error = e;
-                }
-            }, Cancel.Token, TaskCreationOptions.LongRunning);
-            return Activity;
         }
 
     }

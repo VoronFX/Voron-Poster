@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -26,7 +27,7 @@ namespace Voron_Poster
 
         #region Gui
 
-        private MainForm MainForm;
+        public static MainForm MainForm;
         public enum InfoIcons
         {
             Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear,
@@ -434,9 +435,9 @@ namespace Voron_Poster
 
         #endregion
 
-        public PostTask(MainForm Parent)
+        public PostTask()
         {
-            MainForm = Parent;
+            if (MainForm == null) throw new NullReferenceException("MainForm not set");
             Ctrls.InitializeControls();
             MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
             MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
@@ -502,12 +503,12 @@ namespace Voron_Poster
         private void Status_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (Ctrls.Status.LinkColor != Color.Black && Forum != null)
-                Forum.ShowData(TargetUrl);
+                Forum.ShowDebugData(TargetUrl);
         }
 
         public void Delete_Clicked(object sender, EventArgs e)
         {
-            MainForm.tasksTable.SuspendLayout();
+            MainForm.tasksTable.SuspendLayoutSafe();
             for (int c = 0; c < Ctrls.AsArray.Length; c++)
             {
                 int r = MainForm.tasksTable.GetRow(Ctrls.AsArray[c]);
@@ -523,7 +524,24 @@ namespace Voron_Poster
             lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
             MainForm.tasksTable.RowCount -= 1;
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
-            MainForm.tasksTable.ResumeLayout();
+            MainForm.tasksTable.ResumeLayoutSafe();
+        }
+
+        static int ActiveTasks = 0;
+        static ConcurrentQueue<PostTask> PostTaskQueue = new ConcurrentQueue<PostTask>();
+        public static void StartNext(){
+            MainForm.SettingsData Settings = MainForm.Settings;
+            while ((Settings.MaxActiveTasks == 0 || ActiveTasks < Settings.MaxActiveTasks)
+                && !PostTaskQueue.IsEmpty)
+            {
+                PostTask T;
+                if (PostTaskQueue.TryDequeue(out T))
+                {
+                    ActiveTasks++;
+                    T.Status = InfoIcons.Running;
+                    T.Forum.Activity.Start();
+                }
+            }
         }
 
         public async void StartStop_Clicked(object sender, EventArgs e)
@@ -538,17 +556,22 @@ namespace Voron_Poster
                 var Settings = MainForm.Settings;
                 var GlobalAccount = Settings.Account;
                 Forum.AccountToUse = GlobalAccount;
-                Task PostingTask = Forum.ShedulePostingTask(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text);
+                Forum.CreateActivity(() => 
+                    Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
+                PostTaskQueue.Enqueue(this);
                 Ctrls.StartStop.Enabled = true;
-                Status = InfoIcons.Running;
-                Forum.Activity.Start();
-                await PostingTask;
+                Status = InfoIcons.Waiting;
+                Forum.StatusMessage = "В очереди";
+                if (sender == Ctrls.StartStop) StartNext();
+                await Forum.Activity;
                 if (Forum.Cancel.IsCancellationRequested)
                     Status = InfoIcons.Cancelled;
                 else if (Forum.Error != null)
                     Status = InfoIcons.Error;
                 else
                     Status = InfoIcons.Complete;
+                ActiveTasks--;
+                StartNext();
                 Ctrls.Delete.Enabled = true;
                 Ctrls.Properties.Enabled = true;
                 Ctrls.StartStop.Enabled = true;

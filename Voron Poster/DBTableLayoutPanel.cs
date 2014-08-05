@@ -14,6 +14,23 @@ namespace Voron_Poster
             this.DoubleBuffered = true;
         }
 
+        bool LayoutSuspended = false;
+        public void SuspendLayoutSafe(){
+            if (!LayoutSuspended)
+            {
+                LayoutSuspended = true;
+                base.SuspendLayout();
+            }
+        }
+
+        public void ResumeLayoutSafe()
+        {
+            if (LayoutSuspended)
+            {
+                LayoutSuspended = false;
+                base.ResumeLayout();
+            }
+        }
         
     }
 }

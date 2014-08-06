@@ -105,20 +105,18 @@ namespace Voron_Poster
                     {
                         Ctrls.StatusIcon.Image = InfoIconsBitmaps[(int)status];
 
-                        if (status == InfoIcons.Error)
+                        switch (status)
                         {
-                            Ctrls.Status.LinkColor = Color.Red;
-                            Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
+                            case InfoIcons.Error: Ctrls.Status.LinkColor = Color.Red; break;
+                            case InfoIcons.Complete: Ctrls.Status.LinkColor = Color.Green; break;
+                            default: Ctrls.Status.LinkColor = Color.Black; break;
                         }
-                        else if (status == InfoIcons.Complete)
+
+                        switch (status)
                         {
-                            Ctrls.Status.LinkColor = Color.Green;
-                            Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
-                        }
-                        else
-                        {
-                            Ctrls.Status.LinkColor = Color.Black;
-                            Ctrls.Status.LinkBehavior = LinkBehavior.NeverUnderline;
+                            case InfoIcons.Waiting:
+                            case InfoIcons.Stopped: Ctrls.Status.LinkBehavior = LinkBehavior.NeverUnderline; break;
+                            default: Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline; break;
                         }
 
                         switch (status)
@@ -143,126 +141,6 @@ namespace Voron_Poster
                     Ctrls.StartStop.Image = InfoIconsBitmaps[(int)action];
                 }));
             }
-        }
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        public void SetStatusIcon()
-        {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-            // if (Forum != null && Monitor.TryEnter(Forum.Log, TimeSpan.Zero))
-            // {
-            //     // lock (Forum.Log)
-            //     // {
-            //     string StatusText = Forum.Log.Last<string>();
-            //     Ctrls.Status.Text = StatusText;
-            //     //     //Ctrls.Status.Text = new string(StatusText.Skip(Math.Max(0, StatusText.IndexOf(":")+1)).ToArray());
-            //     // }
-            //     Monitor.Exit(Forum.Log);
-            // }
-            stopwatch.Stop();
-            if (stopwatch.ElapsedMilliseconds > 10)
-                Console.WriteLine("# 1 - {0}", stopwatch.ElapsedMilliseconds);
-            stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-            if (Forum == null || Forum.Activity == null)
-            {
-                Ctrls.StatusIcon.Image = InfoIconsBitmaps[(int)InfoIcons.Stopped];
-                Status = InfoIcons.Stopped;
-                Action = InfoIcons.Run;
-            }
-            else
-            {
-                switch (Forum.Activity.Status)
-                {
-                    case TaskStatus.Running:
-                    case TaskStatus.WaitingForActivation:
-                        if (Forum.WaitingForQueue)
-                        {
-                            Status = InfoIcons.Waiting;
-                            Action = InfoIcons.Cancel;
-                        }
-                        else
-                        {
-                            Status = InfoIcons.Running;
-                            Action = InfoIcons.Cancel;
-                        }
-                        break;
-                    case TaskStatus.RanToCompletion:
-                        if (Forum.Error == null)
-                        {
-                            Status = InfoIcons.Complete;
-                            Action = InfoIcons.Run;
-                        }
-                        else if (Forum.Error is OperationCanceledException)
-                        {
-                            Status = InfoIcons.Cancelled;
-                            Action = InfoIcons.Run;
-                        }
-                        else
-                        {
-                            Status = InfoIcons.Error;
-                            Action = InfoIcons.Restart;
-                        }
-                        break;
-                    case TaskStatus.Created:
-                    case TaskStatus.WaitingToRun:
-                        Status = InfoIcons.Waiting;
-                        Action = InfoIcons.Cancel;
-                        break;
-                    case TaskStatus.Canceled:
-                        Status = InfoIcons.Cancelled;
-                        Action = InfoIcons.Run;
-                        break;
-                    default:
-                        Status = InfoIcons.Error;
-                        Action = InfoIcons.Restart;
-                        break;
-                }
-            }
-
-            stopwatch.Stop();
-            if (stopwatch.ElapsedMilliseconds > 10)
-                Console.WriteLine("# 2 - {0}", stopwatch.ElapsedMilliseconds);
-            stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-
-            //   ModifyProgressBarColor.SetState(Ctrls.Progress, 1); // Not-green colors sometimes ignores progress changes
-            //if (Status == InfoIcons.Cancelled || Status == InfoIcons.Stopped) Ctrls.Progress.Value = 0;
-            //else
-            //    Ctrls.Progress.Value = Math.Min(561, Forum.progress.Login + Forum.Progress[1] / 5 + Forum.progress.Post);
-            //Ctrls.StatusIcon.Image = InfoIconsBitmaps[(int)Status];
-            //Ctrls.StartStop.Image = InfoIconsBitmaps[(int)Action];
-
-            switch (Status)
-            {
-                case InfoIcons.Error: ModifyProgressBarColor.SetState(Ctrls.Progress, 2); break;
-                case InfoIcons.Waiting: ModifyProgressBarColor.SetState(Ctrls.Progress, 3); break;
-                default: ModifyProgressBarColor.SetState(Ctrls.Progress, 1); break;
-            }
-
-            if (Status == InfoIcons.Error)
-            {
-                Ctrls.Status.LinkColor = Color.Red;
-                Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
-            }
-            else if (Status == InfoIcons.Complete)
-            {
-                Ctrls.Status.LinkColor = Color.Green;
-                Ctrls.Status.LinkBehavior = LinkBehavior.HoverUnderline;
-            }
-            else
-            {
-                Ctrls.Status.LinkColor = Color.Black;
-                Ctrls.Status.LinkBehavior = LinkBehavior.NeverUnderline;
-            }
-
-            // MainForm.ToolTip.SetToolTip(Ctrls.StatusIcon, GetTooltip(Status));
-            //MainForm.ToolTip.SetToolTip(Ctrls.StartStop, GetTooltip(Action));
-            stopwatch.Stop();
-            if (stopwatch.ElapsedMilliseconds > 10)
-                Console.WriteLine("# 3 - {0}", stopwatch.ElapsedMilliseconds);
         }
 
         public struct TaskGuiControls
@@ -420,10 +298,10 @@ namespace Voron_Poster
             for (int i = 0; i < Ctrls.AsArray.Length; i++)
             {
                 MainForm.tasksTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.tasksTable.RowCount - 2);
+            }
                 MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].SizeType = SizeType.Absolute;
                 MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
                 MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            }
         }
 
         public static void ResizeEnd(Control control)
@@ -502,7 +380,7 @@ namespace Voron_Poster
 
         private void Status_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (Ctrls.Status.LinkColor != Color.Black && Forum != null)
+            if (Ctrls.Status.LinkBehavior == LinkBehavior.HoverUnderline && Forum != null)
                 Forum.ShowDebugData(TargetUrl);
         }
 
@@ -523,6 +401,7 @@ namespace Voron_Poster
             }
             lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
             MainForm.tasksTable.RowCount -= 1;
+            MainForm.tasksTable.RowStyles.RemoveAt(MainForm.tasksTable.RowStyles.Count - 1);
             MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
             MainForm.tasksTable.ResumeLayoutSafe();
         }
@@ -530,8 +409,7 @@ namespace Voron_Poster
         static int ActiveTasks = 0;
         static ConcurrentQueue<PostTask> PostTaskQueue = new ConcurrentQueue<PostTask>();
         public static void StartNext(){
-            MainForm.SettingsData Settings = MainForm.Settings;
-            while ((Settings.MaxActiveTasks == 0 || ActiveTasks < Settings.MaxActiveTasks)
+            while ((MainForm.Settings.MaxActiveTasks == 0 || ActiveTasks < MainForm.Settings.MaxActiveTasks)
                 && !PostTaskQueue.IsEmpty)
             {
                 PostTask T;
@@ -553,25 +431,26 @@ namespace Voron_Poster
                 Forum.Cancel.Cancel();
             else
             {
-                var Settings = MainForm.Settings;
-                var GlobalAccount = Settings.Account;
-                Forum.AccountToUse = GlobalAccount;
+                Forum.AccountToUse = MainForm.Settings.Account;
                 Forum.CreateActivity(() => 
                     Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
+                Forum.Activity.ContinueWith((prevtask) => {
+                    ActiveTasks--;
+                    StartNext();
+                });
                 PostTaskQueue.Enqueue(this);
                 Ctrls.StartStop.Enabled = true;
+
                 Status = InfoIcons.Waiting;
                 Forum.StatusMessage = "В очереди";
                 if (sender == Ctrls.StartStop) StartNext();
                 await Forum.Activity;
-                if (Forum.Cancel.IsCancellationRequested)
+                if (Forum.Error is OperationCanceledException)
                     Status = InfoIcons.Cancelled;
                 else if (Forum.Error != null)
                     Status = InfoIcons.Error;
                 else
                     Status = InfoIcons.Complete;
-                ActiveTasks--;
-                StartNext();
                 Ctrls.Delete.Enabled = true;
                 Ctrls.Properties.Enabled = true;
                 Ctrls.StartStop.Enabled = true;

@@ -118,10 +118,6 @@ namespace Voron_Poster
             }
             if (WaitHandle.WaitOne(0))
             {
-
-                if (WaitHandle == null) MessageBox.Show("WaitHandler null");
-                if (Activity == null) MessageBox.Show("Activity null");
-
                 WaitHandle.Reset();
                 Activity.ContinueWith((uselessvar) => WaitHandle.Set());
                 return Task.FromResult(true);
@@ -237,25 +233,32 @@ namespace Voron_Poster
         [XmlIgnore]
         protected List<KeyValuePair<object, string>> HttpLog;
         protected Exception error;
+        /// <summary>
+        /// Need to be null before setting new Error.
+        /// </summary>
         [XmlIgnore]
         public Exception Error
         {
             get { return error; }
             set
             {
-                error = value;
-                if (Cancel != null && Cancel.IsCancellationRequested)
-                {
-                    StatusMessage = "Отменено";
-                }
-                else if (error != null)
-                {
-                    while (error is AggregateException && error.InnerException != null)
-                        error = error.InnerException;
-                    if (error is OperationCanceledException)
-                        StatusMessage = "Ошибка: Время ожидания истекло";
-                    else
-                        StatusMessage = "Ошибка: " + error.Message;
+                if (error != value && (error == null || value == null)) {
+                    if (Cancel != null && Cancel.IsCancellationRequested)
+                    {
+                        StatusMessage = "Отменено";
+                        error = new OperationCanceledException(StatusMessage, value);
+                    }
+                    else if (value != null)
+                    {
+                        while (value is AggregateException && value.InnerException != null)
+                            value = value.InnerException;
+                        if (value is OperationCanceledException)
+                            StatusMessage = "Ошибка: Время ожидания истекло";
+                        else
+                            StatusMessage = "Ошибка: " + value.Message;
+                        error = value;
+                    }
+                    else error = value;
                 }
             }
         }
@@ -325,12 +328,15 @@ namespace Voron_Poster
         protected List<string> Log;
 
         protected string status;
+        /// <summary>
+        /// To set status message Error should be null.
+        /// </summary>
         public string StatusMessage
         {
             get { return status; }
             set
             {
-                if (value != status)
+                if (value != status && error == null)
                 {
                     status = value;
                     Log.Add(status);
@@ -472,7 +478,7 @@ namespace Voron_Poster
             TagEnd = Tag.IndexOf("\"", TagBeg + GetAttr.Length + 2, StringComparison.OrdinalIgnoreCase);
             if (TagEnd < 0) return String.Empty;
             return Tag.Substring(TagBeg + GetAttr.Length + 2, TagEnd - (TagBeg + GetAttr.Length + 2));
-        } 
+        }
 
         #endregion
 
@@ -563,9 +569,9 @@ namespace Voron_Poster
         public virtual void Reset()
         {
             Log = new List<string>();
+            Error = null;
             StatusMessage = "Остановлено";
             HttpLog = new List<KeyValuePair<object, string>>();
-            Error = null;
             Activity = null;
             progress.Average = 0;
             WaitingForQueue = true;
@@ -613,15 +619,16 @@ namespace Voron_Poster
         /// <param name="Message">Post text.</param>
         public void LoginRunScritsAndPost(Uri TargetBoard, string Subject, string Message)
         {
-            Cancel.Token.ThrowIfCancellationRequested();
             WaitingForQueue = false;
-            if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
+            Cancel.Token.ThrowIfCancellationRequested();
+            if (Properties.UseLocalAccount) AccountToUse = Properties.Account;      
+
             // Async Magic. Wait for domain free and then run login operation 
             Task LoginProcess = null;
             Task WaitingDomain = WaitOrAdd(GetDomain(Properties.ForumMainPage)).
                 ContinueWith((uselessvar) => { LoginProcess = Login(); });
 
-            // Meanwile process the scripts
+            // Meanwhile process the scripts
             StatusMessage = "Обработка скриптов";
             CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
             var Session = InitScriptEngine(CurrentScriptData);
@@ -633,6 +640,7 @@ namespace Voron_Poster
                 Cancel.Token.ThrowIfCancellationRequested();
             }
             progress.Scripts = 255;
+            Cancel.Token.ThrowIfCancellationRequested();
 
             // Waiting for login end
             if (LoginProcess == null)
@@ -666,16 +674,25 @@ namespace Voron_Poster
             Reset();
             Activity = new Task(() =>
             {
-                try
+                if (Cancel.IsCancellationRequested) Error = new OperationCanceledException();
+                else
                 {
-                    Init();
-                    action.Invoke();
+                    try
+                    {
+                        Init();
+                        action.Invoke();
+                    }
+                    catch (Exception e)
+                    {
+                        Error = e;
+                        Cancel.Cancel();
+                    }
+                    finally
+                    {
+                        if (Client != null) Client.Dispose();
+                        Client = null;
+                    }
                 }
-                catch (Exception e)
-                {
-                    Error = e;
-                }
-                finally { Client.Dispose(); }
             }, TaskCreationOptions.LongRunning);
         }
 

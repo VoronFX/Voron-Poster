@@ -154,23 +154,24 @@ namespace Voron_Poster
         protected void ProcessCSSNoDisplayStyles(HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> ExternalCSS =
-                doc.DocumentNode.Descendants("link").Where(x => x.GetAttributeValueDecoded("rel") == "stylesheet");
+                doc.DocumentNode.Descendants("link").Where(x => x.GetAttributeValueDecoded("rel") == "stylesheet" &&
+               (x.Attributes["media"] == null || Regex.IsMatch(x.GetAttributeValueDecoded("media", ""),@"(?i)all|screen")));
             Parallel.ForEach(ExternalCSS, (CSSNode) =>
             {
                 string Href = CSSNode.GetAttributeValueDecoded("href");
-                string stylesheet;
-                if (!CSSChache.TryGetValue(Href, out stylesheet))
+                try
                 {
-                    try
+                    string stylesheet;
+                    if (!CSSChache.TryGetValue(Href, out stylesheet))
                     {
                         HttpResponseMessage Response = Client.GetAsync(Href, Cancel.Token).Result;
                         if (Response.IsSuccessStatusCode)
                             stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
+                        CSSChache.TryAdd(Href, stylesheet);
                     }
-                    catch (Exception) { }
-                    CSSChache.TryAdd(Href, stylesheet);
+                    lock (doc) InlineNoDisplayStyle(doc, stylesheet);
                 }
-                lock (doc) InlineNoDisplayStyle(doc, stylesheet);
+                catch (Exception) { }
             });
             var Styles = doc.DocumentNode.Descendants("style");
             while (Styles.Count() > 0)
@@ -196,7 +197,7 @@ namespace Voron_Poster
             MatchCollection allCssRules = Regex.Matches(stylesheet ?? String.Empty, "([^{}]*){([^}]*)}", RegexOptions.Singleline);
             foreach (Match cssRule in allCssRules)
             {
-                if (Cancel.IsCancellationRequested) return;
+                Cancel.Token.ThrowIfCancellationRequested();
                 try
                 {
                     if (cssRule.Value.IndexOf('@') >= 0 ||
@@ -417,6 +418,7 @@ namespace Voron_Poster
                         LoginSuccess = @"(?i)" +
                                        @"благодарим\s+за\s+визит|" +
                                        @"спасибо,?\s+что\s+зашли|" +
+                                       @"вы\s+((за|во)шли|выполнили\s+вход|прошли\s+авторизацию|авторизировались)\s+в\s+систем[е|у]|" +
                                        @"вы\s+успешно\s+((за|во)шли|выполнили\s+вход|прошли\s+авторизацию|авторизировались)|" +
                                        @"((вы\s+((за|во)шли|выполнили\s+вход|прошли\s+авторизацию|авторизировались)|подключен)\s+(как|под\s+(логином|именем)))(?![\s\W]+(гость|guest))",
 
@@ -571,11 +573,12 @@ namespace Voron_Poster
 
             public static int ErrorNodes(HtmlAgilityPack.HtmlDocument doc)
             {
+                string IgnoreExpression = @"(?i)отключен\s+javascript|предупреждени[яе]й?";
                 IEnumerable<HtmlNode> Nodes =
                     doc.DocumentNode.Descendants().Where(
-                    x => x.Attributes.Any(
-                        y => Expr.IsMatch(y.ValueDecoded(), @"(?i)error|warn"))
-                        && !Expr.IsMatch(x.InnerText, @"(?i)отключен\s+javascript"));
+                    x => x.Attributes.Any(y => Expr.IsMatch(y.ValueDecoded(), @"(?i)error|warn"))
+                        && !x.Attributes.Any(y => Expr.IsMatch(y.ValueDecoded(), IgnoreExpression))
+                        && !Expr.IsMatch(x.InnerText, IgnoreExpression));
                 return Nodes.Count();
             }
 
@@ -1070,8 +1073,7 @@ namespace Voron_Poster
         }
 
         public override async Task PostMessage(Uri targetBoard, string subject, string message)
-        {
-            return;
+        {           
             // Delay needed on some sites
             if (Expr.DelayNeeded.Contains(targetBoard.Host))
             {

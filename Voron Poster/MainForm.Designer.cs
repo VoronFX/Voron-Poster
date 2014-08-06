@@ -1246,6 +1246,11 @@
             this.settingsMaxActive.Name = "settingsMaxActive";
             this.settingsMaxActive.Size = new System.Drawing.Size(120, 20);
             this.settingsMaxActive.TabIndex = 18;
+            this.settingsMaxActive.Value = new decimal(new int[] {
+            6,
+            0,
+            0,
+            0});
             this.settingsMaxActive.ValueChanged += new System.EventHandler(this.settingsMaxActive_ValueChanged);
             // 
             // settingsApplySuggestedProfile
@@ -1596,7 +1601,7 @@
             this.tasksTable.Size = new System.Drawing.Size(816, 404);
             this.tasksTable.TabIndex = 0;
             this.tasksTable.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.TasksGuiTable_CellPaint);
-            this.tasksTable.Paint += new System.Windows.Forms.PaintEventHandler(this.tasksTable_Paint);
+            this.tasksTable.Resize += new System.EventHandler(this.tasksTable_Resize);
             // 
             // GTName
             // 
@@ -1734,7 +1739,6 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.Tabs.ResumeLayout(false);
             this.messageTab.ResumeLayout(false);
             this.messageTab.PerformLayout();

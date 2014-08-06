@@ -347,6 +347,8 @@ namespace Voron_Poster
 
         private void AddTaskButton_Click(object sender, EventArgs e)
         {
+            tasksTable.Width -= 50;
+            tasksTable.Visible = false;
             tasksTable.SuspendLayoutSafe();
             PostTask New = new PostTask();
             New.TargetUrl = tasksUrl.Text;
@@ -354,6 +356,8 @@ namespace Voron_Poster
             propEngine.SelectedIndex = 4;
             Tasks.Add(New);
             tasksTable.ResumeLayoutSafe();
+            tasksTable.Visible = true;
+            tasksTable.Width += 50;
 
             //TaskPropertiesPage.Enabled = false;
             // Tabs.TabIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
@@ -486,6 +490,7 @@ namespace Voron_Poster
             GTStop.Enabled = false;
             GTDelete.Enabled = false;
             TasksUpdater.Enabled = false;
+            tasksTable.Visible = false;
             PostTask.InfoIcons Action = (PostTask.InfoIcons)Enum.Parse(typeof(PostTask.InfoIcons), (string)(sender as Button).Image.Tag);
             if (Action == PostTask.InfoIcons.Clear)
                 for (int i = 0; i < Tasks.Count; i++)
@@ -516,15 +521,18 @@ namespace Voron_Poster
                 //});
                 for (int i = 0; i < Tasks.Count; i++)
                 {
-                    Tasks[i].Ctrls.Progress.Refresh();
                     if (Tasks[i].Ctrls.Selected.Checked
                         && Tasks[i].Ctrls.StartStop.Enabled
                            && Tasks[i].Action == Action)
                         //   Tasks[i].Ctrls.StartStop.PerformClick();
                         Tasks[i].StartStop_Clicked(sender, e);
                 }
-                PostTask.StartNext();
+                ////Task.Delay(100).ContinueWith((x) =>
+               //     BeginInvoke((Action)(() => PostTask.StartNext()));
+                //);
+                    Task.Run((Action)(() => PostTask.StartNext()));
             }
+            tasksTable.Visible = true;
             TasksUpdater.Enabled = true;
         }
 
@@ -541,12 +549,14 @@ namespace Voron_Poster
                         Remove.Add(Tasks[i]);
                     }
                 }
+                tasksTable.Visible = false;
                 tasksTable.SuspendLayoutSafe();
                 foreach (PostTask Task in Remove)
                 {
                     Task.Delete_Clicked(sender, e);
                 }
                 tasksTable.ResumeLayoutSafe();
+                tasksTable.Visible = true;
             }
             Remove.Clear();
         }
@@ -571,6 +581,8 @@ namespace Voron_Poster
             }
             public static void Load(List<PostTask> tasks, MainForm parent, string path)
             {
+                parent.tasksTable.Width -= 50;
+                parent.tasksTable.Visible = false;
                 parent.tasksTable.SuspendLayoutSafe();
                 TaskList TaskList;
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
@@ -587,6 +599,8 @@ namespace Voron_Poster
                     tasks.Add(NewTask);
                 }
                 parent.tasksTable.ResumeLayoutSafe();
+                parent.tasksTable.Visible = true;
+                parent.tasksTable.Width += 50;
             }
         }
 
@@ -622,8 +636,6 @@ namespace Voron_Poster
                 OpenFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, @"TaskLists");
                 if (OpenFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     TaskList.Load(Tasks, this, OpenFileDialog.FileName);
-                Application.DoEvents();
-                MainForm_Resize(null, EventArgs.Empty);
             }
             catch (Exception Error)
             {
@@ -632,7 +644,7 @@ namespace Voron_Poster
             tasksLoad.Enabled = true;
         }
 
-        private void MainForm_Resize(object sender, EventArgs e)
+        private void tasksTable_Resize(object sender, EventArgs e)
         {
             tasksTable.SuspendLayoutSafe();
             for (int i = 0; i < Tasks.Count; i++)
@@ -641,8 +653,6 @@ namespace Voron_Poster
                 Tasks[i].Ctrls.Status.Dock = DockStyle.Fill;
             }
             tasksTable.ResumeLayoutSafe();
-
-            Application.DoEvents();
 
             //  Manually sizing text elements, because Dock = Fill or Anchor auto size causes
             //  tasksTable to invoke thousands redraw events on chenging text
@@ -655,11 +665,6 @@ namespace Voron_Poster
             tasksTable.ResumeLayoutSafe();
         }
 
-        private void tasksTable_Paint(object sender, PaintEventArgs e)
-        {
-            tasksTable.Paint -= tasksTable_Paint;
-            MainForm_Resize(sender, e);
-        }
 
         private void tasksTable_SizeChanged(object sender, EventArgs e)
         {
@@ -1750,8 +1755,8 @@ namespace Voron_Poster
             }
         }
 
-        public SettingsData Settings;
-        public struct SettingsData
+        public SettingsData Settings = new SettingsData();
+        public class SettingsData
         {
             public bool LoadLastTaskList;
             public bool ApplySuggestedProfile;
@@ -1860,6 +1865,11 @@ namespace Voron_Poster
         }
 
         #endregion
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+
+        }
 
     }
 }

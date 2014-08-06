@@ -1,0 +1,1 @@
+Input.Message = Regex.Replace(Input.Message, "(?i)\\[URL.*?/URL\\]", "");

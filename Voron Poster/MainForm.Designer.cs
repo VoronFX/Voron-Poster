@@ -140,6 +140,7 @@
             this.TasksUpdater = new System.Windows.Forms.Timer(this.components);
             this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scriptsTestAbortTimer = new System.Windows.Forms.Timer(this.components);
+            this.settingsMaxActiveAuto = new System.Windows.Forms.Button();
             this.tasksTable = new Voron_Poster.DBTableLayoutPanel();
             this.GTName = new System.Windows.Forms.Label();
             this.GTStatus = new System.Windows.Forms.Label();
@@ -1216,6 +1217,7 @@
             // 
             // settingsTab
             // 
+            this.settingsTab.Controls.Add(this.settingsMaxActiveAuto);
             this.settingsTab.Controls.Add(this.settingsMaxActiveLabel);
             this.settingsTab.Controls.Add(this.settingsMaxActive);
             this.settingsTab.Controls.Add(this.settingsApplySuggestedProfile);
@@ -1234,7 +1236,7 @@
             // settingsMaxActiveLabel
             // 
             this.settingsMaxActiveLabel.AutoSize = true;
-            this.settingsMaxActiveLabel.Location = new System.Drawing.Point(244, 109);
+            this.settingsMaxActiveLabel.Location = new System.Drawing.Point(244, 107);
             this.settingsMaxActiveLabel.Name = "settingsMaxActiveLabel";
             this.settingsMaxActiveLabel.Size = new System.Drawing.Size(204, 13);
             this.settingsMaxActiveLabel.TabIndex = 19;
@@ -1252,6 +1254,7 @@
             0,
             0});
             this.settingsMaxActive.ValueChanged += new System.EventHandler(this.settingsMaxActive_ValueChanged);
+            this.settingsMaxActive.Enter += new System.EventHandler(this.settings_Changed);
             // 
             // settingsApplySuggestedProfile
             // 
@@ -1565,6 +1568,16 @@
             // 
             this.scriptsTestAbortTimer.Interval = 5000;
             this.scriptsTestAbortTimer.Tick += new System.EventHandler(this.scriptsTestAbortTimer_Tick);
+            // 
+            // settingsMaxActiveAuto
+            // 
+            this.settingsMaxActiveAuto.Location = new System.Drawing.Point(373, 123);
+            this.settingsMaxActiveAuto.Name = "settingsMaxActiveAuto";
+            this.settingsMaxActiveAuto.Size = new System.Drawing.Size(75, 23);
+            this.settingsMaxActiveAuto.TabIndex = 20;
+            this.settingsMaxActiveAuto.Text = "Авто";
+            this.settingsMaxActiveAuto.UseVisualStyleBackColor = true;
+            this.settingsMaxActiveAuto.Click += new System.EventHandler(this.settingsMaxActiveAuto_Click);
             // 
             // tasksTable
             // 
@@ -1902,6 +1915,7 @@
         private System.Windows.Forms.LinkLabel propAuthStatus;
         private System.Windows.Forms.Label settingsMaxActiveLabel;
         private System.Windows.Forms.NumericUpDown settingsMaxActive;
+        private System.Windows.Forms.Button settingsMaxActiveAuto;
 
 
     }

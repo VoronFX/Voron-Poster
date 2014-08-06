@@ -1628,11 +1628,15 @@ namespace Voron_Poster
                     var ScriptData = new Forum.ScriptData(new Forum.ScriptData.PostMessage(scriptsSubject.Text, scriptsMessage.Text));
                     var Session = Forum.InitScriptEngine(ScriptData);
                     Session.Execute(Code);
+                    Result.Add("Исходное сообщение " );
+                    Result.Add("Исходная тема: " + ScriptData.Input.Subject);
+                    Result.Add("Исходный текст:\r\n" + ScriptData.Input.Message);
+                    Result.Add(String.Empty);
                     for (int i = 0; i < ScriptData.Output.Count; i++)
                     {
                         Result.Add("Сообщение " + i.ToString());
                         Result.Add("Тема: " + ScriptData.Output[i].Subject);
-                        Result.Add("Текст:\n" + ScriptData.Output[i].Message);
+                        Result.Add("Текст:\r\n" + ScriptData.Output[i].Message);
                         Result.Add(String.Empty);
                     }
                 }
@@ -1820,6 +1824,18 @@ namespace Voron_Poster
             settings_Changed(sender, e);
         }
 
+        private void settingsMaxActiveAuto_Click(object sender, EventArgs e)
+        {
+            uint clockSpeed = 1000;
+            int coreCount = 0;
+            foreach (var item in new System.Management.ManagementObjectSearcher("Select * from Win32_Processor").Get())
+            {
+                coreCount += int.Parse(item["NumberOfLogicalProcessors"].ToString());
+                clockSpeed = (uint)item["MaxClockSpeed"];
+            }
+            settingsMaxActive.Value = (int)Math.Round(coreCount * clockSpeed / 1900F);
+        }
+
         #endregion
 
         #region About Page
@@ -1865,11 +1881,6 @@ namespace Voron_Poster
         }
 
         #endregion
-
-        private void MainForm_Resize(object sender, EventArgs e)
-        {
-
-        }
 
     }
 }

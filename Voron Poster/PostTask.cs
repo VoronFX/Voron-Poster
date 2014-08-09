@@ -432,8 +432,8 @@ namespace Voron_Poster
             else
             {
                 Forum.AccountToUse = MainForm.Settings.Account;
-                Forum.CreateActivity(() => 
-                    Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
+                Forum.CreateActivity(async ()=>
+                   await Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
                 Forum.Activity.ContinueWith((prevtask) => {
                     ActiveTasks--;
                     StartNext();
@@ -445,7 +445,7 @@ namespace Voron_Poster
                 Forum.StatusMessage = "В очереди";
                 if (sender == Ctrls.StartStop) StartNext();
                 await Forum.Activity;
-                if (Forum.Error is OperationCanceledException)
+                if (Forum.Error is Forum.UserCancelledException)
                     Status = InfoIcons.Cancelled;
                 else if (Forum.Error != null)
                     Status = InfoIcons.Error;

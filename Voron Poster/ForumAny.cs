@@ -117,7 +117,7 @@ namespace Voron_Poster
             }
 
             doc.ClearScriptsComments();
-            ProcessCSSNoDisplayStyles(doc);
+            await ProcessCSSNoDisplayStyles(doc);
             return doc;
         }
 
@@ -151,37 +151,45 @@ namespace Voron_Poster
         }
 
         protected static ConcurrentDictionary<string, string> CSSChache = new ConcurrentDictionary<string, string>();
-        protected void ProcessCSSNoDisplayStyles(HtmlAgilityPack.HtmlDocument doc)
+        protected async Task LoadAndParseCSS(HtmlAgilityPack.HtmlDocument doc, HtmlNode cssNode)
+        {
+            string Href = cssNode.GetAttributeValueDecoded("href");
+            try
+            {
+                string stylesheet;
+                if (!CSSChache.TryGetValue(Href, out stylesheet))
+                {
+                    HttpResponseMessage Response = await Client.GetAsync(Href, Cancel.Token);
+                    if (Response.IsSuccessStatusCode)
+                        stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
+                    CSSChache.TryAdd(Href, stylesheet);
+                }
+                lock (doc) InlineNoDisplayStyle(doc, stylesheet);
+            }
+            catch (Exception) { }
+        }
+
+        protected async Task ProcessCSSNoDisplayStyles(HtmlAgilityPack.HtmlDocument doc)
         {
             IEnumerable<HtmlNode> ExternalCSS =
                 doc.DocumentNode.Descendants("link").Where(x => x.GetAttributeValueDecoded("rel") == "stylesheet" &&
                (x.Attributes["media"] == null || Regex.IsMatch(x.GetAttributeValueDecoded("media", ""),@"(?i)all|screen")));
-            Parallel.ForEach(ExternalCSS, (CSSNode) =>
+            List<Task> External = new List<Task>(ExternalCSS.Count());
+            foreach (var CSSNode in ExternalCSS)
+                External.Add(LoadAndParseCSS(doc, CSSNode));
+            lock (doc)
             {
-                string Href = CSSNode.GetAttributeValueDecoded("href");
-                try
+                var Styles = doc.DocumentNode.Descendants("style");
+                while (Styles.Count() > 0)
                 {
-                    string stylesheet;
-                    if (!CSSChache.TryGetValue(Href, out stylesheet))
-                    {
-                        HttpResponseMessage Response = Client.GetAsync(Href, Cancel.Token).Result;
-                        if (Response.IsSuccessStatusCode)
-                            stylesheet = CleanCSSStylesheet(Response.Content.ReadAsStringAsync().Result);
-                        CSSChache.TryAdd(Href, stylesheet);
-                    }
-                    lock (doc) InlineNoDisplayStyle(doc, stylesheet);
+                    InlineNoDisplayStyle(doc, CleanCSSStylesheet(Styles.First().InnerHtml));
+                    Styles.First().Remove();
                 }
-                catch (Exception) { }
-            });
-            var Styles = doc.DocumentNode.Descendants("style");
-            while (Styles.Count() > 0)
-            {
-                InlineNoDisplayStyle(doc, CleanCSSStylesheet(Styles.First().InnerHtml));
-                Styles.First().Remove();
             }
+            await Task.WhenAll(External);
         }
 
-        protected string CleanCSSStylesheet(string stylesheet)
+        protected static string CleanCSSStylesheet(string stylesheet)
         {
             // clean up the stylesheet
             stylesheet = Regex.Replace(stylesheet, @"[\r\n]", string.Empty); // remove newlines

@@ -93,11 +93,15 @@ namespace Voron_Poster
         {
             try
             {
+                settingsCancel_Click(sender, e);
                 if (File.Exists("Settings.xml"))
                     Settings = SettingsData.Load("Settings.xml");
+                else
+                    Settings.MaxActiveTasks = settingsSuggestMaxActive();
+                settingsCancel_Click(sender, e);
+
                 if (settingsLoadLastTasklist.Checked && File.Exists("LastTasklist.xml"))
                     TaskList.Load(Tasks, this, "LastTasklist.xml");
-                settingsCancel_Click(sender, e);
 
                 aboutLicenseList.SelectedIndex = 0;
 
@@ -528,9 +532,9 @@ namespace Voron_Poster
                         Tasks[i].StartStop_Clicked(sender, e);
                 }
                 ////Task.Delay(100).ContinueWith((x) =>
-               //     BeginInvoke((Action)(() => PostTask.StartNext()));
+                //     BeginInvoke((Action)(() => PostTask.StartNext()));
                 //);
-                    Task.Run((Action)(() => PostTask.StartNext()));
+                Task.Run((Action)(() => PostTask.StartNext()));
             }
             tasksTable.Visible = true;
             TasksUpdater.Enabled = true;
@@ -866,7 +870,7 @@ namespace Voron_Poster
             if (TempForum.Properties.UseLocalAccount) TempForum.AccountToUse = TempForum.Properties.Account;
             else TempForum.AccountToUse = Settings.Account;
 
-            TempForum.CreateActivity(() => TempForum.Login().Wait());
+            TempForum.CreateActivity(TempForum.Login);
             StopProperties = TempForum.Cancel;
             PropertiesActivityTask = TempForum.Activity;
             PropertiesActivityTask.Start();
@@ -1628,7 +1632,7 @@ namespace Voron_Poster
                     var ScriptData = new Forum.ScriptData(new Forum.ScriptData.PostMessage(scriptsSubject.Text, scriptsMessage.Text));
                     var Session = Forum.InitScriptEngine(ScriptData);
                     Session.Execute(Code);
-                    Result.Add("Исходное сообщение " );
+                    Result.Add("Исходное сообщение ");
                     Result.Add("Исходная тема: " + ScriptData.Input.Subject);
                     Result.Add("Исходный текст:\r\n" + ScriptData.Input.Message);
                     Result.Add(String.Empty);
@@ -1824,7 +1828,7 @@ namespace Voron_Poster
             settings_Changed(sender, e);
         }
 
-        private void settingsMaxActiveAuto_Click(object sender, EventArgs e)
+        private int settingsSuggestMaxActive()
         {
             uint clockSpeed = 1000;
             int coreCount = 0;
@@ -1833,7 +1837,12 @@ namespace Voron_Poster
                 coreCount += int.Parse(item["NumberOfLogicalProcessors"].ToString());
                 clockSpeed = (uint)item["MaxClockSpeed"];
             }
-            settingsMaxActive.Value = (int)Math.Round(coreCount * clockSpeed / 1900F);
+            return (int)Math.Round(coreCount * clockSpeed / 1900F);
+        }
+
+        private void settingsMaxActiveAuto_Click(object sender, EventArgs e)
+        {
+            settingsMaxActive.Value = settingsSuggestMaxActive();
         }
 
         #endregion

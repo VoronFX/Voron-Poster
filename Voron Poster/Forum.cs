@@ -242,11 +242,11 @@ namespace Voron_Poster
             get { return error; }
             set
             {
-                if (error != value && (error == null || value == null)) {
-                    if (Cancel != null && Cancel.IsCancellationRequested)
+                if (error != value && (error == null || value == null))
+                {
+                    if (value is UserCancelledException)
                     {
                         StatusMessage = "Отменено";
-                        error = new OperationCanceledException(StatusMessage, value);
                     }
                     else if (value != null)
                     {
@@ -256,9 +256,8 @@ namespace Voron_Poster
                             StatusMessage = "Ошибка: Время ожидания истекло";
                         else
                             StatusMessage = "Ошибка: " + value.Message;
-                        error = value;
                     }
-                    else error = value;
+                    error = value;
                 }
             }
         }
@@ -482,6 +481,8 @@ namespace Voron_Poster
 
         #endregion
 
+        public class UserCancelledException : OperationCanceledException { };
+
         //public byte[] GetDump(bool inludeAccount)
         //{
         //    BinaryFormatter Dumper = new BinaryFormatter();
@@ -617,11 +618,11 @@ namespace Voron_Poster
         /// <param name="TargetBoard">>Url of target theme or board for posting.</param>
         /// <param name="Subject">Post subject.</param>
         /// <param name="Message">Post text.</param>
-        public void LoginRunScritsAndPost(Uri TargetBoard, string Subject, string Message)
+        public async Task LoginRunScritsAndPost(Uri TargetBoard, string Subject, string Message)
         {
             WaitingForQueue = false;
             Cancel.Token.ThrowIfCancellationRequested();
-            if (Properties.UseLocalAccount) AccountToUse = Properties.Account;      
+            if (Properties.UseLocalAccount) AccountToUse = Properties.Account;
 
             // Async Magic. Wait for domain free and then run login operation 
             Task LoginProcess = null;
@@ -648,9 +649,9 @@ namespace Voron_Poster
                 WaitingForQueue = true;
                 StatusMessage = "Авторизация: В очереди";
             }
-            WaitingDomain.Wait();
+            await WaitingDomain;
             WaitingForQueue = false;
-            LoginProcess.Wait();
+            await LoginProcess;
             Cancel.Token.ThrowIfCancellationRequested();
 
             // Post messages
@@ -669,23 +670,28 @@ namespace Voron_Poster
         /// Create parallel task with specified action and error handling. Activity need to be started manually.
         /// </summary>
         /// <param name="action">Action that will be executed in task.</param>
-        public void CreateActivity(Action action)
+        public void CreateActivity(Func<Task> action)
         {
             Reset();
             Activity = new Task(() =>
             {
-                if (Cancel.IsCancellationRequested) Error = new OperationCanceledException();
+                if (Cancel.IsCancellationRequested) Error = new UserCancelledException();
                 else
                 {
                     try
                     {
                         Init();
-                        action.Invoke();
+                        action().Wait();
                     }
                     catch (Exception e)
                     {
-                        Error = e;
-                        Cancel.Cancel();
+                        if (Cancel.IsCancellationRequested)
+                            Error = new UserCancelledException();
+                        else
+                        {
+                            Error = e;
+                            Cancel.Cancel();
+                        }
                     }
                     finally
                     {
@@ -693,7 +699,7 @@ namespace Voron_Poster
                         Client = null;
                     }
                 }
-            }, TaskCreationOptions.LongRunning);
+            });
         }
 
         public void ShowDebugData(string Title)

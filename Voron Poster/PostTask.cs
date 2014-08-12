@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Windows.Forms.VisualStyles;
+using System.Drawing.Imaging;
 
 namespace Voron_Poster
 {
@@ -24,7 +27,6 @@ namespace Voron_Poster
 
     public class PostTask
     {
-
         #region Gui
 
         public static MainForm MainForm;
@@ -33,9 +35,9 @@ namespace Voron_Poster
             Complete, Running, Stopped, Waiting, Cancelled, Error, Run, Restart, Cancel, Clear,
             Gear, Activity, Login, Question, Save, Test, None
         }
-        public static Bitmap[] InfoIconsBitmaps = InitInfoIconsBitmap();
-        public static string[] InfoIconsTooltips = InitInfoIconsTooltip();
-        private static Bitmap[] InitInfoIconsBitmap()
+        public static Bitmap[] InfoIconsBitmaps = InitInfoIconsBitmapsInit();
+        public static string[] InfoIconsTooltips = InitInfoIconsTooltipsInit();
+        private static Bitmap[] InitInfoIconsBitmapsInit()
         {
             var Bitmaps = new Bitmap[Enum.GetValues(typeof(InfoIcons)).Length];
             // Statuses
@@ -64,7 +66,7 @@ namespace Voron_Poster
             }
             return Bitmaps;
         }
-        private static string[] InitInfoIconsTooltip()
+        private static string[] InitInfoIconsTooltipsInit()
         {
             var Tooltips = new string[Enum.GetValues(typeof(InfoIcons)).Length];
             // Statuses
@@ -91,15 +93,6 @@ namespace Voron_Poster
                 if (value != status)
                 {
                     status = value;
-
-                    switch (status)
-                    {
-                        case InfoIcons.Error: Action = InfoIcons.Restart; break;
-                        case InfoIcons.Complete:
-                        case InfoIcons.Stopped:
-                        case InfoIcons.Cancelled: Action = InfoIcons.Run; break;
-                        default: Action = InfoIcons.Cancel; break;
-                    }
 
                     MainForm.BeginInvoke((Action)(() =>
                     {
@@ -132,7 +125,17 @@ namespace Voron_Poster
         }
         public InfoIcons Action
         {
-            get { return action; }
+            get
+            {
+                switch (status)
+                {
+                    case InfoIcons.Complete:
+                    case InfoIcons.Stopped:
+                    case InfoIcons.Cancelled: return InfoIcons.Run; break;
+                    case InfoIcons.Error: return InfoIcons.Restart; break;
+                    default: return InfoIcons.Cancel; break;
+                }
+            }
             private set
             {
                 action = value;
@@ -299,9 +302,9 @@ namespace Voron_Poster
             {
                 MainForm.tasksTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.tasksTable.RowCount - 2);
             }
-                MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].SizeType = SizeType.Absolute;
-                MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
-                MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].SizeType = SizeType.Absolute;
+            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
+            MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         }
 
         public static void ResizeEnd(Control control)
@@ -309,6 +312,269 @@ namespace Voron_Poster
             Size s = control.ClientSize;
             control.Dock = DockStyle.None;
             control.Size = s;
+        }
+
+        #endregion
+
+        public string StatusText { get; set; }
+        public bool Selected { get; set; }
+
+        #region DataGridView
+
+        public class DataGridViewStatusIconCell : DataGridViewImageCell
+        {
+            public DataGridViewStatusIconCell() : base() { }
+
+            protected override object GetFormattedValue(object value,
+            int rowIndex, ref DataGridViewCellStyle cellStyle,
+            TypeConverter valueTypeConverter,
+            TypeConverter formattedValueTypeConverter,
+            DataGridViewDataErrorContexts context)
+            {
+                cellStyle.Alignment =
+                   DataGridViewContentAlignment.MiddleCenter;
+                if (value is InfoIcons || value is int)
+                {
+
+                    var StatusTextCell = OwningRow.Cells[ColumnIndex + 1] as DataGridViewLinkCell;
+                    var ProgressCell = OwningRow.Cells[ColumnIndex + 2] as DataGridViewProgressCell;
+
+                    switch ((InfoIcons)value)
+                    {
+                        case InfoIcons.Error: StatusTextCell.LinkColor = Color.Red; break;
+                        case InfoIcons.Complete: StatusTextCell.LinkColor = Color.Green; break;
+                        default: StatusTextCell.LinkColor = Color.Black; break;
+                    }
+
+                    switch ((InfoIcons)value)
+                    {
+                        case InfoIcons.Waiting:
+                        case InfoIcons.Stopped: StatusTextCell.LinkBehavior = LinkBehavior.NeverUnderline; break;
+                        default: StatusTextCell.LinkBehavior = LinkBehavior.HoverUnderline; break;
+                    }
+
+                    switch ((InfoIcons)value)
+                    {
+                        case InfoIcons.Cancelled:
+                        case InfoIcons.Error: ProgressCell.ProgressBar.SetState(2); break;
+                        case InfoIcons.Waiting: ProgressCell.ProgressBar.SetState(3); break;
+                        default: ProgressCell.ProgressBar.SetState(1); break;
+                    }
+
+                    return InfoIconsBitmaps[(int)value];
+                }
+                else return null;
+            }
+        }
+
+        public class DataGridViewStatusIconColumn : DataGridViewColumn
+        {
+            public DataGridViewStatusIconColumn() : base(new DataGridViewStatusIconCell()) { }
+        }
+
+        public class DataGridViewProgressCell : DataGridViewCell
+        {
+            public DataGridViewProgressCell() : base() { }
+
+
+            protected override object GetFormattedValue(object value,
+            int rowIndex, ref DataGridViewCellStyle cellStyle,
+            TypeConverter valueTypeConverter,
+            TypeConverter formattedValueTypeConverter,
+            DataGridViewDataErrorContexts context)
+            {
+                if (value is int)
+                    ProgressBar.Value = (int)value;
+                return null;
+            }
+
+            public ProgressBar ProgressBar = new ProgressBar()
+            {
+                Maximum = 561
+            };
+
+            protected override void Paint(Graphics graphics, Rectangle clipBounds,
+                Rectangle cellBounds, int rowIndex, DataGridViewElementStates cellState,
+                object value, object formattedValue, string errorText,
+                DataGridViewCellStyle cellStyle,
+                DataGridViewAdvancedBorderStyle advancedBorderStyle,
+                DataGridViewPaintParts paintParts)
+            {
+                Rectangle Borders = this.BorderWidths(advancedBorderStyle);
+                var Rectangle = new Rectangle(0, 0, cellBounds.Width - cellStyle.Padding.Horizontal - Borders.Width,
+                    cellBounds.Height - cellStyle.Padding.Vertical - Borders.Height);
+                Bitmap b = new Bitmap(Rectangle.Width, Rectangle.Height);
+                ProgressBar.Size = Rectangle.Size;
+                ProgressBar.DrawToBitmap(b, Rectangle);
+                Rectangle.Offset(cellBounds.Location);
+                Rectangle.Offset(cellStyle.Padding.Left, cellStyle.Padding.Top);
+
+                // Draw the cell background, if specified. 
+                if ((paintParts & DataGridViewPaintParts.Background) ==
+                    DataGridViewPaintParts.Background)
+                {
+                    SolidBrush cellBackground =
+                        new SolidBrush(cellStyle.BackColor);
+                    graphics.FillRectangle(cellBackground, cellBounds);
+                    cellBackground.Dispose();
+                }
+
+                // Draw the cell borders, if specified. 
+                if ((paintParts & DataGridViewPaintParts.Border) ==
+                    DataGridViewPaintParts.Border)
+                {
+                    PaintBorder(graphics, clipBounds, cellBounds, cellStyle,
+                        advancedBorderStyle);
+                }
+
+                graphics.DrawImage(b, Rectangle);
+            }
+
+            ~DataGridViewProgressCell()
+            {
+                if (ProgressBar.IsHandleCreated)
+                    ProgressBar.Invoke((Action)(() => ProgressBar.Dispose()));
+            }
+        }
+
+        public int pr { get; set; }
+        public class DataGridViewProgressColumn : DataGridViewColumn
+        {
+            public DataGridViewProgressColumn()
+                : base(new DataGridViewProgressCell()) { }
+        }
+
+        public class DataGridViewImageButtonCell : DataGridViewButtonCell
+        {
+            public DataGridViewImageButtonCell()
+                : base()
+            {
+                if (OwningColumn != null)
+                    Icon = (OwningColumn as DataGridViewImageButtonColumn).Icon;
+            }
+
+            protected bool enabled = true;
+            public bool Enabled
+            {
+                get { return enabled; }
+                set
+                {
+                    if (value != enabled)
+                    {
+                        enabled = value;
+                        DataGridView.InvalidateCell(this);
+                    }
+                }
+            }
+            public Bitmap Icon;
+
+            protected override object GetFormattedValue(object value,
+            int rowIndex, ref DataGridViewCellStyle cellStyle,
+            TypeConverter valueTypeConverter,
+            TypeConverter formattedValueTypeConverter,
+            DataGridViewDataErrorContexts context)
+            {
+                if (OwningColumn != null)
+                    Icon = (OwningColumn as DataGridViewImageButtonColumn).Icon;
+                if (value is InfoIcons)
+                    switch ((InfoIcons)value)
+                    {
+                        case InfoIcons.Running:
+                        case InfoIcons.Waiting: Icon = InfoIconsBitmaps[(int)InfoIcons.Cancel]; break;
+                        case InfoIcons.Stopped:
+                        case InfoIcons.Cancelled:
+                        case InfoIcons.Complete: Icon = InfoIconsBitmaps[(int)InfoIcons.Run]; break;
+                        case InfoIcons.Error: Icon = InfoIconsBitmaps[(int)InfoIcons.Restart]; break;
+                    }
+                return null;
+            }
+
+            protected override void Paint(Graphics graphics, Rectangle clipBounds,
+                Rectangle cellBounds, int rowIndex, DataGridViewElementStates cellState,
+                object value, object formattedValue, string errorText,
+                DataGridViewCellStyle cellStyle,
+                DataGridViewAdvancedBorderStyle advancedBorderStyle,
+                DataGridViewPaintParts paintParts)
+            {
+                if (Icon == null) return;
+                // Calculate the area in which to draw the button.
+                Rectangle buttonArea = cellBounds;
+                Rectangle buttonAdjustment =
+                    this.BorderWidths(advancedBorderStyle);
+                buttonArea.X += buttonAdjustment.X;
+                buttonArea.Y += buttonAdjustment.Y;
+                buttonArea.Height -= buttonAdjustment.Height;
+                buttonArea.Width -= buttonAdjustment.Width;
+
+                var Rectangle = new Rectangle((int)Math.Round((buttonArea.Width - Icon.Width) / 2F),
+                    (int)Math.Round((buttonArea.Height - Icon.Height) / 2F), Icon.Width, Icon.Height);
+                Rectangle.Offset(buttonArea.Location);
+
+                ImageAttributes attributes = new ImageAttributes();
+                ColorMatrix matrix = new ColorMatrix();
+                float value2;
+
+                if (this.Enabled == false)
+                    value2 = 0.4f;
+                else
+                    value2 = 1.0f;
+
+                matrix.Matrix33 = value2;
+                attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+
+                if (!Enabled)
+                {
+                    // Draw the cell background, if specified. 
+                    if ((paintParts & DataGridViewPaintParts.Background) ==
+                        DataGridViewPaintParts.Background)
+                    {
+                        SolidBrush cellBackground =
+                            new SolidBrush(cellStyle.BackColor);
+                        graphics.FillRectangle(cellBackground, cellBounds);
+                        cellBackground.Dispose();
+                    }
+
+                    // Draw the cell borders, if specified. 
+                    if ((paintParts & DataGridViewPaintParts.Border) ==
+                        DataGridViewPaintParts.Border)
+                    {
+                        PaintBorder(graphics, clipBounds, cellBounds, cellStyle,
+                            advancedBorderStyle);
+                    }
+
+                    // Draw the disabled button.                
+                    ButtonRenderer.DrawButton(graphics, buttonArea, PushButtonState.Disabled);
+
+                }
+                else
+                {
+
+                    // The button cell is enabled, so let the base class  
+                    // handle the painting. 
+                    base.Paint(graphics, clipBounds, cellBounds, rowIndex,
+                        cellState, value, formattedValue, errorText,
+                        cellStyle, advancedBorderStyle, paintParts);
+
+                }
+                graphics.DrawImage(Icon, Rectangle, 0, 0, Icon.Width, Icon.Height, GraphicsUnit.Pixel, attributes);
+            }
+
+        }
+
+        public class DataGridViewImageButtonColumn : DataGridViewColumn
+        {
+            public DataGridViewImageButtonColumn()
+                : base(new DataGridViewImageButtonCell()) { }
+
+            public Bitmap Icon { get; set; } 
+
+            public override object Clone()
+            {
+                DataGridViewImageButtonColumn col = base.Clone() as DataGridViewImageButtonColumn;
+                col.Icon = Icon;
+                return col;
+            }
+
         }
 
         #endregion
@@ -329,7 +595,7 @@ namespace Voron_Poster
 
         public bool New = true;
 
-        public string TargetUrl;
+        public string TargetUrl { get; set; }
         protected Forum forum;
         public Forum Forum
         {
@@ -355,6 +621,7 @@ namespace Voron_Poster
             Ctrls.Status.BeginInvoke((Action)(() =>
             {
                 Ctrls.Status.Text = status;
+                StatusText = status;
                 MainForm.ToolTip.SetToolTip(Ctrls.Status, status);
             }));
         }
@@ -362,6 +629,7 @@ namespace Voron_Poster
         private void Progress_ProgressChanged(object sender, int e)
         {
             Ctrls.Progress.Value = e;
+            pr = e;
         }
 
         public void Properties_Clicked(object sender, EventArgs e)
@@ -408,7 +676,8 @@ namespace Voron_Poster
 
         static int ActiveTasks = 0;
         static ConcurrentQueue<PostTask> PostTaskQueue = new ConcurrentQueue<PostTask>();
-        public static void StartNext(){
+        public static void StartNext()
+        {
             while ((MainForm.Settings.MaxActiveTasks == 0 || ActiveTasks < MainForm.Settings.MaxActiveTasks)
                 && !PostTaskQueue.IsEmpty)
             {
@@ -432,9 +701,10 @@ namespace Voron_Poster
             else
             {
                 Forum.AccountToUse = MainForm.Settings.Account;
-                Forum.CreateActivity(async ()=>
+                Forum.CreateActivity(async () =>
                    await Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
-                Forum.Activity.ContinueWith((prevtask) => {
+                Forum.Activity.ContinueWith((prevtask) =>
+                {
                     ActiveTasks--;
                     StartNext();
                 });

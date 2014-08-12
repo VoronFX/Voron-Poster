@@ -28,7 +28,7 @@ namespace Voron_Poster
 {
     public partial class MainForm : Form, IMessageFilter
     {
-        public List<PostTask> Tasks = new List<PostTask>();
+        public BindingList<PostTask> Tasks = new BindingList<PostTask>();
         public PostTask CurrTask;
         public Scintilla scriptsEditor = new Scintilla();
 
@@ -61,9 +61,23 @@ namespace Voron_Poster
             //}
             //catch { }
 
-            //        typeof(TabControl).InvokeMember("DoubleBuffered",
-            //BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-            //null, Tabs, new object[] { true });
+            typeof(DataGridView).InvokeMember("DoubleBuffered",
+    BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+    null, dataGridView1, new object[] { true });
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.DataSource = Tasks;
+
+            var Timer = new System.Windows.Forms.Timer() { Interval = 50, Enabled = true };
+            Timer.Tick += (o, e) =>
+            {
+                if (dataGridView1.Columns[4].Displayed)
+                    foreach (DataGridViewRow Row in dataGridView1.Rows)
+                    {
+                        if (Row.Displayed)
+                            dataGridView1.InvalidateCell(Row.Cells[4]);
+                    }
+                dataGridView1.Refresh();
+            };
             scriptsEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             scriptsEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
             scriptsEditor.Location = new System.Drawing.Point(0, 0);
@@ -569,7 +583,7 @@ namespace Voron_Poster
         {
             public Forum.TaskBaseProperties[] Properties;
             public string[] TargetUrls;
-            public static void Save(List<PostTask> tasks, string path)
+            public static void Save(BindingList<PostTask> tasks, string path)
             {
                 TaskList TaskList;
                 TaskList.Properties = new Forum.TaskBaseProperties[tasks.Count];
@@ -583,7 +597,7 @@ namespace Voron_Poster
                 using (FileStream F = File.Create(path))
                     Xml.Serialize(F, TaskList);
             }
-            public static void Load(List<PostTask> tasks, MainForm parent, string path)
+            public static void Load(BindingList<PostTask> tasks, MainForm parent, string path)
             {
                 parent.tasksTable.Width -= 50;
                 parent.tasksTable.Visible = false;
@@ -1890,6 +1904,26 @@ namespace Voron_Poster
         }
 
         #endregion
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridViewRow Row = dataGridView1.Rows[e.RowIndex];
+            switch (e.ColumnIndex)
+            {
+                case 1: System.Diagnostics.Process.Start(Row.Cells[1].Value as string); break;
+                case 3: if ((Row.Cells[3] as DataGridViewLinkCell).LinkBehavior == LinkBehavior.HoverUnderline &&
+                        (Row.DataBoundItem as PostTask).Forum != null)
+                        (Row.DataBoundItem as PostTask).Forum.ShowDebugData((Row.DataBoundItem as PostTask).TargetUrl);
+                    break;
+                case 5: (Row.DataBoundItem as PostTask).StartStop_Clicked(sender, e); break;
+                case 6: (Row.DataBoundItem as PostTask).Properties_Clicked(sender, e); break;
+                case 7: (Row.DataBoundItem as PostTask).Delete_Clicked(sender, e); break;
+            }
+        }
+
+        private void dataGridView1_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+        }
 
     }
 }

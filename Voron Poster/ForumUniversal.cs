@@ -25,8 +25,8 @@ namespace Voron_Poster
         {
             //InitExpression();
         }
-        static ConcurrentDictionary<string, TaskBaseProperties.AccountData> DomainLogged
-         = new ConcurrentDictionary<string, TaskBaseProperties.AccountData>();
+        static ConcurrentDictionary<string, ForumBaseProperties.AccountData> DomainLogged
+         = new ConcurrentDictionary<string, ForumBaseProperties.AccountData>();
         static List<Thread> WBThreads = new List<Thread>();
         ManualResetEvent CookieClearEvent = new ManualResetEvent(false);
         Form a;
@@ -639,7 +639,7 @@ namespace Voron_Poster
             CookieClearEvent.Reset();
 
             // Check if logged with right account
-            TaskBaseProperties.AccountData CurrentLogged;
+            ForumBaseProperties.AccountData CurrentLogged;
             if (DomainLogged.TryGetValue(GetDomain(Properties.ForumMainPage), out CurrentLogged)
                 && (CurrentLogged.password != AccountToUse.password
                 || CurrentLogged.username != AccountToUse.username))
@@ -681,7 +681,7 @@ namespace Voron_Poster
            StatusMessage = "Авторизация: Загрузка страницы";
             Uri LoginPage = new Uri(Properties.ForumMainPage);
             if (!await WaitNavigate(LoginPage, 2)) throw new Exception("Сервер не отвечает");
-            progress.Login += 38;
+            Progress.Login += 38;
 
             // Extracting possible login links
            StatusMessage = "Авторизация: Поиск страницы входа";
@@ -690,7 +690,7 @@ namespace Voron_Poster
             List<Uri> LoginLinks = GetPossibleLoginPageLinks(Links);
             LoginForm LoginForm = null;
             HtmlElementCollection Forms = null;
-            progress.Login += 18;
+            Progress.Login += 18;
             int LinkIndex = -1;
 
             while (LoginForm == null && LinkIndex < LoginLinks.Count)
@@ -700,7 +700,7 @@ namespace Voron_Poster
                 {
                    StatusMessage = "Авторизация: Загрузка страницы";
                    if (!await WaitNavigate(LoginLinks[LinkIndex], 2)) throw new Exception("Сервер не отвечает");
-                    progress.Login += 87 / LoginLinks.Count;
+                    Progress.Login += 87 / LoginLinks.Count;
                 }
                 Cancel.Token.ThrowIfCancellationRequested();
 
@@ -711,7 +711,7 @@ namespace Voron_Poster
                 if (LoginForm == null) LinkIndex++;
             }
             if (LoginForm == null) throw new Exception("Форма авторизации не найдена");
-            progress.Login = 143;
+            Progress.Login = 143;
 
             // Fill the form and submit
             Cancel.Token.ThrowIfCancellationRequested();
@@ -719,19 +719,19 @@ namespace Voron_Poster
             if (LinkIndex != -1) LoginPage = LoginLinks[LinkIndex];
             LoginForm.Login.SetAttribute("value", AccountToUse.Username);
             LoginForm.Password.SetAttribute("value", AccountToUse.Password);
-            progress.Login += 18;
+            Progress.Login += 18;
             WaitLoad.Reset();
             LoginForm.Submit.InvokeMember("click");
             await WaitAndStop();
             LogPage();
-            progress.Login += 38;
+            Progress.Login += 38;
 
             // Load page with login form again and check if login successful
             Cancel.Token.ThrowIfCancellationRequested();
            StatusMessage = "Авторизация: Загрузка страницы";
            if (!await WaitNavigate(LoginPage, 2)) throw new Exception("Сервер не отвечает");
             Cancel.Token.ThrowIfCancellationRequested();
-            progress.Login += 38;
+            Progress.Login += 38;
             string Html = String.Empty;
             WB.Invoke((Action)(() =>
             {
@@ -744,7 +744,7 @@ namespace Voron_Poster
             {
                StatusMessage = "Успешно авторизирован";
                 DomainLogged.TryAdd(GetDomain(Properties.ForumMainPage), AccountToUse);
-                progress.Login += 18;
+                Progress.Login += 18;
             }
         }
 
@@ -754,7 +754,7 @@ namespace Voron_Poster
            StatusMessage = "Публикация: Загрузка страницы";
             Uri PostPage = TargetBoard;
             if (!await WaitNavigate(PostPage, 2)) throw new Exception("Сервер не отвечает");
-            progress.Post += 38 / progress.PostCount;
+            Progress.Post += 38 / Progress.PostCount;
 
             // Extracting possible post links
            StatusMessage = "Публикация: Поиск страницы публикации";
@@ -763,10 +763,10 @@ namespace Voron_Poster
             List<Uri> PostLinks = GetPossiblePostPageLinks(Links);
             PostForm PostForm = null;
             HtmlElementCollection Forms = null;
-            progress.Post += 18 / progress.PostCount;
+            Progress.Post += 18 / Progress.PostCount;
             int LinkIndex = -1;
 
-            int LastProgress = progress.Post;
+            int LastProgress = Progress.Post;
             while (PostForm == null && LinkIndex < PostLinks.Count)
             {
                 // Loading next possible page with post form
@@ -774,7 +774,7 @@ namespace Voron_Poster
                 {
                    StatusMessage = "Публикация: Загрузка страницы";
                    if (!await WaitNavigate(PostLinks[LinkIndex], 2)) throw new Exception("Сервер не отвечает");
-                    progress.Post += 87 / PostLinks.Count / progress.PostCount;
+                    Progress.Post += 87 / PostLinks.Count / Progress.PostCount;
                 }
                 Cancel.Token.ThrowIfCancellationRequested();
 
@@ -785,16 +785,16 @@ namespace Voron_Poster
                 if (PostForm == null) LinkIndex++;
             }
             if (PostForm == null) throw new Exception("Форма публикации не найдена");
-            progress.Post = LastProgress + (87 / progress.PostCount);
+            Progress.Post = LastProgress + (87 / Progress.PostCount);
 
             // Ask for captcha if any
             if (PostForm.Captcha != null)
             {
-                progress.Post += 10 / progress.PostCount;
+                Progress.Post += 10 / Progress.PostCount;
                 WaitingForQueue = true;
                StatusMessage = "Публикация: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
-                progress.Post += 20 / progress.PostCount;
+                Progress.Post += 20 / Progress.PostCount;
                 WB.Invoke((Action)(() =>
                 {
                     PostForm.CaptchaImg.AttachEventHandler("onload", (o, e) => { WaitLoad.Set(); });
@@ -815,9 +815,9 @@ namespace Voron_Poster
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 PostForm.Captcha.SetAttribute("value", CaptchaForm.Result.Text);
                 CaptchaForm.IsFree.Set();
-                progress.Post += 20 / progress.PostCount;
+                Progress.Post += 20 / Progress.PostCount;
             }
-            else progress.Post += 50 / progress.PostCount;
+            else Progress.Post += 50 / Progress.PostCount;
 
             // Fill the form and submit
             Cancel.Token.ThrowIfCancellationRequested();
@@ -826,12 +826,12 @@ namespace Voron_Poster
             if (PostForm.Title != null)
                 PostForm.Title.SetAttribute("value", Subject);
             PostForm.Message.SetAttribute("value", Message);
-            progress.Post += 10 / progress.PostCount;
+            Progress.Post += 10 / Progress.PostCount;
             WaitLoad.Reset();
             PostForm.Submit.InvokeMember("click");
             await WaitAndStop();
             LogPage();
-            progress.Post += 21 / progress.PostCount;
+            Progress.Post += 21 / Progress.PostCount;
 
             // Check if no error was returned
             Cancel.Token.ThrowIfCancellationRequested();
@@ -841,13 +841,13 @@ namespace Voron_Poster
                 Forms = WB.Document.Forms;
                 Text = WB.Document.Body.InnerText;
             }));
-            progress.Post += 21 / progress.PostCount;
+            Progress.Post += 21 / Progress.PostCount;
             if (MatchRate(Text, Expr.Error) >= 30)
                 throw new Exception("Сайт вернул ошибку");
             else
             {
                StatusMessage = "Опубликовано";
-                progress.Post += 10 / progress.PostCount;
+                Progress.Post += 10 / Progress.PostCount;
             }
         }
     }

@@ -263,7 +263,7 @@ namespace Voron_Poster
         }
         [XmlIgnore]
         public Task Activity;
-        public class TaskBaseProperties
+        public class ForumBaseProperties
         {
             public Engine Engine;
             public string ForumMainPage;
@@ -305,11 +305,11 @@ namespace Voron_Poster
             public AccountData Account;
 
             public List<String> PreProcessingScripts;
-            public TaskBaseProperties()
+            public ForumBaseProperties()
             {
                 PreProcessingScripts = new List<string>();
             }
-            public TaskBaseProperties(TaskBaseProperties Data)
+            public ForumBaseProperties(ForumBaseProperties Data)
             {
                 Engine = Data.Engine;
                 ForumMainPage = Data.ForumMainPage;
@@ -320,9 +320,9 @@ namespace Voron_Poster
             }
         }
         [NonSerialized]
-        public TaskBaseProperties Properties = new TaskBaseProperties();
+        public ForumBaseProperties Properties = new ForumBaseProperties();
         [XmlIgnore]
-        public TaskBaseProperties.AccountData AccountToUse;
+        public ForumBaseProperties.AccountData AccountToUse;
         public TimeSpan RequestTimeout = new TimeSpan(0, 0, 20);
         protected List<string> Log;
 
@@ -339,31 +339,31 @@ namespace Voron_Poster
                 {
                     status = value;
                     Log.Add(status);
-                    if (StatusUpdate != null)
-                        StatusUpdate(status);
+                    if (StatusMessageUpdate != null)
+                        StatusMessageUpdate(status);
                 }
             }
         }
         [XmlIgnore]
-        public Action<string> StatusUpdate;
+        public Action<string> StatusMessageUpdate;
         [XmlIgnore]
-        public Progress<int> Progress = new Progress<int>();
-        protected struct ForumRunProgress
+        public struct ForumRunProgress
         {
             int login, scripts, post, postcount;
             [XmlIgnore]
-            public IProgress<int> Progress;
-            public int Login { get { return login; } set { login = value; Progress.Report(Average); } }
-            public int Scripts { get { return scripts; } set { scripts = value; Progress.Report(Average); } }
-            public int Post { get { return post; } set { post = value; Progress.Report(Average); } }
+            public int Login { get { return login; } set { login = value; if (ProgressUpdate != null) ProgressUpdate(Average); } }
+            public int Scripts { get { return scripts; } set { scripts = value; if (ProgressUpdate != null) ProgressUpdate(Average); } }
+            public int Post { get { return post; } set { post = value; if (ProgressUpdate != null) ProgressUpdate(Average); } }
             public int PostCount { get { return postcount; } set { postcount = value; } }
             public int Average
             {
                 get { return Math.Min(561, login + scripts / 5 + post); }
                 set { Login = value / 3; Scripts = value / 3; Post = value / 3; PostCount = 1; }
             }
+            [XmlIgnore]
+            public Action<int> ProgressUpdate;
         }
-        protected ForumRunProgress progress;
+        public ForumRunProgress Progress;
 
         public CancellationTokenSource Cancel;
         public static CaptchaForm CaptchaForm = new CaptchaForm();
@@ -550,7 +550,6 @@ namespace Voron_Poster
 
         public Forum()
         {
-            progress.Progress = Progress;
             Reset();
         }
 
@@ -574,7 +573,7 @@ namespace Voron_Poster
             StatusMessage = "Остановлено";
             HttpLog = new List<KeyValuePair<object, string>>();
             Activity = null;
-            progress.Average = 0;
+            Progress.Average = 0;
             WaitingForQueue = true;
             Cancel = new CancellationTokenSource();
         }
@@ -633,14 +632,14 @@ namespace Voron_Poster
             StatusMessage = "Обработка скриптов";
             CurrentScriptData = new ScriptData(new ScriptData.PostMessage(Subject, Message));
             var Session = InitScriptEngine(CurrentScriptData);
-            progress.Scripts += 50;
+            Progress.Scripts += 50;
             for (int i = 0; i < Properties.PreProcessingScripts.Count; i++)
             {
                 Session.Execute(System.IO.File.ReadAllText(MainForm.GetScriptPath(Properties.PreProcessingScripts[i])));
-                progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
+                Progress.Scripts += (byte)(205 / Properties.PreProcessingScripts.Count);
                 Cancel.Token.ThrowIfCancellationRequested();
             }
-            progress.Scripts = 255;
+            Progress.Scripts = 255;
             Cancel.Token.ThrowIfCancellationRequested();
 
             // Waiting for login end
@@ -655,7 +654,7 @@ namespace Voron_Poster
             Cancel.Token.ThrowIfCancellationRequested();
 
             // Post messages
-            progress.PostCount = CurrentScriptData.Output.Count;
+            Progress.PostCount = CurrentScriptData.Output.Count;
             for (int i = 0; i < CurrentScriptData.Output.Count; i++)
             {
                 Task PostProcess = PostMessage(TargetBoard, CurrentScriptData.Output[i].Subject, CurrentScriptData.Output[i].Message);
@@ -663,7 +662,7 @@ namespace Voron_Poster
                 Task.Delay(1000).Wait();
                 Cancel.Token.ThrowIfCancellationRequested();
             }
-            progress.Post = 255;
+            Progress.Post = 255;
         }
 
         /// <summary>

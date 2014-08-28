@@ -84,7 +84,7 @@ namespace Voron_Poster
             return Tooltips;
         }
 
-        private InfoIcons status = InfoIcons.Stopped, action = InfoIcons.Run;
+        private InfoIcons status = InfoIcons.Stopped;
         public InfoIcons Status
         {
             get { return status; }
@@ -131,193 +131,19 @@ namespace Voron_Poster
                 {
                     case InfoIcons.Complete:
                     case InfoIcons.Stopped:
-                    case InfoIcons.Cancelled: return InfoIcons.Run; break;
-                    case InfoIcons.Error: return InfoIcons.Restart; break;
-                    default: return InfoIcons.Cancel; break;
+                    case InfoIcons.Cancelled: return InfoIcons.Run;
+                    case InfoIcons.Error: return InfoIcons.Restart;
+                    default: return InfoIcons.Cancel;
                 }
             }
-            private set
-            {
-                action = value;
-                Ctrls.StartStop.BeginInvoke((Action)(() =>
-                {
-                    Ctrls.StartStop.Image = InfoIconsBitmaps[(int)action];
-                }));
-            }
-        }
-
-        public struct TaskGuiControls
-        {
-            public CheckBox Selected;
-            public LinkLabel Name;
-            public LinkLabel Status;
-            public PictureBox StatusIcon;
-            public ProgressBar Progress;
-            public Button StartStop;
-            public Button Properties;
-            public Button Delete;
-            public Control[] AsArray;
-            public void InitializeControls()
-            {
-                this.Selected = new System.Windows.Forms.CheckBox();
-                this.Name = new System.Windows.Forms.LinkLabel();
-                this.Status = new System.Windows.Forms.LinkLabel();
-                this.StatusIcon = new System.Windows.Forms.PictureBox();
-                this.Progress = new System.Windows.Forms.ProgressBar();
-                this.StartStop = new System.Windows.Forms.Button();
-                this.Properties = new System.Windows.Forms.Button();
-                this.Delete = new System.Windows.Forms.Button();
-                // 
-                // GTSelected
-                // 
-                Selected.AutoSize = false;
-                Selected.Dock = System.Windows.Forms.DockStyle.Fill;
-                Selected.Anchor = System.Windows.Forms.AnchorStyles.Top;
-                Selected.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-                Selected.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-                Selected.Location = new System.Drawing.Point(1, 1);
-                Selected.Margin = new System.Windows.Forms.Padding(0);
-                Selected.MaximumSize = new System.Drawing.Size(24, 24);
-                Selected.MinimumSize = new System.Drawing.Size(24, 24);
-                Selected.Name = "GTSelected";
-                Selected.Size = new System.Drawing.Size(24, 24);
-                Selected.TabIndex = 0;
-                Selected.UseVisualStyleBackColor = true;
-                Selected.BackColor = Color.Transparent;
-                Selected.Checked = true;
-                // 
-                // GTName
-                // 
-                Name.AutoSize = false;
-                Name.Dock = System.Windows.Forms.DockStyle.Fill;
-                Name.Location = new System.Drawing.Point(0, 0);
-                Name.Name = "GTName";
-                Name.Size = new System.Drawing.Size(377, 24);
-                // Name.MaximumSize = new System.Drawing.Size(0, 24);
-                //    Name.MinimumSize = new System.Drawing.Size(0, 24);
-                Name.TabIndex = 3;
-                Name.Text = "Тема/Раздел";
-                Name.Padding = new Padding(3, 6, 3, 0);
-                Name.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-                Name.BackColor = Color.Transparent;
-                // 
-                // GTStatus
-                // 
-                Status.AutoSize = false;
-                Status.Dock = DockStyle.Fill;
-                Status.Location = new System.Drawing.Point(0, 0);
-                Status.Name = "GTStatus";
-                Status.Size = new System.Drawing.Size(153, 24);
-                // Status.MaximumSize = new System.Drawing.Size(0, 24);
-                // Status.MinimumSize = new System.Drawing.Size(0, 24);
-                Status.TabIndex = 4;
-                Status.Text = "Остановлено";
-                Status.Padding = new Padding(3, 6, 3, 0);
-                Status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-                Status.LinkColor = Color.Black;
-                Status.LinkBehavior = LinkBehavior.NeverUnderline;
-                Status.ActiveLinkColor = Color.Black;
-                Status.BackColor = Color.Transparent;
-                // 
-                // GTStatusIcon
-                // 
-                StatusIcon.Dock = System.Windows.Forms.DockStyle.Fill;
-                StatusIcon.Image = InfoIconsBitmaps[(int)InfoIcons.Stopped];
-                StatusIcon.Location = new System.Drawing.Point(569, 1);
-                StatusIcon.Margin = new System.Windows.Forms.Padding(0);
-                StatusIcon.MaximumSize = new System.Drawing.Size(24, 24);
-                StatusIcon.MinimumSize = new System.Drawing.Size(24, 24);
-                StatusIcon.Name = "GTStatusIcon";
-                StatusIcon.Size = new System.Drawing.Size(24, 24);
-                StatusIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-                StatusIcon.TabIndex = 9;
-                StatusIcon.TabStop = false;
-                StatusIcon.BackColor = Color.Transparent;
-                // 
-                // GTProgress
-                // 
-                Progress.Dock = System.Windows.Forms.DockStyle.Fill;
-                Progress.Location = new System.Drawing.Point(597, 4);
-                Progress.Name = "GTProgress";
-                Progress.Size = new System.Drawing.Size(69, 18);
-                Progress.MaximumSize = new System.Drawing.Size(0, 18);
-                Progress.MinimumSize = new System.Drawing.Size(0, 18);
-                Progress.Maximum = 561;
-                Progress.TabIndex = 2;
-                // 
-                // GTStartStop
-                // 
-                StartStop.AutoSize = false;
-                StartStop.Dock = System.Windows.Forms.DockStyle.Fill;
-                StartStop.Image = global::Voron_Poster.Properties.Resources.arrow_run_16xLG;
-                StartStop.Location = new System.Drawing.Point(670, 1);
-                StartStop.Margin = new System.Windows.Forms.Padding(0);
-                StartStop.MaximumSize = new System.Drawing.Size(24, 24);
-                StartStop.MinimumSize = new System.Drawing.Size(24, 24);
-                StartStop.Name = "GTStartStop";
-                StartStop.Size = new System.Drawing.Size(24, 24);
-                StartStop.TabIndex = 8;
-                StartStop.UseVisualStyleBackColor = true;
-                StartStop.BackColor = Color.Transparent;
-                // 
-                // GTPropeties
-                // 
-                Properties.AutoSize = false;
-                Properties.Dock = System.Windows.Forms.DockStyle.Fill;
-                Properties.Image = global::Voron_Poster.Properties.Resources.gear_16xLG;
-                Properties.Location = new System.Drawing.Point(695, 1);
-                Properties.Margin = new System.Windows.Forms.Padding(0);
-                Properties.MaximumSize = new System.Drawing.Size(24, 24);
-                Properties.MinimumSize = new System.Drawing.Size(24, 24);
-                Properties.Name = "GTPropeties";
-                Properties.Size = new System.Drawing.Size(24, 24);
-                Properties.TabIndex = 7;
-                Properties.UseVisualStyleBackColor = true;
-                Properties.BackColor = Color.Transparent;
-                // 
-                // GTDelete
-                // 
-                Delete.AutoSize = false;
-                Delete.Dock = System.Windows.Forms.DockStyle.Fill;
-                Delete.Image = global::Voron_Poster.Properties.Resources.action_Cancel_16xLG;
-                Delete.Location = new System.Drawing.Point(720, 1);
-                Delete.Margin = new System.Windows.Forms.Padding(0);
-                Delete.MaximumSize = new System.Drawing.Size(24, 24);
-                Delete.MinimumSize = new System.Drawing.Size(24, 24);
-                Delete.Name = "GTDelete";
-                Delete.Size = new System.Drawing.Size(24, 24);
-                Delete.TabIndex = 10;
-                Delete.UseVisualStyleBackColor = true;
-                AsArray = new Control[] { Selected, Name, Status, StatusIcon, Progress, StartStop, Properties, Delete };
-            }
-
-        }
-
-        public TaskGuiControls Ctrls;
-
-        private void AddToGuiTable()
-        {
-            MainForm.tasksTable.RowCount = MainForm.tasksTable.RowCount + 1;
-            for (int i = 0; i < Ctrls.AsArray.Length; i++)
-            {
-                MainForm.tasksTable.Controls.Add(Ctrls.AsArray[i], i, MainForm.tasksTable.RowCount - 2);
-            }
-            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].SizeType = SizeType.Absolute;
-            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 2].Height = 24F;
-            MainForm.tasksTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        }
-
-        public static void ResizeEnd(Control control)
-        {
-            Size s = control.ClientSize;
-            control.Dock = DockStyle.None;
-            control.Size = s;
         }
 
         #endregion
 
-        public string StatusText { get; set; }
         public bool Selected { get; set; }
+        public string TargetUrl { get; set; }
+        public string StatusText { get; set; }
+        public int Progress { get; set; }
 
         #region DataGridView
 
@@ -437,7 +263,6 @@ namespace Voron_Poster
             }
         }
 
-        public int pr { get; set; }
         public class DataGridViewProgressColumn : DataGridViewColumn
         {
             public DataGridViewProgressColumn()
@@ -566,7 +391,7 @@ namespace Voron_Poster
             public DataGridViewImageButtonColumn()
                 : base(new DataGridViewImageButtonCell()) { }
 
-            public Bitmap Icon { get; set; } 
+            public Bitmap Icon { get; set; }
 
             public override object Clone()
             {
@@ -579,23 +404,13 @@ namespace Voron_Poster
 
         #endregion
 
-        public PostTask()
+        public PostTask(MainForm mainForm)
         {
-            if (MainForm == null) throw new NullReferenceException("MainForm not set");
-            Ctrls.InitializeControls();
-            MainForm.ToolTip.SetToolTip(Ctrls.Delete, "Удалить");
-            MainForm.ToolTip.SetToolTip(Ctrls.Properties, "Опции");
-            Ctrls.StartStop.Click += StartStop_Clicked;
-            Ctrls.Delete.Click += Delete_Clicked;
-            Ctrls.Properties.Click += Properties_Clicked;
-            Ctrls.Name.LinkClicked += Name_LinkClicked;
-            Ctrls.Status.LinkClicked += Status_LinkClicked;
-            AddToGuiTable();
+            MainForm = mainForm;
         }
 
         public bool New = true;
 
-        public string TargetUrl { get; set; }
         protected Forum forum;
         public Forum Forum
         {
@@ -605,8 +420,8 @@ namespace Voron_Poster
                 forum = value;
                 if (forum != null)
                 {
-                    forum.Progress.ProgressChanged += Progress_ProgressChanged;
-                    forum.StatusUpdate = StatusUpdate;
+                    forum.StatusMessageUpdate = StatusUpdate;
+                    forum.Progress.ProgressUpdate = x => Progress = x;
                 }
             }
         }
@@ -618,61 +433,8 @@ namespace Voron_Poster
                 if (Forum.WaitingForQueue) Status = InfoIcons.Waiting;
                 else Status = InfoIcons.Running;
             }
-            Ctrls.Status.BeginInvoke((Action)(() =>
-            {
-                Ctrls.Status.Text = status;
-                StatusText = status;
-                MainForm.ToolTip.SetToolTip(Ctrls.Status, status);
-            }));
         }
 
-        private void Progress_ProgressChanged(object sender, int e)
-        {
-            Ctrls.Progress.Value = e;
-            pr = e;
-        }
-
-        public void Properties_Clicked(object sender, EventArgs e)
-        {
-            Ctrls.Properties.Enabled = false;
-            Ctrls.StartStop.Enabled = false;
-            Ctrls.Delete.Enabled = false;
-            MainForm.CurrTask = this;
-            MainForm.propShow();
-        }
-
-        private void Name_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start((sender as LinkLabel).Text);
-        }
-
-        private void Status_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (Ctrls.Status.LinkBehavior == LinkBehavior.HoverUnderline && Forum != null)
-                Forum.ShowDebugData(TargetUrl);
-        }
-
-        public void Delete_Clicked(object sender, EventArgs e)
-        {
-            MainForm.tasksTable.SuspendLayoutSafe();
-            for (int c = 0; c < Ctrls.AsArray.Length; c++)
-            {
-                int r = MainForm.tasksTable.GetRow(Ctrls.AsArray[c]);
-                MainForm.tasksTable.Controls.Remove(Ctrls.AsArray[c]);
-                Ctrls.AsArray[c].Dispose();
-                for (r = r + 1; r < MainForm.tasksTable.RowCount; r++)
-                {
-                    Control ControlBelow = MainForm.tasksTable.GetControlFromPosition(c, r);
-                    if (ControlBelow != null)
-                        MainForm.tasksTable.SetRow(ControlBelow, r - 1);
-                }
-            }
-            lock (MainForm.Tasks) MainForm.Tasks.Remove(this);
-            MainForm.tasksTable.RowCount -= 1;
-            MainForm.tasksTable.RowStyles.RemoveAt(MainForm.tasksTable.RowStyles.Count - 1);
-            MainForm.tasksTable.RowStyles[MainForm.tasksTable.RowCount - 1].SizeType = SizeType.AutoSize;
-            MainForm.tasksTable.ResumeLayoutSafe();
-        }
 
         static int ActiveTasks = 0;
         static ConcurrentQueue<PostTask> PostTaskQueue = new ConcurrentQueue<PostTask>();
@@ -691,40 +453,30 @@ namespace Voron_Poster
             }
         }
 
-        public async void StartStop_Clicked(object sender, EventArgs e)
+        public void QueueTask()
         {
-            Ctrls.StartStop.Enabled = false;
-            Ctrls.Delete.Enabled = false;
-            Ctrls.Properties.Enabled = false;
-            if (Action == InfoIcons.Cancel)
-                Forum.Cancel.Cancel();
-            else
+            Forum.AccountToUse = MainForm.Settings.Account;
+            Forum.CreateActivity(async () =>
+               await Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
+            Forum.Activity.ContinueWith((prevtask) =>
             {
-                Forum.AccountToUse = MainForm.Settings.Account;
-                Forum.CreateActivity(async () =>
-                   await Forum.LoginRunScritsAndPost(new Uri(TargetUrl), MainForm.messageSubject.Text, MainForm.messageText.Text));
-                Forum.Activity.ContinueWith((prevtask) =>
-                {
-                    ActiveTasks--;
-                    StartNext();
-                });
-                PostTaskQueue.Enqueue(this);
-                Ctrls.StartStop.Enabled = true;
+                ActiveTasks--;
+                StartNext();
+            });
+            Status = InfoIcons.Waiting;
+            Forum.StatusMessage = "В очереди";
+            PostTaskQueue.Enqueue(this);
+        }
 
-                Status = InfoIcons.Waiting;
-                Forum.StatusMessage = "В очереди";
-                if (sender == Ctrls.StartStop) StartNext();
-                await Forum.Activity;
-                if (Forum.Error is Forum.UserCancelledException)
-                    Status = InfoIcons.Cancelled;
-                else if (Forum.Error != null)
-                    Status = InfoIcons.Error;
-                else
-                    Status = InfoIcons.Complete;
-                Ctrls.Delete.Enabled = true;
-                Ctrls.Properties.Enabled = true;
-                Ctrls.StartStop.Enabled = true;
-            }
+        public async Task AwaitForComplete()
+        {
+            await Forum.Activity;
+            if (Forum.Error is Forum.UserCancelledException)
+                Status = InfoIcons.Cancelled;
+            else if (Forum.Error != null)
+                Status = InfoIcons.Error;
+            else
+                Status = InfoIcons.Complete;
         }
 
     }

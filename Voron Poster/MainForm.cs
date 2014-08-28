@@ -29,7 +29,7 @@ namespace Voron_Poster
     public partial class MainForm : Form, IMessageFilter
     {
         public BindingList<PostTask> Tasks = new BindingList<PostTask>();
-        public PostTask CurrTask;
+        public PostTask propCurrentTask;
         public Scintilla scriptsEditor = new Scintilla();
 
         public MainForm()
@@ -63,20 +63,20 @@ namespace Voron_Poster
 
             typeof(DataGridView).InvokeMember("DoubleBuffered",
     BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-    null, dataGridView1, new object[] { true });
-            dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.DataSource = Tasks;
+    null, tasksTable, new object[] { true });
+            tasksTable.AutoGenerateColumns = false;
+            tasksTable.DataSource = Tasks;
 
             var Timer = new System.Windows.Forms.Timer() { Interval = 50, Enabled = true };
             Timer.Tick += (o, e) =>
             {
-                if (dataGridView1.Columns[4].Displayed)
-                    foreach (DataGridViewRow Row in dataGridView1.Rows)
+                if (tasksTable.Columns[4].Displayed)
+                    foreach (DataGridViewRow Row in tasksTable.Rows)
                     {
                         if (Row.Displayed)
-                            dataGridView1.InvalidateCell(Row.Cells[4]);
+                            tasksTable.InvalidateCell(Row.Cells[4]);
                     }
-                dataGridView1.Refresh();
+                tasksTable.Refresh();
             };
             scriptsEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             scriptsEditor.LineWrapping.VisualFlags = ScintillaNET.LineWrappingVisualFlags.End;
@@ -334,57 +334,15 @@ namespace Voron_Poster
 
         #region Tasks Page
 
-        private void TasksGuiTable_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
+        private async void AddTaskButton_Click(object sender, EventArgs e)
         {
-            if (e.Row == 0)
-            {
-                Graphics g = e.Graphics;
-                Rectangle r = e.CellBounds;
-                g.FillRectangle(SystemBrushes.Control, r);
-            }
-            //else // Color table rows by status, but I dislike the result
-            //{
-            //    var Status = (PictureBox)tasksTable.GetControlFromPosition(3, e.Row);
-            //    if (Status != null)
-            //    {
-            //        switch (TaskGui.GetInfo((Bitmap)Status.Image))
-            //        {
-            //            case TaskGui.InfoIcons.Running:
-            //            case TaskGui.InfoIcons.Waiting:
-            //                g.FillRectangle(Brushes.LightBlue, r); break;
-            //            case TaskGui.InfoIcons.Complete:
-            //                g.FillRectangle(Brushes.LightGreen, r); break;
-            //            case TaskGui.InfoIcons.Error:
-            //                g.FillRectangle(Brushes.LightPink, r); break;
-            //            default:
-            //                g.FillRectangle(Brushes.White, r); break;
-            //        }
-            //    }
-            //}
-        }
-
-        private void AddTaskButton_Click(object sender, EventArgs e)
-        {
-            tasksTable.Width -= 50;
-            tasksTable.Visible = false;
-            tasksTable.SuspendLayoutSafe();
-            PostTask New = new PostTask();
+            PostTask New = new PostTask(this);
             New.TargetUrl = tasksUrl.Text;
-            New.Properties_Clicked(sender, e);
             propEngine.SelectedIndex = 4;
+            await propShow(New);
             Tasks.Add(New);
-            tasksTable.ResumeLayoutSafe();
-            tasksTable.Visible = true;
-            tasksTable.Width += 50;
-
-            //TaskPropertiesPage.Enabled = false;
-            // Tabs.TabIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
-            // Tabs.SelectTab(TaskPropertiesPage);
-            // TaskPropertiesPage.Select();
-            //  Tabs.TabPages.Remove(TaskPropertiesPage);
         }
 
-        // TabPage PreviousTab = null;
         private void Tabs_Selecting(object sender, TabControlCancelEventArgs e)
         {
             //if (PreviousTab == propTab && e.TabPage != scriptsTab)
@@ -543,7 +501,7 @@ namespace Voron_Poster
                         && Tasks[i].Ctrls.StartStop.Enabled
                            && Tasks[i].Action == Action)
                         //   Tasks[i].Ctrls.StartStop.PerformClick();
-                        Tasks[i].StartStop_Clicked(sender, e);
+                        Tasks[i].Run(sender, e);
                 }
                 ////Task.Delay(100).ContinueWith((x) =>
                 //     BeginInvoke((Action)(() => PostTask.StartNext()));
@@ -556,37 +514,30 @@ namespace Voron_Poster
 
         private void GTDelete_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show())
             (sender as Button).Enabled = false;
             List<PostTask> Remove = new List<PostTask>();
-            lock (Tasks)
+            foreach (DataGridViewRow Row in tasksTable.Rows)
             {
-                for (int i = 0; i < Tasks.Count; i++)
-                {
-                    if (Tasks[i].Ctrls.Selected.Checked && Tasks[i].Ctrls.Delete.Enabled)
-                    {
-                        Remove.Add(Tasks[i]);
-                    }
-                }
-                tasksTable.Visible = false;
-                tasksTable.SuspendLayoutSafe();
-                foreach (PostTask Task in Remove)
-                {
-                    Task.Delete_Clicked(sender, e);
-                }
-                tasksTable.ResumeLayoutSafe();
-                tasksTable.Visible = true;
+                if ((bool)Row.Cells[tasksTableChecked.Index].Value
+                    && (Row.Cells[tasksTableDelete.Index] as PostTask.DataGridViewImageButtonCell).Enabled)
+                    Remove.Add(Row.DataBoundItem as PostTask);
+            }
+            foreach (PostTask Task in Remove)
+            {
+                Tasks.Remove(Task);
             }
             Remove.Clear();
         }
 
         public struct TaskList
         {
-            public Forum.TaskBaseProperties[] Properties;
+            public Forum.ForumBaseProperties[] Properties;
             public string[] TargetUrls;
             public static void Save(BindingList<PostTask> tasks, string path)
             {
                 TaskList TaskList;
-                TaskList.Properties = new Forum.TaskBaseProperties[tasks.Count];
+                TaskList.Properties = new Forum.ForumBaseProperties[tasks.Count];
                 TaskList.TargetUrls = new string[tasks.Count];
                 for (int i = 0; i < tasks.Count; i++)
                 {
@@ -599,26 +550,21 @@ namespace Voron_Poster
             }
             public static void Load(BindingList<PostTask> tasks, MainForm parent, string path)
             {
-                parent.tasksTable.Width -= 50;
-                parent.tasksTable.Visible = false;
-                parent.tasksTable.SuspendLayoutSafe();
+
                 TaskList TaskList;
                 var Xml = new System.Xml.Serialization.XmlSerializer(typeof(TaskList));
                 using (FileStream F = File.OpenRead(path))
                     TaskList = (TaskList)Xml.Deserialize(F);
                 for (int i = 0; i < TaskList.Properties.Length; i++)
                 {
-                    PostTask NewTask = new PostTask();
+                    PostTask NewTask = new PostTask(parent);
                     NewTask.New = false;
                     NewTask.TargetUrl = TaskList.TargetUrls[i];
                     NewTask.Forum = Forum.New(TaskList.Properties[i].Engine);
                     NewTask.Forum.Properties = TaskList.Properties[i];
-                    NewTask.Ctrls.Name.Text = NewTask.TargetUrl;
                     tasks.Add(NewTask);
                 }
-                parent.tasksTable.ResumeLayoutSafe();
-                parent.tasksTable.Visible = true;
-                parent.tasksTable.Width += 50;
+
             }
         }
 
@@ -662,36 +608,6 @@ namespace Voron_Poster
             tasksLoad.Enabled = true;
         }
 
-        private void tasksTable_Resize(object sender, EventArgs e)
-        {
-            tasksTable.SuspendLayoutSafe();
-            for (int i = 0; i < Tasks.Count; i++)
-            {
-                //   Tasks[i].Ctrls.Name.Dock = DockStyle.Fill;
-                Tasks[i].Ctrls.Status.Dock = DockStyle.Fill;
-            }
-            tasksTable.ResumeLayoutSafe();
-
-            //  Manually sizing text elements, because Dock = Fill or Anchor auto size causes
-            //  tasksTable to invoke thousands redraw events on chenging text
-            tasksTable.SuspendLayoutSafe();
-            for (int i = 0; i < Tasks.Count; i++)
-            {
-                //   TaskGui.ResizeEnd(Tasks[i].Ctrls.Name);
-                PostTask.ResizeEnd(Tasks[i].Ctrls.Status);
-            }
-            tasksTable.ResumeLayoutSafe();
-        }
-
-
-        private void tasksTable_SizeChanged(object sender, EventArgs e)
-        {
-            //int Width = (int)(tasksTable.ClientRectangle.Width * 0.2);
-            //if (Width >= 300) tasksTable.ColumnStyles[2].Width = 300;
-            //else if (Width >= 200) tasksTable.ColumnStyles[2].Width = 200;
-            //else tasksTable.ColumnStyles[2].Width = 100;
-        }
-
         #endregion
 
         #region Task Properties Page
@@ -703,7 +619,7 @@ namespace Voron_Poster
         bool PropertiesLoginActivity;
         Task PropertiesActivityTask;
         Forum TempForum;
-        Forum.TaskBaseProperties TempProperties = new Forum.TaskBaseProperties();
+        Forum.ForumBaseProperties TempProperties = new Forum.ForumBaseProperties();
         CancellationTokenSource StopProperties;
 
         private void propAuthGlobal_CheckedChanged(object sender, EventArgs e)
@@ -870,7 +786,7 @@ namespace Voron_Poster
             {
                 propAuthProgress.Value = e2;
             };
-            TempForum.StatusUpdate = (status) =>
+            TempForum.StatusMessageUpdate = (status) =>
             {
                 propAuthStatus.BeginInvoke((Action)(() =>
                 {
@@ -996,18 +912,21 @@ namespace Voron_Poster
             TempProperties.PreProcessingScripts = propScriptsList.Items.Cast<string>().ToList<string>();
             TempForum = Forum.New(TempProperties.Engine);
             TempForum.Properties = TempProperties;
-            CurrTask.Forum = TempForum;
-            CurrTask.TargetUrl = TempTargetUrl;
-            CurrTask.Ctrls.Name.Text = CurrTask.TargetUrl;
+            propCurrentTask.Forum = TempForum;
+            propCurrentTask.TargetUrl = TempTargetUrl;
+            propCurrentTask.Ctrls.Name.Text = propCurrentTask.TargetUrl;
             TempForum = null;
-            CurrTask.New = false;
+            propCurrentTask.New = false;
             TasksUpdater_Tick(sender, e);
             propClose(sender, e);
             propApply.Enabled = true;
         }
 
-        public void propShow()
+        TaskCompletionSource<bool> propOpened;
+        public Task propShow(PostTask postTask)
         {
+            propCurrentTask = postTask;
+            propOpened = new TaskCompletionSource<bool>();
             tasksAdd.Enabled = false;
             Tabs.TabPages.Insert(Tabs.TabPages.IndexOf(tasksTab) + 1, propTab);
             //Tabs.SelectedIndex = Tabs.TabPages.IndexOf(TaskPropertiesPage);
@@ -1019,23 +938,24 @@ namespace Voron_Poster
             ProfileComboBox_Enter(propProfiles, EventArgs.Empty);
             PropertiesActivity = false;
             PropertiesLoginActivity = false;
-            if (CurrTask.Forum != null)
-                TempProperties = new Forum.TaskBaseProperties(CurrTask.Forum.Properties);
+            if (propCurrentTask.Forum != null)
+                TempProperties = new Forum.ForumBaseProperties(propCurrentTask.Forum.Properties);
             else
             {
-                TempProperties = new Forum.TaskBaseProperties();
+                TempProperties = new Forum.ForumBaseProperties();
                 TempProperties.PreProcessingScripts.Add("(built in) Опубликовать");
             }
             LoadTaskBaseProperties(TempProperties);
-            propTargetUrl.Text = CurrTask.TargetUrl;
+            propTargetUrl.Text = propCurrentTask.TargetUrl;
             propAuthGlobalUsername.Text = Settings.Account.Username;
             propValidate();
             propTargetUrl.Focus();
             //this.AcceptButton = TaskPropApply;
             //this.CancelButton = TaskPropCancel;
+            return propOpened.Task;
         }
 
-        private void LoadTaskBaseProperties(Forum.TaskBaseProperties Properties)
+        private void LoadTaskBaseProperties(Forum.ForumBaseProperties Properties)
         {
             if (TempProperties.UseLocalAccount)
                 propAuthLocal.Select();
@@ -1087,14 +1007,14 @@ namespace Voron_Poster
             Tabs.SelectTab(tasksTab);
             //for (int i = 0; i < Tabs.TabPages.Count; i++) Tabs.TabPages[i].Enabled = true;
             Tabs.TabPages.Remove(propTab);
-            CurrTask.Ctrls.Properties.Enabled = true;
-            CurrTask.Ctrls.StartStop.Enabled = true;
-            CurrTask.Ctrls.Delete.Enabled = true;
-            if (CurrTask.New)
+            propCurrentTask.Ctrls.Properties.Enabled = true;
+            propCurrentTask.Ctrls.StartStop.Enabled = true;
+            propCurrentTask.Ctrls.Delete.Enabled = true;
+            if (propCurrentTask.New)
             {
-                CurrTask.Delete_Clicked(sender, e);
+                propCurrentTask.Delete_Clicked(sender, e);
             }
-            CurrTask = null;
+            propCurrentTask = null;
             TempForum = null;
             tasksAdd.Enabled = true;
             propCancel.Enabled = true;
@@ -1210,7 +1130,7 @@ namespace Voron_Poster
             {
                 TempProperties.PreProcessingScripts = propScriptsList.Items.Cast<string>().ToList<string>();
                 if (propProfiles.Text == String.Empty) NewProfileButton_Click(sender, e);
-                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.ForumBaseProperties));
                 using (FileStream F = File.Create(GetProfilePath(propProfiles.Text)))
                     Xml.Serialize(F, TempProperties);
                 propValidate();
@@ -1233,9 +1153,9 @@ namespace Voron_Poster
             propProfileLoad.Enabled = false;
             try
             {
-                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.TaskBaseProperties));
+                var Xml = new System.Xml.Serialization.XmlSerializer(typeof(Forum.ForumBaseProperties));
                 using (FileStream F = File.OpenRead(GetProfilePath(propProfiles.Text)))
-                    TempProperties = (Forum.TaskBaseProperties)Xml.Deserialize(F);
+                    TempProperties = (Forum.ForumBaseProperties)Xml.Deserialize(F);
                 LoadTaskBaseProperties(TempProperties);
                 propValidate();
             }
@@ -1782,7 +1702,7 @@ namespace Voron_Poster
         {
             public bool LoadLastTaskList;
             public bool ApplySuggestedProfile;
-            public Forum.TaskBaseProperties.AccountData Account;
+            public Forum.ForumBaseProperties.AccountData Account;
             public int MaxActiveTasks;
             public static void Save(SettingsData Data, string path)
             {
@@ -1905,19 +1825,46 @@ namespace Voron_Poster
 
         #endregion
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void tasksTable_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridViewRow Row = dataGridView1.Rows[e.RowIndex];
-            switch (e.ColumnIndex)
+            DataGridViewRow Row = tasksTable.Rows[e.RowIndex];
+            PostTask CurrentTask = Row.DataBoundItem as PostTask;
+            PostTask.DataGridViewImageButtonCell ButtonCell =
+                Row.Cells[e.ColumnIndex] as PostTask.DataGridViewImageButtonCell;
+            if (e.ColumnIndex == tasksTableTargetUrl.Index)
+                System.Diagnostics.Process.Start(Row.Cells[1].Value as string);
+            else if (e.ColumnIndex == tasksTableStatusText.Index)
             {
-                case 1: System.Diagnostics.Process.Start(Row.Cells[1].Value as string); break;
-                case 3: if ((Row.Cells[3] as DataGridViewLinkCell).LinkBehavior == LinkBehavior.HoverUnderline &&
-                        (Row.DataBoundItem as PostTask).Forum != null)
-                        (Row.DataBoundItem as PostTask).Forum.ShowDebugData((Row.DataBoundItem as PostTask).TargetUrl);
-                    break;
-                case 5: (Row.DataBoundItem as PostTask).StartStop_Clicked(sender, e); break;
-                case 6: (Row.DataBoundItem as PostTask).Properties_Clicked(sender, e); break;
-                case 7: (Row.DataBoundItem as PostTask).Delete_Clicked(sender, e); break;
+                if ((Row.Cells[3] as DataGridViewLinkCell).LinkBehavior == LinkBehavior.HoverUnderline &&
+                            CurrentTask.Forum != null)
+                    CurrentTask.Forum.ShowDebugData(CurrentTask.TargetUrl);
+            }
+            else if (ButtonCell != null && ButtonCell.Enabled)
+            {
+                if (e.ColumnIndex == tasksTableDelete.Index)
+                    Tasks.Remove(CurrentTask);
+                else
+                {
+                    (Row.Cells[tasksTableStart.Index] as PostTask.DataGridViewImageButtonCell).Enabled = false;
+                    (Row.Cells[tasksTableProperites.Index] as PostTask.DataGridViewImageButtonCell).Enabled = false;
+                    (Row.Cells[tasksTableDelete.Index] as PostTask.DataGridViewImageButtonCell).Enabled = false;
+
+                    if (e.ColumnIndex == tasksTableStart.Index)
+                        if (CurrentTask.Action == PostTask.InfoIcons.Cancel)
+                            CurrentTask.Forum.Cancel.Cancel();
+                        else
+                        {
+                            CurrentTask.QueueTask();
+                            PostTask.StartNext();
+                            await CurrentTask.AwaitForComplete();
+                        }
+                    else if (e.ColumnIndex == tasksTableProperites.Index)
+                        await propShow(CurrentTask);
+
+                    (Row.Cells[tasksTableStart.Index] as PostTask.DataGridViewImageButtonCell).Enabled = true;
+                    (Row.Cells[tasksTableProperites.Index] as PostTask.DataGridViewImageButtonCell).Enabled = true;
+                    (Row.Cells[tasksTableDelete.Index] as PostTask.DataGridViewImageButtonCell).Enabled = true;
+                }
             }
         }
 

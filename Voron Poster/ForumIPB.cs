@@ -27,15 +27,15 @@ namespace Voron_Poster
                     new KeyValuePair<string, string>("UserName", AccountToUse.Username.ToLower()),
                     new KeyValuePair<string, string>("PassWord", AccountToUse.Password)
                  });
-            progress.Login += 40;
+            Progress.Login += 40;
 
             // Send data to login and wait response
            StatusMessage = "Авторизация: Запрос авторизации";
             var Response = await PostAndLog(Properties.ForumMainPage + "index.php?act=Login&CODE=01", PostData);
             Cancel.Token.ThrowIfCancellationRequested();
-            progress.Login += 120;
+            Progress.Login += 120;
             string Html = (await Response.Content.ReadAsStringAsync()).ToLower();
-            progress.Login += 60;
+            Progress.Login += 60;
 
             // Check if login successfull
             Cancel.Token.ThrowIfCancellationRequested();
@@ -47,7 +47,7 @@ namespace Voron_Poster
             else
             {
                StatusMessage = "Успешно авторизирован";
-                progress.Login += 35;
+                Progress.Login += 35;
             }
         }
 
@@ -78,7 +78,7 @@ namespace Voron_Poster
             if (TargetForum == null) throw new Exception("Неправильная ссылка на тему или раздел");
             string Do = "reply_post";
             if (TargetTopic == null) Do = "new_post";
-            progress.Post += 40 / progress.PostCount;
+            Progress.Post += 40 / Progress.PostCount;
             Cancel.Token.ThrowIfCancellationRequested();
 
             //var PostData = new FormUrlEncodedContent(new[]
@@ -93,16 +93,16 @@ namespace Voron_Poster
            StatusMessage = "Публикация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage + "index.php?act=Post&do="
                 + Do + "&f=" + TargetForum + "&t=" + TargetTopic);
-            progress.Post += 60 / progress.PostCount;
+            Progress.Post += 60 / Progress.PostCount;
             string Html = await Response.Content.ReadAsStringAsync();
-            progress.Post += 25 / progress.PostCount;
+            Progress.Post += 25 / Progress.PostCount;
             Cancel.Token.ThrowIfCancellationRequested();
 
            StatusMessage = "Публикация: Поиск переменных";
             string auth_key = GetFieldValue(Html, "auth_key");
             string code = GetFieldValue(Html, "code");
             string attach_post_key = GetFieldValue(Html, "attach_post_key");
-            progress.Post += 10 / progress.PostCount;
+            Progress.Post += 10 / Progress.PostCount;
 
            StatusMessage = "Публикация: Подготовка данных";
            Cancel.Token.ThrowIfCancellationRequested();
@@ -119,16 +119,16 @@ namespace Voron_Poster
                 FormData.Add(new StringContent(auth_key), "auth_key");
                 FormData.Add(new StringContent(code), "CODE");
                 FormData.Add(new StringContent(attach_post_key), "attach_post_key");
-                progress.Post += 10 / progress.PostCount;
+                Progress.Post += 10 / Progress.PostCount;
 
                StatusMessage = "Публикация: Отправка запроса";
                Cancel.Token.ThrowIfCancellationRequested();
                 Response = await PostAndLog(Properties.ForumMainPage + "index.php?", FormData);
-                progress.Post += 60 / progress.PostCount;
+                Progress.Post += 60 / Progress.PostCount;
                 Html = await Response.Content.ReadAsStringAsync();
-                progress.Post += 25 / progress.PostCount;
+                Progress.Post += 25 / Progress.PostCount;
                 Html = Html.ToLower();
-                progress.Post += 10 / progress.PostCount;
+                Progress.Post += 10 / Progress.PostCount;
 
                 // Check if success
                 Cancel.Token.ThrowIfCancellationRequested();
@@ -139,7 +139,7 @@ namespace Voron_Poster
                 else
                 {
                    StatusMessage = "Опубликовано";
-                    progress.Post += 15 / progress.PostCount;
+                    Progress.Post += 15 / Progress.PostCount;
                 }
             }
         }

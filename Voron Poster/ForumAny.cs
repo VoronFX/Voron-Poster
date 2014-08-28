@@ -706,7 +706,7 @@ namespace Voron_Poster
                     );
             }
 
-            public HttpContent PostData(TaskBaseProperties.AccountData account, string captcha, Encoding encoding)
+            public HttpContent PostData(ForumBaseProperties.AccountData account, string captcha, Encoding encoding)
             {
                 var PostString = new StringBuilder();
                 PostString.Append("&" + UsernameFieldName + "=");
@@ -848,7 +848,7 @@ namespace Voron_Poster
                 return Result.Distinct().Take(10).ToList();
             }
 
-            public HttpContent PostData(TaskBaseProperties.AccountData account, Encoding encoding,
+            public HttpContent PostData(ForumBaseProperties.AccountData account, Encoding encoding,
                                             string subject, string message, string captcha)
             {
                 List<KeyValuePair<string, string>> OtherFieldsList = OtherFields.ToList();
@@ -933,7 +933,7 @@ namespace Voron_Poster
             StatusMessage = "Авторизация: Загрузка страницы";
             var Response = await GetAndLog(Properties.ForumMainPage);
             if (!Response.IsSuccessStatusCode) throw new Exception("Авторизация: " + Response.StatusCode.ToString());
-            progress.Login = 40;
+            Progress.Login = 40;
 
             // If Windows authetification
             if (Response.StatusCode == HttpStatusCode.Unauthorized)
@@ -944,7 +944,7 @@ namespace Voron_Poster
                 Client = new HttpClient(handler);
                 StatusMessage = "Авторизация: Запрос авторизации";
                 Response = await GetAndLog(Properties.ForumMainPage);
-                progress.Login = 205;
+                Progress.Login = 205;
                 if (Response.IsSuccessStatusCode)
                 {
                     StatusMessage = "Авторизация: Успешно";
@@ -957,33 +957,33 @@ namespace Voron_Poster
             var Html = await InitHtml(Response);
             string LoginUrl = Properties.ForumMainPage;
             LoginForm LoginForm = LoginForm.Find(Html);
-            progress.Login = 50;
+            Progress.Login = 50;
 
             // Check other pages for LoginForm
             if (LoginForm == null)
             {
                 StatusMessage = "Авторизация: Поиск страницы авторизации";
                 List<KeyValuePair<string, int>> LoginLinks = LoginForm.FindLinks(Html, new Uri(LoginUrl).Host);
-                progress.Login = 55;
+                Progress.Login = 55;
                 int i = 0;
                 while (LoginForm == null && i < LoginLinks.Count)
                 {
                     LoginUrl = LoginLinks[i].Key;
                     StatusMessage = "Авторизация: Загрузка страницы";
                     Response = await GetAndLog(LoginUrl);
-                    progress.Login += 50 / LoginLinks.Count;
+                    Progress.Login += 50 / LoginLinks.Count;
                     StatusMessage = "Авторизация: Поиск формы авторизации";
                     if (Response.IsSuccessStatusCode)
                     {
                         Html = await InitHtml(Response);
                         LoginForm = LoginForm.Find(Html);
                     }
-                    progress.Login += 10 / LoginLinks.Count;
+                    Progress.Login += 10 / LoginLinks.Count;
                     i++;
                 }
             }
             if (LoginForm == null) throw new Exception("Форма авторизации не найдена");
-            progress.Login = 155;
+            Progress.Login = 155;
 
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("LoginLink: {0}", LoginUrl);
@@ -1009,19 +1009,19 @@ namespace Voron_Poster
                 WaitingForQueue = true;
                 StatusMessage = "Авторизация: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
-                progress.Login += 10;
+                Progress.Login += 10;
                 StatusMessage = "Авторизация: Загрузка капчи";
                 Response = await Client.GetAsync(LoginForm.CaptchaPictureUrl, Cancel.Token);
-                progress.Login += 15;
+                Progress.Login += 15;
                 CaptchaForm.Picture.Image = new Bitmap(await Response.Content.ReadAsStreamAsync());
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
                 StatusMessage = "Авторизация: Ожидание ввода капчи";
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 Captcha = CaptchaForm.Result.Text;
                 CaptchaForm.IsFree.Set();
-                progress.Login += 15;
+                Progress.Login += 15;
             }
-            else progress.Login += 40;
+            else Progress.Login += 40;
 
 
             // Send authorization request
@@ -1029,11 +1029,11 @@ namespace Voron_Poster
 
             Response = await PostAndLog(LoginForm.Action,
                 LoginForm.PostData(AccountToUse, Captcha, LoginForm.ChooseEncoding(Html.Encoding)));
-            progress.Login = 195;
+            Progress.Login = 195;
             Html = await InitHtml(Response);
             Html.ClearNoDisplay();
             Text = Html.DocumentNode.InnerTextDecoded();
-            progress.Login = 205;
+            Progress.Login = 205;
             // Analyze response
             int SuccessScore = PreAnalyseFilter(PreLoginSuccess, Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count)
                              - PreAnalyseFilter(PreError, Expr.Matches(Text, Expr.Text.Global.Message.Error).Count)
@@ -1051,7 +1051,7 @@ namespace Voron_Poster
             // Load LoginPage again and analyze it now (after we've tryed to login)
             StatusMessage = "Авторизация: Загрузка страницы";
             Response = await GetAndLog(LoginUrl);
-            progress.Login = 245;
+            Progress.Login = 245;
             StatusMessage = "Авторизация: Проверка авторизации";
             Html = await InitHtml(Response);
             LoginForm AfterLoginForm = LoginForm.Find(Html);
@@ -1065,7 +1065,7 @@ namespace Voron_Poster
             if (AfterLoginForm == null || (AfterLoginForm.IsHidden && !LoginForm.IsHidden)) SuccessScore += 3;
             else if (LoggedInScore == 0 && AfterLoginForm != null && !AfterLoginForm.IsHidden) SuccessScore -= 2;
 
-            progress.Login = 255;
+            Progress.Login = 255;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2} LoggeInNodes: {3}",
             Expr.Matches(Text, Expr.Text.Global.Message.LoginSuccess).Count,
@@ -1095,15 +1095,15 @@ namespace Voron_Poster
             StatusMessage = "Постинг: Загрузка страницы";
             var Response = await GetAndLog(targetBoard.AbsoluteUri);
             if (!Response.IsSuccessStatusCode) throw new Exception("Постинг: " + Response.StatusCode.ToString());
-            progress.Post += 40 / progress.PostCount;
+            Progress.Post += 40 / Progress.PostCount;
             StatusMessage = "Постинг: Поиск формы постинга";
             var Html = await InitHtml(Response);
             string PostUrl = targetBoard.AbsoluteUri;
             PostForm PostForm = PostForm.Find(Html);
-            progress.Post += 10 / progress.PostCount;
+            Progress.Post += 10 / Progress.PostCount;
 
             // Check other pages for PostForm
-            int TempProgress = progress.Post;
+            int TempProgress = Progress.Post;
             if (PostForm == null)
             {
                 StatusMessage = "Постинг: Поиск страницы постинга";
@@ -1112,26 +1112,26 @@ namespace Voron_Poster
                 Console.WriteLine("PostLinks: {0}", PostUrl);
                 //       foreach (var Link in PostLinks) Console.WriteLine(Link.Key.ToString());
 #endif
-                progress.Post += 5 / progress.PostCount;
+                Progress.Post += 5 / Progress.PostCount;
                 int i = 0;
                 while (PostForm == null && i < PostLinks.Count)
                 {
                     PostUrl = PostLinks[i].Key;
                     StatusMessage = "Постинг: Загрузка страницы";
                     Response = await GetAndLog(PostUrl);
-                    progress.Post += (80 / progress.PostCount) / PostLinks.Count;
+                    Progress.Post += (80 / Progress.PostCount) / PostLinks.Count;
                     StatusMessage = "Постинг: Поиск формы постинга";
                     if (Response.IsSuccessStatusCode)
                     {
                         Html = await InitHtml(Response);
                         PostForm = PostForm.Find(Html);
                     }
-                    progress.Post += (20 / progress.PostCount) / PostLinks.Count;
+                    Progress.Post += (20 / Progress.PostCount) / PostLinks.Count;
                     i++;
                 }
             }
             if (PostForm == null) throw new Exception("Форма постинга не найдена");
-            progress.Post = TempProgress + (105 / progress.PostCount);
+            Progress.Post = TempProgress + (105 / Progress.PostCount);
 
             // PostPage preanalyse for future success detection
             Html.ClearNoDisplay();
@@ -1156,25 +1156,25 @@ namespace Voron_Poster
                 WaitingForQueue = true;
                 StatusMessage = "Постинг: В очереди";
                 await WaitFor(CaptchaForm.IsFree);
-                progress.Post += 10 / progress.PostCount;
+                Progress.Post += 10 / Progress.PostCount;
                 StatusMessage = "Постинг: Загрузка капчи";
                 Response = await Client.GetAsync(PostForm.CaptchaPictureUrl, Cancel.Token);
-                progress.Post += 20 / progress.PostCount;
+                Progress.Post += 20 / Progress.PostCount;
                 CaptchaForm.Picture.Image = new Bitmap(await Response.Content.ReadAsStreamAsync());
                 CaptchaForm.CancelFunction = () => Cancel.Cancel();
                 StatusMessage = "Постинг: Ожидание ввода капчи";
                 Application.OpenForms[0].Invoke((Action)(() => CaptchaForm.ShowDialog()));
                 Captcha = CaptchaForm.Result.Text;
                 CaptchaForm.IsFree.Set();
-                progress.Post += 20 / progress.PostCount;
+                Progress.Post += 20 / Progress.PostCount;
             }
-            else progress.Post += 50 / progress.PostCount;
+            else Progress.Post += 50 / Progress.PostCount;
 
             // Send post message request
             StatusMessage = "Постинг: Отправка сообщения";
             Response = await PostAndLog(PostForm.Action,
                 PostForm.PostData(AccountToUse, PostForm.ChooseEncoding(Html.Encoding), subject, message, Captcha));
-            progress.Post += 40 / progress.PostCount;
+            Progress.Post += 40 / Progress.PostCount;
             Html = await InitHtml(Response);
             PostForm AfterPostForm = PostForm.Find(Html);
             Html.ClearNoDisplay();
@@ -1186,7 +1186,7 @@ namespace Voron_Poster
                              - PreAnalyseFilter(PreErrorNodes, WebForm.ErrorNodes(Html));
             if (!Response.IsSuccessStatusCode) SuccessScore -= 10;
 
-            progress.Post += 10 / progress.PostCount;
+            Progress.Post += 10 / Progress.PostCount;
 #if DEBUG && DEBUGANYFORUM
             Console.WriteLine("After: Success: {0} Error: {1} ErrorNodes: {2}",
             Expr.Matches(Text, Expr.Text.Global.Message.PostSuccess).Count,
